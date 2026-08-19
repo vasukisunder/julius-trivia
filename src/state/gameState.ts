@@ -3,7 +3,7 @@ import { clueKey } from '../types'
 import { CATEGORIES } from '../data'
 import { TEAMMATES } from '../data'
 import { MAX_TEAMS, MIN_TEAMS, TEAM_COUNT, drawTeams, teamNameFor } from '../data/teams'
-import { freeStyle } from '../data/avatars'
+
 
 export type Action =
   | { type: 'toggleAward'; key: string; teamId: number }
@@ -37,7 +37,7 @@ export type Action =
   | { type: 'clearClue'; key: string }
 
 /** Bump on any change to the saved shape or to the seeded defaults. */
-export const STATE_VERSION = 10
+export const STATE_VERSION = 11
 
 export function initialState(): GameState {
   return {
@@ -203,22 +203,16 @@ export function reducer(state: GameState, action: Action): GameState {
      * only place that can arbitrate. A clash falls back to the next free one, so
      * the second player still ends up with something of their own.
      */
-    case 'setPlayerStyle': {
-      const others = Object.entries(state.playerStyles)
-        .filter(([n]) => n !== action.name)
-        .map(([, s]) => s)
-
-      const wanted = { color: action.color, icon: action.icon }
-      const clashes = others.some(
-        (s) => s.color === wanted.color || s.icon === wanted.icon,
-      )
-      const style = clashes ? freeStyle(others) : wanted
-
+    // Whatever they picked, including one someone else already has. Two people
+    // wanting the same fox is their business.
+    case 'setPlayerStyle':
       return {
         ...state,
-        playerStyles: { ...state.playerStyles, [action.name]: style },
+        playerStyles: {
+          ...state.playerStyles,
+          [action.name]: { color: action.color, icon: action.icon },
+        },
       }
-    }
 
     // Puts the sign-up list back, for when too many people got x-ed out.
     case 'resetRoster':

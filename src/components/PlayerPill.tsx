@@ -1,4 +1,3 @@
-import { PLAYER_ICONS } from '../data/avatars'
 import type { PlayerStyle } from '../types'
 
 type Props = {
@@ -7,12 +6,12 @@ type Props = {
   size?: 'sm' | 'md'
 }
 
-/** The player's shape, drawn in their colour. */
+/** The player's emoji. */
 export function PlayerIcon({ icon, size = 16 }: { icon: string; size?: number }) {
   return (
-    <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden="true">
-      <path d={PLAYER_ICONS[icon] ?? PLAYER_ICONS.circle} fill="currentColor" />
-    </svg>
+    <span className="pemoji" style={{ fontSize: size }} aria-hidden="true">
+      {icon}
+    </span>
   )
 }
 
@@ -30,7 +29,7 @@ export function PlayerPill({ name, style, size = 'md' }: Props) {
   }
   return (
     <span className={`ppill ${size}`} style={{ ['--p' as string]: style.color }}>
-      <PlayerIcon icon={style.icon} size={size === 'sm' ? 13 : 15} />
+      <PlayerIcon icon={style.icon} size={size === 'sm' ? 12 : 14} />
       {name}
     </span>
   )

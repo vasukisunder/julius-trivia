@@ -607,6 +607,8 @@ button:disabled{cursor:default}
 .ppill.sm{font-size:var(--t-12);padding:3px 9px 3px 7px;gap:4px}
 .ppill.blank{background:var(--surface-2);color:var(--ink-2)}
 .ppill svg{flex:none}
+.pemoji{line-height:1;display:inline-block;flex:none;
+  font-family:'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif}
 
 /* Buzz queue picks up the same identity. */
 .buzzicon{display:flex;align-items:center;flex:none}
@@ -614,35 +616,39 @@ button:disabled{cursor:default}
 /* ============================ phone identity ============================= */
 .phone-id{
   display:flex;flex-direction:column;align-items:center;gap:2px;
-  background:none;border:none;cursor:pointer;color:var(--ink);padding:4px 12px;
-  border-radius:var(--r);
+  color:var(--ink);padding:4px 12px;
 }
-.phone-id:hover{background:var(--surface)}
-.phone-id > svg{color:var(--team)}
 
 .picker{
   width:100%;max-width:440px;background:var(--surface);border-radius:var(--r);
-  padding:14px;display:flex;flex-direction:column;gap:10px;flex:none;
+  padding:14px;display:flex;flex-direction:column;gap:8px;flex:none;
 }
+.picker-label{font-size:var(--t-13);font-weight:600;color:var(--ink-3);margin-top:2px}
+.picker-open{
+  background:var(--surface);border:none;border-radius:99px;color:var(--ink-2);
+  font-size:var(--t-13);font-weight:600;padding:10px 18px;cursor:pointer;flex:none;
+  transition:background .15s,color .15s;
+}
+.picker-open:hover{background:var(--surface-2);color:var(--ink)}
 .picker-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
 .swatch{
   width:34px;height:34px;border-radius:99px;border:2px solid transparent;cursor:pointer;
   padding:0;transition:transform .12s var(--ease);
 }
-.swatch:hover:not(:disabled){transform:scale(1.08)}
+.swatch:hover{transform:scale(1.08)}
 .swatch.on{border-color:var(--ink)}
-.swatch:disabled{opacity:.2;cursor:default}
+
 .shape{
-  width:34px;height:34px;border-radius:var(--r-sm);border:none;cursor:pointer;
-  background:var(--surface-2);color:var(--ink-2);
-  display:flex;align-items:center;justify-content:center;transition:color .12s,background .12s;
+  width:38px;height:38px;border-radius:var(--r-sm);border:2px solid transparent;cursor:pointer;
+  background:var(--surface-2);
+  display:flex;align-items:center;justify-content:center;transition:background .12s,border-color .12s;
 }
-.shape:hover:not(:disabled){color:var(--ink)}
-.shape.on{background:var(--team);color:var(--on-color)}
-.shape:disabled{opacity:.2;cursor:default}
+.shape:hover{background:var(--rule)}
+.shape.on{border-color:var(--ink);background:var(--rule)}
+
 .picker-done{
   background:var(--ink);color:var(--canvas);border:none;border-radius:var(--r-sm);
-  padding:10px;font-size:var(--t-13);font-weight:700;cursor:pointer;
+  padding:12px;font-size:var(--t-15);font-weight:700;cursor:pointer;margin-top:4px;
 }
 .phone-name{display:inline-flex;align-items:center;gap:7px}
 

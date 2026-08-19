@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import type { GameState } from '../types'
 import type { Connection } from '../net/useRoom'
-import { playerId, savedName, saveName } from '../net/player'
-import { PLAYER_COLORS, ICON_KEYS, freeStyle } from '../data/avatars'
+import { playerId, savedName, saveName, hasChosen, markChosen } from '../net/player'
+import { PLAYER_COLORS, PLAYER_EMOJI, freeStyle } from '../data/avatars'
 import { PlayerIcon } from './PlayerPill'
 import { Wordmark } from './Wordmark'
 
@@ -23,7 +23,9 @@ type Props = {
  */
 export function BuzzerScreen({ state, connection, onBuzz, onPickStyle }: Props) {
   const [name, setName] = useState<string | null>(savedName)
-  const [picking, setPicking] = useState(false)
+  // Opens by default the first time, because a picker you have to discover is a
+  // picker nobody uses.
+  const [picking, setPicking] = useState(() => !hasChosen())
   const armedAt = useRef<number | null>(null)
 
   const me = state.teams.find((t) => t.members.includes(name ?? ''))
@@ -53,9 +55,6 @@ export function BuzzerScreen({ state, connection, onBuzz, onPickStyle }: Props) 
     onPickStyle(name, suggested.color, suggested.icon)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [name, style])
-
-  const takenBy = (key: 'color' | 'icon', value: string) =>
-    Object.entries(state.playerStyles).find(([n, s]) => n !== name && s[key] === value)?.[0]
 
   if (!name || !me) {
     return (
@@ -91,47 +90,55 @@ export function BuzzerScreen({ state, connection, onBuzz, onPickStyle }: Props) 
 
   return (
     <div className="phone" style={{ ['--team' as string]: accent }}>
-      <button className="phone-id" onClick={() => setPicking((p) => !p)}>
-        {style && <PlayerIcon icon={style.icon} size={22} />}
+      <div className="phone-id">
+        {style && <PlayerIcon icon={style.icon} size={30} />}
         <span className="phone-who">{name}</span>
         <span className="phone-team">{me.name}</span>
-      </button>
+      </div>
 
-      {picking && (
+      {picking ? (
         <div className="picker">
+          <div className="picker-label">Your colour</div>
           <div className="picker-row">
-            {PLAYER_COLORS.map((c) => {
-              const owner = takenBy('color', c)
-              return (
-                <button
-                  key={c}
-                  className={`swatch${style?.color === c ? ' on' : ''}`}
-                  style={{ background: c }}
-                  disabled={!!owner}
-                  title={owner ? `${owner} has this` : c}
-                  onClick={() => onPickStyle(name, c, style?.icon ?? ICON_KEYS[0])}
-                />
-              )
-            })}
+            {PLAYER_COLORS.map((c) => (
+              <button
+                key={c}
+                className={`swatch${style?.color === c ? ' on' : ''}`}
+                style={{ background: c }}
+                aria-label={`Colour ${c}`}
+                onClick={() => onPickStyle(name, c, style?.icon ?? PLAYER_EMOJI[0])}
+              />
+            ))}
           </div>
+
+          <div className="picker-label">Your emoji</div>
           <div className="picker-row">
-            {ICON_KEYS.map((i) => {
-              const owner = takenBy('icon', i)
-              return (
-                <button
-                  key={i}
-                  className={`shape${style?.icon === i ? ' on' : ''}`}
-                  disabled={!!owner}
-                  title={owner ? `${owner} has this` : i}
-                  onClick={() => onPickStyle(name, style?.color ?? PLAYER_COLORS[0], i)}
-                >
-                  <PlayerIcon icon={i} size={20} />
-                </button>
-              )
-            })}
+            {PLAYER_EMOJI.map((e) => (
+              <button
+                key={e}
+                className={`shape${style?.icon === e ? ' on' : ''}`}
+                aria-label={`Emoji ${e}`}
+                onClick={() => onPickStyle(name, style?.color ?? PLAYER_COLORS[0], e)}
+              >
+                <PlayerIcon icon={e} size={22} />
+              </button>
+            ))}
           </div>
-          <button className="picker-done" onClick={() => setPicking(false)}>Done</button>
+
+          <button
+            className="picker-done"
+            onClick={() => {
+              markChosen()
+              setPicking(false)
+            }}
+          >
+            Done
+          </button>
         </div>
+      ) : (
+        <button className="picker-open" onClick={() => setPicking(true)}>
+          Change colour &amp; emoji
+        </button>
       )}
 
       {myBuzz ? (

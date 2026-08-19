@@ -2,7 +2,7 @@ import { reducer, initialState, computeScores } from './gameState'
 import type { GameState } from '../types'
 import { CATEGORIES, TEAMMATES } from '../data'
 import { TEAM_NAMES, TEAM_COUNT, drawTeams } from '../data/teams'
-import { PLAYER_COLORS, ICON_KEYS } from '../data/avatars'
+import { PLAYER_COLORS, PLAYER_EMOJI, freeStyle } from '../data/avatars'
 import { currentBuzz, STATE_VERSION } from './gameState'
 
 let pass = 0, fail = 0
@@ -345,43 +345,34 @@ check('closing clears the timer', so.timerEndsAt === null)
 so = reducer(so, { type: 'openClue', ref: { categoryIndex: 2, clueIndex: 3 } })
 check('reopening a played clue comes back revealed', so.revealed === true)
 
-console.log('\nplayer colours and shapes')
-// Uniqueness has to be settled in the reducer, not the UI: two phones can pick
-// at the same instant and only the Durable Object can arbitrate.
+console.log('\nplayer colours and emoji')
 let sp = initialState()
 check('nobody has a style to begin with', Object.keys(sp.playerStyles).length === 0)
-sp = reducer(sp, { type: 'setPlayerStyle', name: 'Matt', color: PLAYER_COLORS[0], icon: ICON_KEYS[0] })
-check('a player can claim a colour and shape',
-  sp.playerStyles.Matt.color === PLAYER_COLORS[0] && sp.playerStyles.Matt.icon === ICON_KEYS[0])
-sp = reducer(sp, { type: 'setPlayerStyle', name: 'Lucy', color: PLAYER_COLORS[0], icon: ICON_KEYS[0] })
-check('a clash does not steal the first claim', sp.playerStyles.Matt.color === PLAYER_COLORS[0])
-check('the clashing player still gets a colour of their own',
-  sp.playerStyles.Lucy.color !== sp.playerStyles.Matt.color)
-check('and a shape of their own',
-  sp.playerStyles.Lucy.icon !== sp.playerStyles.Matt.icon)
-sp = reducer(sp, { type: 'setPlayerStyle', name: 'Matt', color: PLAYER_COLORS[5], icon: ICON_KEYS[5] })
+sp = reducer(sp, { type: 'setPlayerStyle', name: 'Matt', color: PLAYER_COLORS[0], icon: PLAYER_EMOJI[0] })
+check('a player can claim a colour and emoji',
+  sp.playerStyles.Matt.color === PLAYER_COLORS[0] && sp.playerStyles.Matt.icon === PLAYER_EMOJI[0])
+
+// Duplicates are allowed on purpose: if two people both want the fox, fine.
+sp = reducer(sp, { type: 'setPlayerStyle', name: 'Lucy', color: PLAYER_COLORS[0], icon: PLAYER_EMOJI[0] })
+check('two players may share a colour', sp.playerStyles.Lucy.color === sp.playerStyles.Matt.color)
+check('two players may share an emoji', sp.playerStyles.Lucy.icon === sp.playerStyles.Matt.icon)
+check('picking what you asked for, not a substitute',
+  sp.playerStyles.Lucy.color === PLAYER_COLORS[0] && sp.playerStyles.Lucy.icon === PLAYER_EMOJI[0])
+
+sp = reducer(sp, { type: 'setPlayerStyle', name: 'Matt', color: PLAYER_COLORS[5], icon: PLAYER_EMOJI[5] })
 check('a player can change their own style', sp.playerStyles.Matt.color === PLAYER_COLORS[5])
-check('changing does not duplicate them',
-  Object.keys(sp.playerStyles).length === 2)
-// Everyone claiming at once must still come out distinct.
-let sall = initialState()
-for (const n of TEAMMATES) {
-  sall = reducer(sall, { type: 'setPlayerStyle', name: n, color: PLAYER_COLORS[0], icon: ICON_KEYS[0] })
-}
-const colors = TEAMMATES.map(n => sall.playerStyles[n].color)
-const icons = TEAMMATES.map(n => sall.playerStyles[n].icon)
-check('all 14 players end up with distinct colours', new Set(colors).size === TEAMMATES.length)
-check('all 14 players end up with distinct shapes', new Set(icons).size === TEAMMATES.length)
-check('the palette is big enough for everyone', PLAYER_COLORS.length >= TEAMMATES.length)
-// Walk-ins push past the palette size; identity must still be unique.
-let sbig = initialState()
-const crowd = [...TEAMMATES, ...Array.from({ length: 8 }, (_, i) => `Guest ${i + 1}`)]
-for (const n of crowd) {
-  sbig = reducer(sbig, { type: 'setPlayerStyle', name: n, color: PLAYER_COLORS[0], icon: ICON_KEYS[0] })
-}
-const pairs = crowd.map(n => `${sbig.playerStyles[n].color}|${sbig.playerStyles[n].icon}`)
-check(`beyond the palette (${crowd.length} players) every colour+shape pair is still unique`,
-  new Set(pairs).size === crowd.length)
+check('changing does not duplicate the record', Object.keys(sp.playerStyles).length === 2)
+
+console.log('\nauto-assigned defaults still spread out')
+// Nobody has to open the picker, so the default has to be sensible on its own.
+const assigned: { color: string; icon: string }[] = []
+for (let i = 0; i < TEAMMATES.length; i++) assigned.push(freeStyle(assigned))
+check('every teammate gets a distinct colour by default',
+  new Set(assigned.map(a => a.color)).size === TEAMMATES.length)
+check('every teammate gets a distinct emoji by default',
+  new Set(assigned.map(a => a.icon)).size === TEAMMATES.length)
+check('the emoji set is large enough to keep spreading',
+  PLAYER_EMOJI.length >= PLAYER_COLORS.length)
 
 console.log('\nnew game')
 // The Durable Object keeps state between sessions, so there has to be a way to

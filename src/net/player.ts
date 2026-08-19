@@ -19,3 +19,14 @@ export function savedName(): string | null {
 export function saveName(name: string) {
   localStorage.setItem(NAME_KEY, name)
 }
+
+const CHOSE_KEY = 'julius-trivia:player-chose'
+
+/** Whether this phone has been through the colour/emoji picker before. */
+export function hasChosen(): boolean {
+  return localStorage.getItem(CHOSE_KEY) === '1'
+}
+
+export function markChosen() {
+  localStorage.setItem(CHOSE_KEY, '1')
+}
