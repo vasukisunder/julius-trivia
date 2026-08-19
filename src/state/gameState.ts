@@ -26,6 +26,7 @@ export type Action =
   | { type: 'openClue'; ref: ClueRef }
   | { type: 'closeClue' }
   | { type: 'reveal' }
+  | { type: 'endBuzzing' }
   | { type: 'startTimer'; seconds: number }
   | { type: 'openBuzzers'; seconds: number }
   | { type: 'closeBuzzers' }
@@ -37,7 +38,7 @@ export type Action =
   | { type: 'clearClue'; key: string }
 
 /** Bump on any change to the saved shape or to the seeded defaults. */
-export const STATE_VERSION = 11
+export const STATE_VERSION = 12
 
 export function initialState(): GameState {
   return {
@@ -53,12 +54,13 @@ export function initialState(): GameState {
     phase: 'roster',
     drawSeq: 0,
     open: null,
-    revealed: false,
+    cluePhase: 'reading',
     timerEndsAt: null,
     buzzOpenedAt: null,
     buzzes: [],
     lockedOut: [],
     lastAward: null,
+    lastWrong: null,
   }
 }
 
@@ -75,7 +77,9 @@ export function reducer(state: GameState, action: Action): GameState {
       return {
         ...state,
         open: action.ref,
-        revealed: state.used.includes(clueKey(action.ref)),
+        // Reopening something already played goes straight to the answer: the
+        // host is correcting a score, not running the clue again.
+        cluePhase: state.used.includes(clueKey(action.ref)) ? 'revealed' : 'reading',
         timerEndsAt: null,
         buzzOpenedAt: null,
         buzzes: [],
@@ -85,22 +89,36 @@ export function reducer(state: GameState, action: Action): GameState {
     case 'closeClue':
       return {
         ...state,
-        open: null, revealed: false, timerEndsAt: null,
+        open: null, cluePhase: 'reading', timerEndsAt: null,
         buzzOpenedAt: null, buzzes: [], lockedOut: [],
       }
 
-    // Opening the buzzers also starts the clock: they are the same moment.
+    // Step 2. Opening the buzzers and starting the clock are one moment.
     case 'openBuzzers':
       return {
         ...state,
+        cluePhase: 'buzzing',
         buzzOpenedAt: Date.now(),
         timerEndsAt: Date.now() + action.seconds * 1000,
         buzzes: [],
         lockedOut: [],
       }
 
-    case 'closeBuzzers':
-      return { ...state, buzzOpenedAt: null, timerEndsAt: null }
+    /**
+     * Step 3. The clock ran out or the host stopped it. Whoever buzzed fastest
+     * gets the floor; with nobody on the buzzers there is nothing to rule on, so
+     * it goes straight to the answer.
+     */
+    case 'endBuzzing':
+    case 'closeBuzzers': {
+      const next = state.buzzes.find((b) => !state.lockedOut.includes(b.teamId))
+      return {
+        ...state,
+        buzzOpenedAt: null,
+        timerEndsAt: null,
+        cluePhase: next ? 'verdict' : 'revealed',
+      }
+    }
 
     case 'buzz': {
       // Buzzes only count while the buzzers are open, and one per phone.
@@ -110,15 +128,26 @@ export function reducer(state: GameState, action: Action): GameState {
       return { ...state, buzzes }
     }
 
-    // A wrong answer locks that team out of this clue; the next-fastest buzz
-    // from a team still in play is promoted automatically.
-    case 'markWrong':
+    /**
+     * A wrong answer locks that team out and promotes the next-fastest buzz from
+     * a team still in play. Once everyone who buzzed is out there is nobody left
+     * to ask, so the answer goes up.
+     */
+    case 'markWrong': {
+      const key = state.open ? clueKey(state.open) : null
+      const lockedOut = state.lockedOut.includes(action.teamId)
+        ? state.lockedOut
+        : [...state.lockedOut, action.teamId]
+      const next = state.buzzes.find((b) => !lockedOut.includes(b.teamId))
       return {
         ...state,
-        lockedOut: state.lockedOut.includes(action.teamId)
-          ? state.lockedOut
-          : [...state.lockedOut, action.teamId],
+        lockedOut,
+        cluePhase: next ? 'verdict' : 'revealed',
+        lastWrong: key
+          ? { teamId: action.teamId, key, seq: (state.lastWrong?.seq ?? 0) + 1 }
+          : state.lastWrong,
       }
+    }
 
     // Award, and stamp it so every screen fires the same celebration.
     case 'awardTo': {
@@ -131,6 +160,7 @@ export function reducer(state: GameState, action: Action): GameState {
       return {
         ...state,
         awards,
+        cluePhase: 'revealed',
         buzzOpenedAt: null,
         timerEndsAt: null,
         lastAward: {
@@ -142,8 +172,9 @@ export function reducer(state: GameState, action: Action): GameState {
       }
     }
 
+    // Skips ahead to the answer — for a clue nobody wants to buzz on.
     case 'reveal':
-      return { ...state, revealed: true }
+      return { ...state, cluePhase: 'revealed', buzzOpenedAt: null, timerEndsAt: null }
 
     case 'startTimer':
       return { ...state, timerEndsAt: Date.now() + action.seconds * 1000 }
@@ -301,8 +332,9 @@ export function reducer(state: GameState, action: Action): GameState {
       return {
         ...state,
         awards: {}, used: [], adjustments: {},
-        open: null, revealed: false, timerEndsAt: null,
-        buzzOpenedAt: null, buzzes: [], lockedOut: [], lastAward: null,
+        open: null, cluePhase: 'reading', timerEndsAt: null,
+        buzzOpenedAt: null, buzzes: [], lockedOut: [],
+        lastAward: null, lastWrong: null,
       }
 
     default:

@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import type { Award, Buzz, Clue, PlayerStyle, Team, ViewMode } from '../types'
+import { useEffect, useRef, useState } from 'react'
+import type { Award, Buzz, Clue, CluePhase, PlayerStyle, Team, ViewMode, Wrong } from '../types'
 import { PlayerIcon } from './PlayerPill'
 import { useAwardFlash } from '../state/useAwardFlash'
 import { teamColor } from '../theme'
@@ -7,104 +7,118 @@ import { teamColor } from '../theme'
 type Props = {
   clue: Clue
   categoryName: string
-  /** The category's hue, carried through from the board. */
   accent: string
   mode: ViewMode
   teams: Team[]
-  awardedIds: number[]
-  wasPlayed: boolean
-  /** Shared, so host and presentation reveal at the same moment. */
-  revealed: boolean
-  /** Epoch ms the countdown ends; shared so both screens show the same clock. */
+  /** Where this clue is in its sequence. Drives everything below. */
+  phase: CluePhase
   timerEndsAt: number | null
-  /** The award that just landed, so the stage can celebrate it. */
-  lastAward: Award | null
-  /** This clue's key, so a previous clue's award cannot replay here. */
-  clueKeyStr: string
-  buzzOpen: boolean
   buzzes: Buzz[]
   playerStyles: Record<string, PlayerStyle>
   lockedOut: number[]
-  /** The buzz with the floor — fastest from a team not already wrong. */
+  /** The buzz with the floor — fastest from a team not already ruled wrong. */
   onTheSpot: Buzz | null
-  onReveal: () => void
+  lastAward: Award | null
+  lastWrong: Wrong | null
+  /** This clue's key, so a previous clue's award cannot replay here. */
+  clueKeyStr: string
   onOpenBuzzers: () => void
-  /** Shuts the buzzers before the clock runs out. */
-  onCloseBuzzers: () => void
-  onMarkWrong: (teamId: number) => void
-  onAwardTo: (teamId: number) => void
+  onEndBuzzing: () => void
+  onCorrect: (teamId: number) => void
+  onWrong: (teamId: number) => void
+  onSkipToAnswer: () => void
   onDone: () => void
   onDismiss: () => void
   onReturnToBoard: () => void
 }
 
-/** Seconds remaining, or null when no timer is running. */
-function useCountdown(endsAt: number | null): number | null {
+const TOTAL_SECONDS = 25
+
+/** Seconds remaining, or null when no clock is running. */
+function useCountdown(endsAt: number | null, onZero: () => void): number | null {
   const [, tick] = useState(0)
+  const fired = useRef<number | null>(null)
 
   useEffect(() => {
     if (endsAt === null) return
-    // Quarter-second ticks so both windows land on the same displayed second.
     const id = window.setInterval(() => tick((n) => n + 1), 250)
     return () => clearInterval(id)
   }, [endsAt])
 
-  if (endsAt === null) return null
-  return Math.max(0, Math.ceil((endsAt - Date.now()) / 1000))
+  const left = endsAt === null ? null : Math.max(0, Math.ceil((endsAt - Date.now()) / 1000))
+
+  // The clock running out is a step change, not just a number hitting zero. Only
+  // one screen should announce it, and `fired` keeps it to once per clock.
+  useEffect(() => {
+    if (endsAt === null || left === null || left > 0) return
+    if (fired.current === endsAt) return
+    fired.current = endsAt
+    onZero()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [left, endsAt])
+
+  return left
 }
 
 export function ClueStage({
-  clue, categoryName, accent, mode, teams, awardedIds, wasPlayed, revealed, timerEndsAt,
-  lastAward, clueKeyStr, buzzOpen, buzzes, playerStyles, lockedOut, onTheSpot,
-  onReveal, onOpenBuzzers, onCloseBuzzers, onMarkWrong, onAwardTo, onDone, onDismiss,
+  clue, categoryName, accent, mode, teams, phase, timerEndsAt, buzzes, playerStyles,
+  lockedOut, onTheSpot, lastAward, lastWrong, clueKeyStr,
+  onOpenBuzzers, onEndBuzzing, onCorrect, onWrong, onSkipToAnswer, onDone, onDismiss,
   onReturnToBoard,
 }: Props) {
-  // The host always sees the answer. The room only after a reveal.
   const isHost = mode === 'host'
-  const hostSees = isHost
-  const showAnswer = hostSees || revealed
-  const left = useCountdown(timerEndsAt)
   const stageRef = useRef<HTMLDivElement>(null)
 
+  // Only the host's clock advances the step; a mirror announcing it too would
+  // fire the transition twice.
+  const left = useCountdown(timerEndsAt, isHost ? onEndBuzzing : () => {})
+
+  const cheer = useAwardFlash(lastAward, 2200, clueKeyStr)
+  const wrongFlash = useAwardFlash(
+    lastWrong ? { ...lastWrong, points: 0 } : null,
+    1200,
+    clueKeyStr,
+  )
+
+  const teamOf = (id: number) => teams.find((t) => t.id === id)
+  const indexOf = (id: number) => Math.max(0, teams.findIndex((t) => t.id === id))
+
+  const cheerTeam = cheer ? teamOf(cheer.teamId) : null
+  const spotTeam = onTheSpot ? teamOf(onTheSpot.teamId) : null
+  const winner = phase === 'revealed' && lastAward?.key === clueKeyStr
+    ? teamOf(lastAward.teamId)
+    : null
+
   useEffect(() => {
-    if (mode !== 'host') return
+    if (!isHost) return
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') { e.preventDefault(); onDismiss() }
-      if (e.key === ' ' && !revealed) { e.preventDefault(); onReveal() }
     }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
-  }, [mode, revealed, onDismiss, onReveal])
-
-  // Keep focus inside the stage while it is up.
-  useEffect(() => {
-    const onFocus = (e: FocusEvent) => {
-      if (stageRef.current && !stageRef.current.contains(e.target as Node)) {
-        stageRef.current.querySelector<HTMLElement>('button')?.focus()
-      }
-    }
-    document.addEventListener('focusin', onFocus)
-    return () => document.removeEventListener('focusin', onFocus)
-  }, [])
-
-  // Fires only for an award won on THIS clue, and never on mount.
-  const cheer = useAwardFlash(lastAward, 2200, clueKeyStr)
-
-  const cheerTeam = cheer ? teams.find((t) => t.id === cheer.teamId) : null
-  const cheerIndex = cheerTeam ? teams.indexOf(cheerTeam) : 0
+  }, [isHost, onDismiss])
 
   const heading = clue.kind === 'lie' ? clue.person : categoryName
   const low = left !== null && left <= 5
-  const teamIndexOf = (id: number) => Math.max(0, teams.findIndex((t) => t.id === id))
-  const teamName = (id: number) => teams.find((t) => t.id === id)?.name ?? ''
+
+  /** The step, named on screen so nobody has to infer where they are. */
+  const stepLabel =
+    phase === 'reading' ? 'Read the question' :
+    phase === 'buzzing' ? 'Buzzers open' :
+    phase === 'verdict' ? `${spotTeam?.name ?? 'Someone'} to answer` :
+    'Answer'
+
+  const showAnswer = isHost || phase === 'revealed'
 
   return (
-    <div className="stage-scrim" style={{ ['--cat' as string]: accent }} ref={stageRef}>
+    <div
+      className={`stage-scrim phase-${phase}${wrongFlash ? ' wrong-flash' : ''}`}
+      style={{ ['--cat' as string]: accent }}
+      ref={stageRef}
+    >
       {cheer && cheerTeam && (
-        <div className="cheer" style={{ ['--team' as string]: teamColor(cheerIndex) }}>
-          <div className="cheer-rings" aria-hidden="true">
-            <i /><i /><i />
-          </div>
+        <div className="cheer" style={{ ['--team' as string]: teamColor(indexOf(cheer.teamId)) }}>
+          <div className="cheer-rings" aria-hidden="true"><i /><i /><i /></div>
           <div className="cheer-body">
             <div className="cheer-points">+{cheer.points}</div>
             <div className="cheer-team">{cheerTeam.name}</div>
@@ -116,14 +130,8 @@ export function ClueStage({
         <div className="stage-cat">
           {heading} <span className="stage-pts">· {clue.points} points</span>
         </div>
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-          {left !== null && <span className={`countdown${low ? ' low' : ''}`}>{left}s</span>}
-          <button className="stage-close" disabled={!isHost} onClick={onDismiss}>Close</button>
-        </div>
-      </div>
-
-      <div className={`timerbar${low ? ' low' : ''}`}>
-        <i style={{ transform: `scaleX(${left === null ? 0 : left / 25})` }} />
+        <div className="stage-step">{stepLabel}</div>
+        {isHost && <button className="stage-close" onClick={onDismiss}>Close</button>}
       </div>
 
       <div className="stage-body">
@@ -147,187 +155,135 @@ export function ClueStage({
                 </li>
               ))}
             </ol>
-            {showAnswer && clue.credit && <p className="credit">{clue.credit}</p>}
           </>
         )}
 
-        {clue.kind === 'standard' && showAnswer && (
-          <div className={`answer${hostSees && !revealed ? ' host-only' : ''}`}>
-            <span className="label">{hostSees && !revealed ? 'Answer (host only)' : 'Answer'}</span>
-            <span className="answer-val">{clue.answer}</span>
-          </div>
-        )}
-
-        {buzzOpen && (
-          <div className="buzzpanel">
-            {onTheSpot ? (
-              <div
-                className="onspot"
-                style={{ ['--team' as string]: teamColor(teamIndexOf(onTheSpot.teamId)) }}
-              >
-                <span className="onspot-team">{teamName(onTheSpot.teamId)}</span>
-                <span className="onspot-name">{onTheSpot.name} buzzed first</span>
-              </div>
-            ) : buzzes.length ? (
-              <div className="onspot none">Everyone who buzzed is out</div>
+        {/* ---- step 2: the clock and the queue, and nothing else ---- */}
+        {phase === 'buzzing' && (
+          <div className="buzzstage">
+            <div className={`bigclock${low ? ' low' : ''}`}>{left ?? TOTAL_SECONDS}</div>
+            <div className="clockbar">
+              <i style={{ transform: `scaleX(${(left ?? 0) / TOTAL_SECONDS})` }} />
+            </div>
+            {buzzes.length === 0 ? (
+              <p className="buzzwait">Waiting for buzzes…</p>
             ) : (
-              <div className="onspot waiting">Buzzers are open</div>
-            )}
-
-            {buzzes.length > 0 && (
               <ol className="buzzlist">
-                {buzzes.map((b, i) => {
-                  const out = lockedOut.includes(b.teamId)
-                  const live = onTheSpot?.playerId === b.playerId
-                  return (
-                    <li
-                      key={b.playerId}
-                      className={`buzzrow${out ? ' out' : ''}${live ? ' live' : ''}`}
-                      style={{ ['--team' as string]: teamColor(teamIndexOf(b.teamId)) }}
-                    >
-                      <span className="buzzrank">{i + 1}</span>
-                      {playerStyles[b.name] && (
-                        <span
-                          className="buzzicon"
-                          style={{ color: playerStyles[b.name].color }}
-                        >
-                          <PlayerIcon icon={playerStyles[b.name].icon} size={15} />
-                        </span>
-                      )}
-                      <span className="buzzname">{b.name}</span>
-                      <span className="buzzteam">{teamName(b.teamId)}</span>
-                      <span className="buzzms">{(b.reactionMs / 1000).toFixed(2)}s</span>
-                    </li>
-                  )
-                })}
+                {buzzes.map((b, i) => (
+                  <li
+                    key={b.playerId}
+                    className="buzzrow"
+                    style={{ ['--team' as string]: teamColor(indexOf(b.teamId)) }}
+                  >
+                    <span className="buzzrank">{i + 1}</span>
+                    {playerStyles[b.name] && (
+                      <span style={{ color: playerStyles[b.name].color }}>
+                        <PlayerIcon icon={playerStyles[b.name].icon} size={15} />
+                      </span>
+                    )}
+                    <span className="buzzname">{b.name}</span>
+                    <span className="buzzteam">{teamOf(b.teamId)?.name}</span>
+                    <span className="buzzms">{(b.reactionMs / 1000).toFixed(2)}s</span>
+                  </li>
+                ))}
               </ol>
             )}
           </div>
         )}
-      </div>
 
-      {cheer && (
-        <Celebration
-          teamName={teams.find((t) => t.id === cheer.teamId)?.name ?? ''}
-          colour={teamColor(Math.max(0, teams.findIndex((t) => t.id === cheer.teamId)))}
-          points={cheer.points}
-          seq={cheer.seq}
-        />
-      )}
-
-      {/* The room sees the same controls the host is working; they are inert
-          here, and the answer is the only thing withheld. */}
-      <div className="stage-foot">
-        {buzzOpen ? (
-          <button className="sbtn" disabled={!isHost} onClick={onCloseBuzzers}>
-            Stop buzzers
-          </button>
-        ) : (
-          <button className="sbtn primary" disabled={!isHost} onClick={onOpenBuzzers}>
-            Open buzzers
-          </button>
+        {/* ---- step 3: exactly one team has the floor ---- */}
+        {phase === 'verdict' && onTheSpot && spotTeam && (
+          <div className="verdict" style={{ ['--team' as string]: teamColor(indexOf(onTheSpot.teamId)) }}>
+            <div className="verdict-team">{spotTeam.name}</div>
+            <div className="verdict-who">
+              {playerStyles[onTheSpot.name] && (
+                <PlayerIcon icon={playerStyles[onTheSpot.name].icon} size={17} />
+              )}
+              {onTheSpot.name} buzzed in {(onTheSpot.reactionMs / 1000).toFixed(2)}s
+            </div>
+            {lockedOut.length > 0 && (
+              <div className="verdict-out">
+                Out: {lockedOut.map((id) => teamOf(id)?.name).filter(Boolean).join(', ')}
+              </div>
+            )}
+          </div>
         )}
 
-        {/* With someone on the spot, the only two calls that matter. */}
-        {onTheSpot && (
+        {/* ---- step 4: the answer, plainly ---- */}
+        {phase === 'revealed' && clue.kind === 'standard' && (
+          <div className="answer">
+            <span className="label">Answer</span>
+            <span className="answer-val">{clue.answer}</span>
+          </div>
+        )}
+        {phase === 'revealed' && (
+          <p className="outcome">
+            {winner
+              ? `${winner.name} takes ${clue.points}`
+              : lockedOut.length > 0
+                ? 'Nobody got it'
+                : 'No takers'}
+          </p>
+        )}
+
+        {/* The host's copy of the answer, before the room sees it. */}
+        {isHost && phase !== 'revealed' && clue.kind === 'standard' && (
+          <div className="answer host-only">
+            <span className="label">Answer (host only)</span>
+            <span className="answer-val">{clue.answer}</span>
+          </div>
+        )}
+      </div>
+
+      {/* One primary action per step. Mirrored on the shared screen, inert there. */}
+      <div className="stage-foot">
+        {phase === 'reading' && (
           <>
-            <button
-              className="sbtn correct"
-              disabled={!isHost}
-              onClick={() => onAwardTo(onTheSpot.teamId)}
-            >
-              Correct
+            <button className="step-btn go" disabled={!isHost} onClick={onOpenBuzzers}>
+              Open buzzers
             </button>
-            <button
-              className="sbtn incorrect"
-              disabled={!isHost}
-              onClick={() => onMarkWrong(onTheSpot.teamId)}
-            >
-              Wrong — pass on
+            <button className="step-skip" disabled={!isHost} onClick={onSkipToAnswer}>
+              Skip to answer
             </button>
           </>
         )}
 
-        {!revealed && (
-          <button className="sbtn" disabled={!isHost} onClick={onReveal}>
-            Show answer to room
+        {phase === 'buzzing' && (
+          <button className="step-btn stop" disabled={!isHost} onClick={onEndBuzzing}>
+            Stop buzzers
           </button>
         )}
 
-        {/* Manual award, for anything the buzzers did not settle. */}
-        {!onTheSpot && teams.map((team, i) => (
-          <button
-            key={team.id}
-            className="sbtn award"
-            style={{ ['--team' as string]: teamColor(i) }}
-            disabled={!isHost}
-            aria-pressed={awardedIds.includes(team.id)}
-            onClick={() => onAwardTo(team.id)}
-          >
-            {team.name}
-          </button>
-        ))}
+        {phase === 'verdict' && onTheSpot && (
+          <>
+            <button
+              className="step-btn right"
+              disabled={!isHost}
+              onClick={() => onCorrect(onTheSpot.teamId)}
+            >
+              Correct
+            </button>
+            <button
+              className="step-btn wrong"
+              disabled={!isHost}
+              onClick={() => onWrong(onTheSpot.teamId)}
+            >
+              Wrong
+            </button>
+          </>
+        )}
 
-        <button className="sbtn" disabled={!isHost} onClick={onDone}>Done</button>
-        {wasPlayed && (
-          <button className="sbtn" disabled={!isHost} onClick={onReturnToBoard}>
-            Put back
-          </button>
+        {phase === 'revealed' && (
+          <>
+            <button className="step-btn go" disabled={!isHost} onClick={onDone}>
+              Next question
+            </button>
+            <button className="step-skip" disabled={!isHost} onClick={onReturnToBoard}>
+              Put back on the board
+            </button>
+          </>
         )}
       </div>
     </div>
   )
 }
-
-/**
- * The points landing, full-stage so it reads from across a video call. Confetti
- * is plain spans with per-piece inline styles — no library, and it sits behind
- * the text so it never hurts legibility.
- */
-function Celebration({
-  teamName, colour, points, seq,
-}: { teamName: string; colour: string; points: number; seq: number }) {
-  const pieces = useMemo(
-    () =>
-      Array.from({ length: 26 }, () => ({
-        left: Math.random() * 100,
-        delay: Math.random() * 0.5,
-        duration: 1.5 + Math.random() * 0.9,
-        drift: (Math.random() - 0.5) * 90,
-        spin: 180 + Math.random() * 540,
-        size: 7 + Math.random() * 7,
-        hue: CONFETTI[Math.floor(Math.random() * CONFETTI.length)],
-      })),
-    // A fresh burst per award.
-    [seq],
-  )
-
-  return (
-    <div className="cheer" style={{ ['--team' as string]: colour }} aria-live="polite">
-      <div className="confetti" aria-hidden="true">
-        {pieces.map((p, i) => (
-          <span
-            key={i}
-            style={{
-              left: `${p.left}%`,
-              width: p.size,
-              height: p.size * 1.6,
-              background: p.hue,
-              animationDelay: `${p.delay}s`,
-              animationDuration: `${p.duration}s`,
-              ['--drift' as string]: `${p.drift}px`,
-              ['--spin' as string]: `${p.spin}deg`,
-            }}
-          />
-        ))}
-      </div>
-
-      <div className="cheer-card">
-        <div className="cheer-points">+{points}</div>
-        <div className="cheer-team">{teamName}</div>
-      </div>
-    </div>
-  )
-}
-
-const CONFETTI = ['#8B90E5', '#6D9EE8', '#4FBAC7', '#4FBD8F', '#A2C86E', '#A98BE0']

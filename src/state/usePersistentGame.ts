@@ -51,12 +51,13 @@ export function load(): GameState {
       phase: saved.phase ?? fresh.phase,
       drawSeq: saved.drawSeq ?? 0,
       open: saved.open ?? null,
-      revealed: saved.revealed ?? false,
+      cluePhase: saved.cluePhase ?? 'reading',
       timerEndsAt: saved.timerEndsAt ?? null,
       buzzOpenedAt: saved.buzzOpenedAt ?? null,
       buzzes: saved.buzzes ?? [],
       lockedOut: saved.lockedOut ?? [],
       lastAward: saved.lastAward ?? null,
+      lastWrong: saved.lastWrong ?? null,
     }
   } catch {
     return fresh

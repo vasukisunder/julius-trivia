@@ -208,24 +208,22 @@ export default function App() {
           accent={catColor(openRef.categoryIndex)}
           mode={mode}
           teams={state.teams}
-          awardedIds={state.awards[openKey] ?? []}
-          wasPlayed={used.has(openKey)}
-          revealed={state.revealed}
+          phase={state.cluePhase}
           timerEndsAt={state.timerEndsAt}
-          lastAward={state.lastAward}
-          clueKeyStr={openKey}
-          buzzOpen={state.buzzOpenedAt !== null}
           buzzes={state.buzzes}
           playerStyles={state.playerStyles}
           lockedOut={state.lockedOut}
           onTheSpot={currentBuzz(state)}
-          onReveal={() => dispatch({ type: 'reveal' })}
+          lastAward={state.lastAward}
+          lastWrong={state.lastWrong}
+          clueKeyStr={openKey}
           onOpenBuzzers={() => dispatch({ type: 'openBuzzers', seconds: COUNTDOWN })}
-          onCloseBuzzers={() => dispatch({ type: 'closeBuzzers' })}
-          onMarkWrong={(teamId: number) => dispatch({ type: 'markWrong', teamId })}
-          onAwardTo={(teamId: number) =>
+          onEndBuzzing={() => dispatch({ type: 'endBuzzing' })}
+          onCorrect={(teamId: number) =>
             dispatch({ type: 'awardTo', teamId, points: openClue.points })
           }
+          onWrong={(teamId: number) => dispatch({ type: 'markWrong', teamId })}
+          onSkipToAnswer={() => dispatch({ type: 'reveal' })}
           onDone={() => {
             dispatch({ type: 'consumeClue', key: openKey })
             dispatch({ type: 'closeClue' })

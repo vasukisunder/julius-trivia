@@ -101,8 +101,8 @@ export type GameState = {
 
   /** The clue currently on screen, or null for the board. */
   open: ClueRef | null
-  /** Whether the answer has been shown to the room. The host always sees it. */
-  revealed: boolean
+  /** Where the open clue is in its sequence. The host always sees the answer. */
+  cluePhase: CluePhase
   /** Epoch ms the countdown ends, or null when no timer is running. */
   timerEndsAt: number | null
 
@@ -122,6 +122,15 @@ export type GameState = {
   lockedOut: number[]
   /** The most recent award, used to fire the celebration on every screen. */
   lastAward: Award | null
+  /** The most recent wrong answer, so every screen shows the same buzz-out. */
+  lastWrong: Wrong | null
+}
+
+export type Wrong = {
+  teamId: number
+  /** The clue it happened on, so a stale one cannot replay. */
+  key: string
+  seq: number
 }
 
 export type Buzz = {
@@ -132,6 +141,17 @@ export type Buzz = {
   /** Milliseconds between the buzzer lighting up and the player hitting it. */
   reactionMs: number
 }
+
+/**
+ * A clue runs as a strict sequence, so at every moment there is one obvious next
+ * action rather than a wall of options:
+ *
+ *   reading   everyone reads the question. Host opens the buzzers.
+ *   buzzing   countdown running, buzzes landing. Host can only stop it early.
+ *   verdict   one team has the floor. Host rules correct or wrong.
+ *   revealed  the answer is up, points are in. Host moves on.
+ */
+export type CluePhase = 'reading' | 'buzzing' | 'verdict' | 'revealed'
 
 export type Award = {
   teamId: number

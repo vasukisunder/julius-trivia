@@ -1,9 +1,8 @@
-import { reducer, initialState, computeScores } from './gameState'
+import { reducer, initialState, computeScores, currentBuzz, STATE_VERSION } from './gameState'
 import type { GameState } from '../types'
 import { CATEGORIES, TEAMMATES } from '../data'
 import { TEAM_NAMES, TEAM_COUNT, drawTeams } from '../data/teams'
 import { PLAYER_COLORS, PLAYER_EMOJI, freeStyle } from '../data/avatars'
-import { currentBuzz, STATE_VERSION } from './gameState'
 
 let pass = 0, fail = 0
 const check = (label: string, cond: boolean) => {
@@ -323,46 +322,93 @@ check('a published shuffle fixes the draw for both windows',
   JSON.stringify(shuffled.teams) === JSON.stringify(shuffled.teams) &&
   shuffled.teams.flatMap(t => t.members).length === shuffled.roster.length)
 
-console.log('\nhost and presentation share the open clue')
-let so = reducer(initialState(), { type: 'shuffleTeams' })
-so = reducer(so, { type: 'setTeams', rosters: so.teams.map(t => t.members) })
-check('nothing open to begin with', so.open === null)
-so = reducer(so, { type: 'openClue', ref: { categoryIndex: 2, clueIndex: 3 } })
-check('opening a clue is shared state, not local',
-  so.open?.categoryIndex === 2 && so.open?.clueIndex === 3)
-check('a fresh clue starts unrevealed', so.revealed === false)
-check('no timer until the host starts one', so.timerEndsAt === null)
-so = reducer(so, { type: 'startTimer', seconds: 25 })
-check('starting the timer sets a shared deadline', (so.timerEndsAt ?? 0) > Date.now())
-so = reducer(so, { type: 'reveal' })
-check('revealing is shared, so the room sees it at the same moment', so.revealed === true)
-so = reducer(so, { type: 'consumeClue', key: '2-3' })
-so = reducer(so, { type: 'closeClue' })
-check('closing clears the shared clue', so.open === null)
-check('closing clears the reveal', so.revealed === false)
-check('closing clears the timer', so.timerEndsAt === null)
-// Reopening something already played should show the answer straight away.
-so = reducer(so, { type: 'openClue', ref: { categoryIndex: 2, clueIndex: 3 } })
-check('reopening a played clue comes back revealed', so.revealed === true)
+console.log('\na clue runs as a strict sequence')
+// The complaint this replaces: every option was on screen at once and the order
+// of operations was unclear. Each phase now has exactly one obvious next step.
+let sq2 = reducer(initialState(), { type: 'shuffleTeams' })
+sq2 = reducer(sq2, { type: 'setTeams', rosters: sq2.teams.map(t => t.members) })
+const [teamA, teamB, teamC] = sq2.teams
+
+sq2 = reducer(sq2, { type: 'openClue', ref: { categoryIndex: 1, clueIndex: 2 } })
+check('a fresh clue starts on reading', sq2.cluePhase === 'reading')
+check('no clock yet', sq2.timerEndsAt === null)
+check('buzzers shut', sq2.buzzOpenedAt === null)
+
+sq2 = reducer(sq2, { type: 'openBuzzers', seconds: 25 })
+check('opening buzzers moves to buzzing', sq2.cluePhase === 'buzzing')
+check('and starts the clock in the same moment', (sq2.timerEndsAt ?? 0) > Date.now())
+
+sq2 = reducer(sq2, { type: 'buzz', buzz: { playerId: 'p1', name: 'Slow', teamId: teamA.id, reactionMs: 700 } })
+sq2 = reducer(sq2, { type: 'buzz', buzz: { playerId: 'p2', name: 'Fast', teamId: teamB.id, reactionMs: 250 } })
+check('still buzzing while the clock runs', sq2.cluePhase === 'buzzing')
+
+sq2 = reducer(sq2, { type: 'endBuzzing' })
+check('ending the buzzers moves to verdict', sq2.cluePhase === 'verdict')
+check('the clock stops', sq2.timerEndsAt === null && sq2.buzzOpenedAt === null)
+check('the fastest team has the floor', currentBuzz(sq2)?.teamId === teamB.id)
+
+// Wrong answer: buzz out, promote the next team, stay in verdict.
+sq2 = reducer(sq2, { type: 'markWrong', teamId: teamB.id })
+check('a wrong answer keeps us in verdict while someone is left', sq2.cluePhase === 'verdict')
+check('the next-fastest team is promoted', currentBuzz(sq2)?.teamId === teamA.id)
+check('the wrong answer is stamped for the buzz-out animation',
+  sq2.lastWrong?.teamId === teamB.id && sq2.lastWrong?.key === '1-2')
+
+// Everyone wrong: nothing left to rule on, so the answer goes up.
+sq2 = reducer(sq2, { type: 'markWrong', teamId: teamA.id })
+check('with everyone out it goes to revealed', sq2.cluePhase === 'revealed')
+check('nobody scored', [...computeScores(sq2).values()].every(v => v === 0))
+
+console.log('\nthe correct-answer path')
+let sr3 = reducer(initialState(), { type: 'shuffleTeams' })
+sr3 = reducer(sr3, { type: 'setTeams', rosters: sr3.teams.map(t => t.members) })
+sr3 = reducer(sr3, { type: 'openClue', ref: { categoryIndex: 0, clueIndex: 5 } })
+sr3 = reducer(sr3, { type: 'openBuzzers', seconds: 25 })
+sr3 = reducer(sr3, { type: 'buzz', buzz: { playerId: 'x', name: 'A', teamId: teamC.id, reactionMs: 300 } })
+sr3 = reducer(sr3, { type: 'endBuzzing' })
+sr3 = reducer(sr3, { type: 'awardTo', teamId: teamC.id, points: 600 })
+check('correct goes straight to revealed', sr3.cluePhase === 'revealed')
+check('and the points land', computeScores(sr3).get(teamC.id) === 600)
+check('and the celebration is scoped to this clue', sr3.lastAward?.key === '0-5')
+sr3 = reducer(sr3, { type: 'consumeClue', key: '0-5' })
+sr3 = reducer(sr3, { type: 'closeClue' })
+check('closing resets the sequence for the next clue', sr3.cluePhase === 'reading')
+check('and clears the board state', sr3.open === null && sr3.buzzes.length === 0)
+
+console.log('\nnobody buzzes')
+let sn2 = reducer(initialState(), { type: 'shuffleTeams' })
+sn2 = reducer(sn2, { type: 'openClue', ref: { categoryIndex: 2, clueIndex: 0 } })
+sn2 = reducer(sn2, { type: 'openBuzzers', seconds: 25 })
+sn2 = reducer(sn2, { type: 'endBuzzing' })
+check('an empty buzzer round skips verdict entirely', sn2.cluePhase === 'revealed')
+
+console.log('\nskipping the buzzers')
+let sk2 = reducer(initialState(), { type: 'openClue', ref: { categoryIndex: 3, clueIndex: 1 } })
+sk2 = reducer(sk2, { type: 'reveal' })
+check('the host can jump straight to the answer', sk2.cluePhase === 'revealed')
+
+console.log('\nreopening a played clue')
+let sx2 = reducer(initialState(), { type: 'shuffleTeams' })
+sx2 = reducer(sx2, { type: 'consumeClue', key: '4-4' })
+sx2 = reducer(sx2, { type: 'openClue', ref: { categoryIndex: 4, clueIndex: 4 } })
+check('a played clue reopens on the answer, not the question',
+  sx2.cluePhase === 'revealed')
 
 console.log('\nthe phone can identify people during setup')
-// The QR is shown on the setup screens, so phones arrive BEFORE teams exist.
-// The name list has to come from the roster; reading it from teams left the
-// "Who are you?" page blank for the entire setup stage.
+// The QR is on the setup screens, so phones arrive BEFORE teams exist. The name
+// list has to come from the roster; reading it from teams left "Who are you?"
+// blank for the whole setup stage.
 const atSetup = initialState()
 check('setup starts with no teams drawn', atSetup.teams.length === 0)
 check('but the roster is already full', atSetup.roster.length === TEAMMATES.length)
 check('so a phone has names to choose from', atSetup.roster.length > 0)
-// And a claimed colour must survive the shuffle that follows.
 let sph = reducer(atSetup, { type: 'setPlayerStyle', name: 'Ana', color: PLAYER_COLORS[3], icon: PLAYER_EMOJI[3] })
 sph = reducer(sph, { type: 'shuffleTeams' })
 check('a style claimed before the shuffle survives it',
   sph.playerStyles.Ana.color === PLAYER_COLORS[3])
-check('and that player is now on a team',
-  sph.teams.some(t => t.members.includes('Ana')))
-// Someone dropped from the roster should no longer be offered on a phone.
-const dropped = reducer(atSetup, { type: 'removeFromRoster', name: 'Joe' })
-check('a dropped player is not offered on the phone', !dropped.roster.includes('Joe'))
+check('and that player is now on a team', sph.teams.some(t => t.members.includes('Ana')))
+check('a dropped player is not offered on the phone',
+  !reducer(atSetup, { type: 'removeFromRoster', name: 'Joe' }).roster.includes('Joe'))
 
 console.log('\nplayer colours and emoji')
 let sp = initialState()
@@ -370,45 +416,55 @@ check('nobody has a style to begin with', Object.keys(sp.playerStyles).length ==
 sp = reducer(sp, { type: 'setPlayerStyle', name: 'Matt', color: PLAYER_COLORS[0], icon: PLAYER_EMOJI[0] })
 check('a player can claim a colour and emoji',
   sp.playerStyles.Matt.color === PLAYER_COLORS[0] && sp.playerStyles.Matt.icon === PLAYER_EMOJI[0])
-
 // Duplicates are allowed on purpose: if two people both want the fox, fine.
 sp = reducer(sp, { type: 'setPlayerStyle', name: 'Lucy', color: PLAYER_COLORS[0], icon: PLAYER_EMOJI[0] })
 check('two players may share a colour', sp.playerStyles.Lucy.color === sp.playerStyles.Matt.color)
 check('two players may share an emoji', sp.playerStyles.Lucy.icon === sp.playerStyles.Matt.icon)
-check('picking what you asked for, not a substitute',
-  sp.playerStyles.Lucy.color === PLAYER_COLORS[0] && sp.playerStyles.Lucy.icon === PLAYER_EMOJI[0])
-
 sp = reducer(sp, { type: 'setPlayerStyle', name: 'Matt', color: PLAYER_COLORS[5], icon: PLAYER_EMOJI[5] })
 check('a player can change their own style', sp.playerStyles.Matt.color === PLAYER_COLORS[5])
 check('changing does not duplicate the record', Object.keys(sp.playerStyles).length === 2)
 
 console.log('\nauto-assigned defaults still spread out')
-// Nobody has to open the picker, so the default has to be sensible on its own.
+// Nobody has to open the picker, so the default must be sensible on its own.
 const assigned: { color: string; icon: string }[] = []
 for (let i = 0; i < TEAMMATES.length; i++) assigned.push(freeStyle(assigned))
 check('every teammate gets a distinct colour by default',
   new Set(assigned.map(a => a.color)).size === TEAMMATES.length)
 check('every teammate gets a distinct emoji by default',
   new Set(assigned.map(a => a.icon)).size === TEAMMATES.length)
-check('the emoji set is large enough to keep spreading',
-  PLAYER_EMOJI.length >= PLAYER_COLORS.length)
+
+console.log('\nhost and presentation share the open clue')
+let so = reducer(initialState(), { type: 'shuffleTeams' })
+so = reducer(so, { type: 'setTeams', rosters: so.teams.map(t => t.members) })
+check('nothing open to begin with', so.open === null)
+so = reducer(so, { type: 'openClue', ref: { categoryIndex: 2, clueIndex: 3 } })
+check('opening a clue is shared state, not local',
+  so.open?.categoryIndex === 2 && so.open?.clueIndex === 3)
+check('the phase is shared too, so both screens show the same step',
+  so.cluePhase === 'reading')
+so = reducer(so, { type: 'reveal' })
+check('revealing is shared, so the room sees it at the same moment',
+  so.cluePhase === 'revealed')
+so = reducer(so, { type: 'closeClue' })
+check('closing clears the shared clue', so.open === null)
+check('closing resets the step', so.cluePhase === 'reading')
 
 console.log('\nnew game')
-// The Durable Object keeps state between sessions, so there has to be a way to
-// wipe a rehearsal completely before the real night.
+// The Durable Object keeps state between sessions, so a rehearsal has to be
+// wipeable before the real night.
 let sn = reducer(initialState(), { type: 'removeFromRoster', name: 'Joe' })
 sn = reducer(sn, { type: 'shuffleTeams' })
 sn = reducer(sn, { type: 'setTeams', rosters: sn.teams.map(t => t.members) })
 sn = reducer(sn, { type: 'renameTeam', teamId: sn.teams[0].id, name: 'Rehearsal' })
 sn = reducer(sn, { type: 'toggleAward', key: '0-0', teamId: sn.teams[0].id })
 sn = reducer(sn, { type: 'consumeClue', key: '0-0' })
+sn = reducer(sn, { type: 'setPlayerStyle', name: 'Matt', color: PLAYER_COLORS[1], icon: PLAYER_EMOJI[1] })
 sn = reducer(sn, { type: 'newGame' })
 check('new game returns to the roster screen', sn.phase === 'roster')
 check('new game restores the full sign-up list', sn.roster.length === TEAMMATES.length)
 check('new game clears the board', sn.used.length === 0)
 check('new game clears scores', [...computeScores(sn).values()].every(v => v === 0))
-check('new game drops rehearsal team names',
-  sn.teams.every(t => !t.name.includes('Rehearsal')))
+check('new game drops rehearsal team names', sn.teams.every(t => !t.name.includes('Rehearsal')))
 check('new game clears any award celebration', sn.lastAward === null)
 check('new game clears player colours', Object.keys(sn.playerStyles).length === 0)
 

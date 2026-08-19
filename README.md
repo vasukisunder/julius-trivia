@@ -135,7 +135,21 @@ buzzer from a team still in play.
   many teams), then **shuffle** them into teams. Editing the roster first is what makes
   the draw come out even.
 - After the shuffle you can drag players between teams before starting.
-- Once a clue is revealed, **Open buzzers** starts the countdown and the phones go live.
+- Each clue runs as a fixed sequence, with one obvious action at every step:
+
+  1. **Read the question.** Everyone sees it. Host's only move: *Open buzzers*
+     (or the quiet *Skip to answer*, for a clue nobody will buzz on).
+  2. **Buzzers open.** A large countdown, buzzes landing in order. Nothing else is
+     possible. Host's only move: *Stop buzzers*, or let the clock run out.
+  3. **One team has the floor** — the fastest buzzer from a team not already ruled
+     out. Host rules *Correct* or *Wrong*. Wrong buzzes that team out, flashes the
+     stage red, and promotes the next team automatically. When everyone who buzzed
+     is out, it moves on by itself.
+  4. **Answer.** Shown plainly, with who scored. Host's only move: *Next question*.
+
+  The step is named at the top of the screen throughout, on both the host's view
+  and the shared one. Scores can still be corrected any time from the scoreboard
+  steppers, so the sequence never traps the host.
 - Clicking a tile opens the clue. **Escape, the ✕, and clicking outside all close
   without using it up** — only "Done" retires a clue.
 - After revealing, tap every player who got it. Tapping again takes it back.
