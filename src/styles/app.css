@@ -263,9 +263,11 @@ body[data-mode="host"]::before{
   animation:rise .22s var(--ease) both}
 @keyframes rise{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
 .answer-val{
-  font-family:var(--display);font-size:clamp(20px,2.8vw,var(--t-32));font-weight:600;
-  letter-spacing:-.02em;line-height:1.25;max-width:34ch;text-wrap:balance;color:var(--cat);
+  font-family:var(--display);font-size:clamp(30px,5vw,64px);font-weight:700;
+  letter-spacing:-.03em;line-height:1.15;max-width:30ch;text-wrap:balance;color:var(--cat);
 }
+/* The host's advance copy is reference material, not the headline. */
+.answer.host-only .answer-val{font-size:clamp(20px,2.6vw,32px);font-weight:600}
 /* Host-only answers are framed in red so a mis-shared window is obvious. */
 .answer.host-only{border:1px solid rgba(229,87,77,.5);border-radius:var(--r);padding:14px 22px}
 .answer.host-only .label{color:var(--signal)}
@@ -322,7 +324,7 @@ body[data-mode="host"]::before{
 /* ---- step 2: the clock dominates ---- */
 .buzzstage{display:flex;flex-direction:column;align-items:center;gap:14px;width:100%;max-width:52ch}
 .bigclock{
-  font-family:var(--display);font-size:clamp(64px,13vw,132px);font-weight:700;
+  font-family:var(--display);font-size:clamp(56px,10vw,104px);font-weight:700;
   letter-spacing:-.05em;line-height:.95;color:var(--cat);font-variant-numeric:tabular-nums;
 }
 .bigclock.low{color:var(--wrong);animation:tick .5s steps(2,end) infinite}
@@ -367,10 +369,8 @@ body[data-mode="host"]::before{
 
 /* Reading and revealed keep the question central; buzzing tightens it up so the
    clock is the thing you look at. */
-.phase-buzzing .clue{font-size:clamp(19px,2.4vw,var(--t-24))}
-.phase-verdict .clue{font-size:clamp(18px,2.2vw,var(--t-22));color:var(--ink-2)}
-.phase-revealed .clue{font-size:clamp(17px,2vw,var(--t-20));color:var(--ink-2)}
-.phase-revealed .answer-val{font-size:clamp(26px,4vw,var(--t-48))}
+/* The question stays readable through every step — it used to shrink once the
+   buzzers opened and never recover, while people were still trying to read it. */
 .sbtn:hover{background:var(--surface-2);color:var(--ink)}
 .sbtn.primary{background:var(--cat);color:var(--on-color)}
 .sbtn.primary:hover{background:var(--cat);color:var(--on-color);filter:brightness(1.08)}
