@@ -470,7 +470,22 @@ body[data-mode="host"]::before{
 .conn.online{color:#4FBD8F}
 .conn.reconnecting{color:#E4B063}
 .conn.unavailable{color:var(--wrong)}
-.floatbadge{position:fixed;top:16px;right:18px;z-index:50}
+.floatbadge{position:fixed;top:16px;right:18px;z-index:50;display:flex;gap:8px;align-items:center}
+
+/* Sound control. Only ever rendered on the presentation screen. */
+.soundbtn{
+  font-size:var(--t-12);font-weight:600;padding:5px 12px;border-radius:99px;
+  background:var(--surface);border:none;color:var(--ink-3);cursor:pointer;
+  transition:background .15s,color .15s;
+}
+.soundbtn:hover{background:var(--surface-2);color:var(--ink)}
+.soundbtn.on{color:#4FBD8F}
+/* Louder, because silent-all-night is the failure this prevents. */
+.soundbtn.needs-unlock{
+  background:#E4B063;color:#241A08;font-weight:700;font-size:var(--t-13);padding:7px 15px;
+  animation:nudge 2s ease-in-out infinite;
+}
+@keyframes nudge{50%{transform:scale(1.04)}}
 .joinline{font-size:var(--t-13);color:var(--ink-3);margin:0 0 14px}
 .joinline strong{color:var(--ink);font-weight:600}
 

@@ -553,6 +553,33 @@ check('new game drops rehearsal team names', sn.teams.every(t => !t.name.include
 check('new game clears any award celebration', sn.lastAward === null)
 check('new game clears player colours', Object.keys(sn.playerStyles).length === 0)
 
+console.log('\nsound cues have transitions to fire on')
+// The presentation screen derives every cue from a change in shared state, since
+// it never handles the click that caused it. Each of these fields must actually
+// change on the transition the cue is named after.
+let ss = reducer(initialState(), { type: 'shuffleTeams' })
+check('drawing teams bumps drawSeq (shuffle cue)', ss.drawSeq === 1)
+const beforeStart = ss.phase
+ss = reducer(ss, { type: 'setTeams', rosters: ss.teams.map(t => t.members) })
+check('starting the game changes phase (start cue)',
+  beforeStart === 'draft' && ss.phase === 'board')
+ss = reducer(ss, { type: 'openClue', ref: { categoryIndex: 0, clueIndex: 0 } })
+check('opening a clue changes open (select cue)', ss.open !== null)
+ss = reducer(ss, { type: 'openBuzzers', seconds: 25 })
+check('opening buzzers changes cluePhase (buzzOpen cue)', ss.cluePhase === 'buzzing')
+check('and sets a deadline the ticks can count down (tick cue)', ss.timerEndsAt !== null)
+const before = ss.buzzes.length
+ss = reducer(ss, { type: 'buzz', buzz: { playerId: 'z', name: 'A', teamId: ss.teams[0].id, reactionMs: 200 } })
+check('a buzz grows the queue (buzz cue)', ss.buzzes.length === before + 1)
+ss = reducer(ss, { type: 'endBuzzing' })
+check('the clock ending moves buzzing -> verdict (timeUp cue)', ss.cluePhase === 'verdict')
+ss = reducer(ss, { type: 'markWrong', teamId: ss.teams[0].id })
+check('a wrong answer bumps lastWrong.seq (wrong cue)', (ss.lastWrong?.seq ?? 0) === 1)
+let ss2 = reducer(initialState(), { type: 'shuffleTeams' })
+ss2 = reducer(ss2, { type: 'openClue', ref: { categoryIndex: 0, clueIndex: 0 } })
+ss2 = reducer(ss2, { type: 'awardTo', teamId: ss2.teams[0].id, points: 100 })
+check('an award bumps lastAward.seq (correct cue)', (ss2.lastAward?.seq ?? 0) === 1)
+
 console.log('\nreset')
 let s3 = reducer(initialState(), { type: 'shuffleTeams' })
 s3 = reducer(s3, { type: 'setTeams', rosters: s3.teams.map(t => t.members) })

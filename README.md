@@ -120,6 +120,29 @@ keeps the teams and just clears the board.
 
 **Do not deploy on game day.** Deploy, hit **New game**, then leave it alone.
 
+## Sound
+
+Only the **presentation screen** makes noise — the host's laptop and every phone stay
+silent. Sound belongs to the one machine whose audio the room hears; sixteen devices
+chiming at once would be unusable.
+
+Cues are synthesised with the Web Audio API rather than loaded from files: nothing extra
+for the Worker to serve, nothing to fail on a flaky connection, and the whole set is a
+couple of kilobytes. They are short, soft-attacked and quiet, because this plays over a
+video call.
+
+Cues fire off changes in shared state, not off the click that caused them — the shared
+screen never handles the interaction, so it watches the state instead. There is a cue for
+a tile opening, buzzers going live, each buzz (first place is brighter), the closing five
+seconds, the clock running out, a right answer, a wrong one, teams being drawn, and the
+game starting.
+
+**One thing the host must do:** browsers keep audio suspended until something is clicked
+in that window, and the presentation window is opened programmatically, so it has had no
+click of its own. It shows an amber **Turn on sound** button until pressed — pressing
+anything in that window also does it. Without that, the night is silent and nothing says
+why.
+
 ## How the buzzer stays fair
 
 Ranking by when a buzz *arrives* would rank people by their broadband, not their

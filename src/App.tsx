@@ -8,6 +8,8 @@ import { CATEGORIES, TEAMMATES } from './data'
 import { computeScores, currentBuzz } from './state/gameState'
 import { useGame } from './state/useGame'
 import { useBuildCheck } from './net/useBuildCheck'
+import { useGameSounds } from './audio/useGameSounds'
+import { SoundToggle, useSoundPref } from './components/SoundToggle'
 import { BuzzerScreen } from './components/BuzzerScreen'
 import { playerId } from './net/player'
 import { catColor } from './theme'
@@ -46,6 +48,9 @@ function SyncBadge({ connection, mode }: { connection: Connection; mode: ViewMod
 export default function App() {
   const route = routeFromUrl()
   const stale = useBuildCheck()
+  // Sound is the shared screen's job alone: the host's laptop and every phone
+  // staying silent is the whole point.
+  const [soundOn] = useSoundPref()
   const { state, dispatch, connection, hoveredKey, sendHover } = useGame()
   // Which clue is open lives in shared state, so the presentation screen opens
   // the same tile at the same moment the host picks it.
@@ -57,6 +62,8 @@ export default function App() {
   useEffect(() => {
     document.body.dataset.mode = route
   }, [route])
+
+  useGameSounds(state, route === 'present' && soundOn)
 
   const used = useMemo(() => new Set(state.used), [state.used])
   const scores = useMemo(() => computeScores(state), [state])
@@ -98,7 +105,10 @@ export default function App() {
     return (
       <>
       {staleBar}
-      <div className="floatbadge"><SyncBadge connection={connection} mode={mode} /></div>
+      <div className="floatbadge">
+        {route === 'present' && <SoundToggle />}
+        <SyncBadge connection={connection} mode={mode} />
+      </div>
       <RosterStage
         roster={state.roster}
         teamCount={state.teamCount}
@@ -121,7 +131,10 @@ export default function App() {
     return (
       <>
       {staleBar}
-      <div className="floatbadge"><SyncBadge connection={connection} mode={mode} /></div>
+      <div className="floatbadge">
+        {route === 'present' && <SoundToggle />}
+        <SyncBadge connection={connection} mode={mode} />
+      </div>
       <TeamDraft
         teams={state.teams}
         drawSeq={state.drawSeq}
@@ -147,6 +160,7 @@ export default function App() {
             {mode === 'host' ? 'Host view · answers shown' : 'On screen'}
           </span>
           <SyncBadge connection={connection} mode={mode} />
+          {route === 'present' && <SoundToggle />}
           {mode === 'host' && (
             <button
               className="tbtn go"
