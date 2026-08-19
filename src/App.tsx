@@ -7,6 +7,7 @@ import { TeamDraft } from './components/TeamDraft'
 import { CATEGORIES, TEAMMATES } from './data'
 import { computeScores, currentBuzz } from './state/gameState'
 import { useGame } from './state/useGame'
+import { useBuildCheck } from './net/useBuildCheck'
 import { BuzzerScreen } from './components/BuzzerScreen'
 import { playerId } from './net/player'
 import { catColor } from './theme'
@@ -44,6 +45,7 @@ function SyncBadge({ connection, mode }: { connection: Connection; mode: ViewMod
 
 export default function App() {
   const route = routeFromUrl()
+  const stale = useBuildCheck()
   const { state, dispatch, connection, hoveredKey, sendHover } = useGame()
   // Which clue is open lives in shared state, so the presentation screen opens
   // the same tile at the same moment the host picks it.
@@ -63,11 +65,21 @@ export default function App() {
   const openCategory = openRef ? CATEGORIES[openRef.categoryIndex] : null
   const openClue = openRef ? openCategory?.clues[openRef.clueIndex] : null
 
+  // Unmissable, and on every surface: a window running an old bundle looks like a
+  // bug rather than a stale page.
+  const staleBar = stale ? (
+    <button className="stalebar" onClick={() => window.location.reload()}>
+      This window is out of date — click to reload
+    </button>
+  ) : null
+
   if (route === 'none') return <Landing />
 
   // Phones only ever show the buzzer.
   if (route === 'buzz') {
     return (
+      <>
+      {staleBar}
       <BuzzerScreen
         state={state}
         connection={connection}
@@ -78,12 +90,14 @@ export default function App() {
           dispatch({ type: 'setPlayerStyle', name, color, icon })
         }
       />
+      </>
     )
   }
 
   if (state.phase === 'roster') {
     return (
       <>
+      {staleBar}
       <div className="floatbadge"><SyncBadge connection={connection} mode={mode} /></div>
       <RosterStage
         roster={state.roster}
@@ -106,6 +120,7 @@ export default function App() {
   if (state.phase === 'draft') {
     return (
       <>
+      {staleBar}
       <div className="floatbadge"><SyncBadge connection={connection} mode={mode} /></div>
       <TeamDraft
         teams={state.teams}
@@ -123,6 +138,7 @@ export default function App() {
 
   return (
     <div className="shell">
+      {staleBar}
       <header className="topbar">
         <Wordmark />
 
@@ -134,9 +150,15 @@ export default function App() {
           {mode === 'host' && (
             <button
               className="tbtn go"
-              onClick={() =>
-                window.open(PRESENT_URL, 'trivia-present', 'width=1280,height=800')
-              }
+              onClick={() => {
+                // The changing param forces a fresh load. window.open reuses a
+                // window with the same name and will happily leave it running
+                // whatever JavaScript it already had — which is how the shared
+                // screen ended up showing markup two builds old.
+                const url = `${PRESENT_URL}?r=${Date.now()}`
+                const w = window.open(url, 'trivia-present', 'width=1280,height=800')
+                w?.focus()
+              }}
             >
               Open presentation window
             </button>

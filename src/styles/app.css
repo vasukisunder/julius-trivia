@@ -737,3 +737,14 @@ button:disabled{cursor:default}
   .draft-head{gap:18px}
   .joinqr-panel{width:120px !important;height:120px !important}
 }
+
+
+/* Stale-bundle warning. Deliberately loud: a window running an old build looks
+   like a rendering bug, and it has been mistaken for one twice. */
+.stalebar{
+  position:fixed;top:0;left:0;right:0;z-index:300;
+  background:#E4B063;color:#241A08;border:none;cursor:pointer;
+  font-family:var(--display);font-size:var(--t-15);font-weight:700;
+  padding:11px 16px;text-align:center;
+}
+.stalebar:hover{filter:brightness(1.05)}
