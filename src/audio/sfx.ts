@@ -10,7 +10,6 @@ export type Cue =
   | 'select'     // a tile opens
   | 'buzzOpen'   // buzzers go live
   | 'buzz'       // someone buzzes in
-  | 'tick'       // legacy single tick
   | 'timeUp'     // the clock runs out
   | 'correct'    // right answer
   | 'wrong'      // wrong answer
@@ -79,35 +78,51 @@ function tone({ freq, dur, type = 'sine', gain = 0.5, at = 0, to }: ToneOpts) {
 }
 
 /**
- * The tick-tock bed that runs while the buzzers are open.
+ * The thinking loop that plays while the buzzers are open.
  *
- * Deliberately generic — a two-note clock alternation that accelerates as the
- * window closes — rather than the Jeopardy think-music, which is a copyrighted
- * melody. The tension comes from the tempo, not from a tune.
+ * A gentle bouncy figure at STEADY tempo, not an accelerating clock. An
+ * accelerating tick reads as a stress signal — which is the opposite of what a
+ * think-music bed is for. Quiz-show thinking music is famously light and almost
+ * jaunty, and the tension comes from knowing time is passing rather than from
+ * being nagged about it.
  *
- * `progress` is 0 at the start of the window and 1 at the end.
+ * The figure is original. The obvious reference tune is copyrighted, so this
+ * borrows the character — major key, walking bass, lilting arpeggio — and none of
+ * the notes.
  */
-export function playTock(beat: number, progress: number) {
-  const urgent = progress > 0.8
-  // Alternating pitch is what reads as a clock rather than a metronome.
-  const base = beat % 2 === 0 ? 320 : 244
-  const lift = 1 + progress * 0.35
-  tone({
-    freq: base * lift,
-    dur: urgent ? 0.075 : 0.055,
-    type: 'square',
-    gain: (urgent ? 0.2 : 0.11) + progress * 0.08,
-  })
-  // A woodblock-ish knock under it, so the bed has some body on a laptop speaker.
-  tone({ freq: base * 0.5 * lift, dur: 0.09, type: 'triangle', gain: 0.07 + progress * 0.05 })
-}
+
+// A gentle rise and fall over eight steps: C E G E D F A F.
+const MELODY = [523.25, 659.25, 783.99, 659.25, 587.33, 698.46, 880.0, 698.46]
+// Walking bass, landing on the first and fifth step: C then G below.
+const BASS: (number | null)[] = [130.81, null, null, null, 98.0, null, null, null]
+
+/** Milliseconds per step. Fixed — the whole point is that it does not speed up. */
+export const THINK_STEP_MS = 300
 
 /**
- * Gap to the next tock, in ms. Starts loose and closes right up, which is what
- * makes a countdown feel like it is getting away from you.
+ * One step of the loop. `progress` runs 0 to 1 across the window and is used only
+ * for a light lift near the end, never to change the tempo.
  */
-export function tockGap(progress: number): number {
-  return 720 - progress * 520
+export function playThinkStep(step: number, progress: number) {
+  const i = step % 8
+  const closing = progress > 0.8
+
+  tone({
+    freq: MELODY[i],
+    dur: 0.2,
+    type: 'triangle',
+    gain: 0.13,
+  })
+
+  // A sparkle an octave up over the closing stretch: noticeable, still friendly.
+  if (closing && i % 2 === 0) {
+    tone({ freq: MELODY[i] * 2, dur: 0.14, type: 'sine', gain: 0.07, at: 0.04 })
+  }
+
+  const bass = BASS[i]
+  if (bass !== null) {
+    tone({ freq: bass, dur: 0.34, type: 'sine', gain: 0.16 })
+  }
 }
 
 /** Position in the buzz queue, so first place is unmistakably brighter. */
@@ -127,10 +142,6 @@ export function play(cue: Cue) {
       // Two notes up: unambiguously "go".
       tone({ freq: 523, dur: 0.13, type: 'triangle', gain: 0.5 })
       tone({ freq: 784, dur: 0.22, type: 'triangle', gain: 0.5, at: 0.11 })
-      break
-
-    case 'tick':
-      tone({ freq: 1100, dur: 0.035, type: 'square', gain: 0.16 })
       break
 
     case 'timeUp':

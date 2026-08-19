@@ -170,7 +170,6 @@ export function BuzzerScreen({ state, connection, onBuzz, onPickStyle }: Props) 
             {place === 1 ? 'IN!' : ORDINALS[(place ?? 1) - 1] ?? `#${place}`}
           </div>
           <div className="phone-ms">{(myBuzz.reactionMs / 1000).toFixed(2)}s</div>
-          {place !== 1 && <div className="phone-behind">{place === 2 ? 'just missed it' : 'in the queue'}</div>}
         </div>
       ) : connection === 'reconnecting' ? (
         <div className="phone-buzz waiting">Reconnecting…</div>

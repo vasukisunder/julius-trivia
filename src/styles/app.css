@@ -707,7 +707,6 @@ body[data-mode="host"]::before{
   color:var(--ink-3);font-variant-numeric:tabular-nums;
 }
 .phone-result.first .phone-ms{color:var(--on-color);opacity:.75}
-.phone-behind{position:relative;font-size:var(--t-13);color:var(--ink-3)}
 /* Rings burst out from the middle, contained by the panel. */
 .phone-rings{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
 .phone-rings i{
