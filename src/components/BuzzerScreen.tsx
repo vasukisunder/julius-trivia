@@ -28,6 +28,9 @@ export function BuzzerScreen({ state, connection, onBuzz, onPickStyle }: Props) 
   const [picking, setPicking] = useState(() => !hasChosen())
   const armedAt = useRef<number | null>(null)
 
+  // The roster exists from the start; teams only after the host shuffles. People
+  // scan the QR during setup, so identity has to work off the roster.
+  const onRoster = !!name && state.roster.includes(name)
   const me = state.teams.find((t) => t.members.includes(name ?? ''))
   const open = state.buzzOpenedAt !== null
   const myBuzz = state.buzzes.find((b) => b.playerId === playerId())
@@ -56,14 +59,16 @@ export function BuzzerScreen({ state, connection, onBuzz, onPickStyle }: Props) 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [name, style])
 
-  if (!name || !me) {
+  if (!name || !onRoster) {
     return (
       <div className="phone">
         <div className="phone-head"><Wordmark /></div>
         <p className="phone-pick-label">Who are you?</p>
-        <div className="phone-names">
-          {state.teams.flatMap((team) =>
-            team.members.map((member) => {
+        {state.roster.length === 0 ? (
+          <p className="phone-note">Waiting for the host to open the game.</p>
+        ) : (
+          <div className="phone-names">
+            {state.roster.map((member) => {
               const st = state.playerStyles[member]
               return (
                 <button
@@ -79,9 +84,9 @@ export function BuzzerScreen({ state, connection, onBuzz, onPickStyle }: Props) 
                   {member}
                 </button>
               )
-            }),
-          )}
-        </div>
+            })}
+          </div>
+        )}
       </div>
     )
   }
@@ -93,7 +98,7 @@ export function BuzzerScreen({ state, connection, onBuzz, onPickStyle }: Props) 
       <div className="phone-id">
         {style && <PlayerIcon icon={style.icon} size={30} />}
         <span className="phone-who">{name}</span>
-        <span className="phone-team">{me.name}</span>
+        <span className="phone-team">{me ? me.name : 'Team to be drawn'}</span>
       </div>
 
       {picking ? (
@@ -154,6 +159,8 @@ export function BuzzerScreen({ state, connection, onBuzz, onPickStyle }: Props) 
         </div>
       ) : connection === 'connecting' ? (
         <div className="phone-buzz waiting">Connecting…</div>
+      ) : !me ? (
+        <div className="phone-buzz waiting small">Teams haven’t been drawn yet</div>
       ) : open ? (
         <button
           className="phone-buzz live"

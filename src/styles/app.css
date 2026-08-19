@@ -497,6 +497,7 @@ body[data-mode="host"]::before{
   letter-spacing:-.03em;color:var(--team);
 }
 .phone-ms{font-size:var(--t-17);color:var(--ink-3);font-variant-numeric:tabular-nums}
+.phone-note{color:var(--ink-3);font-size:var(--t-15);text-align:center;margin:0}
 .phone-switch{
   background:none;border:none;color:var(--ink-3);font-size:var(--t-13);font-weight:600;cursor:pointer;
 }

@@ -345,6 +345,25 @@ check('closing clears the timer', so.timerEndsAt === null)
 so = reducer(so, { type: 'openClue', ref: { categoryIndex: 2, clueIndex: 3 } })
 check('reopening a played clue comes back revealed', so.revealed === true)
 
+console.log('\nthe phone can identify people during setup')
+// The QR is shown on the setup screens, so phones arrive BEFORE teams exist.
+// The name list has to come from the roster; reading it from teams left the
+// "Who are you?" page blank for the entire setup stage.
+const atSetup = initialState()
+check('setup starts with no teams drawn', atSetup.teams.length === 0)
+check('but the roster is already full', atSetup.roster.length === TEAMMATES.length)
+check('so a phone has names to choose from', atSetup.roster.length > 0)
+// And a claimed colour must survive the shuffle that follows.
+let sph = reducer(atSetup, { type: 'setPlayerStyle', name: 'Ana', color: PLAYER_COLORS[3], icon: PLAYER_EMOJI[3] })
+sph = reducer(sph, { type: 'shuffleTeams' })
+check('a style claimed before the shuffle survives it',
+  sph.playerStyles.Ana.color === PLAYER_COLORS[3])
+check('and that player is now on a team',
+  sph.teams.some(t => t.members.includes('Ana')))
+// Someone dropped from the roster should no longer be offered on a phone.
+const dropped = reducer(atSetup, { type: 'removeFromRoster', name: 'Joe' })
+check('a dropped player is not offered on the phone', !dropped.roster.includes('Joe'))
+
 console.log('\nplayer colours and emoji')
 let sp = initialState()
 check('nobody has a style to begin with', Object.keys(sp.playerStyles).length === 0)
