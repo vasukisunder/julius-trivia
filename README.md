@@ -74,14 +74,30 @@ testing.
 
 ## Deploying
 
-One Cloudflare Worker serves the app *and* the buzzer, so it is one URL with no CORS:
+One Cloudflare Worker serves the app *and* the buzzer, so it is one URL with no CORS.
+
+**Automatic** - every push to `main` builds and deploys, via Cloudflare Workers Builds.
+Settings live in the dashboard under Workers & Pages -> julius-trivia -> Settings ->
+Builds:
+
+| Setting | Value |
+|---|---|
+| Build command | `npm run build` |
+| Deploy command | `npx wrangler deploy` (the default) |
+| Root directory | *(blank)* |
+| Branch | `main` |
+
+The Worker name in the dashboard has to match `name` in `wrangler.toml`, or the build
+fails. Pushes to other branches upload a preview version rather than going live.
+
+**Manual**, if you need to deploy without pushing:
 
 ```bash
-npx wrangler login
+npx wrangler login   # once per machine
 npm run deploy
 ```
 
-That gives a public HTTPS URL. Hand the host `/`, the presenter `/present`, and the
+Either way you get a public HTTPS URL. Hand the host `/`, the presenter `/present`, and the
 room `/buzz`. Nothing runs locally during the game, and it fits inside the Cloudflare
 free plan.
 
@@ -91,6 +107,18 @@ buzz ordering authoritative with no races. Add `?room=<name>` to run separate ga
 Because that state persists between sessions, use **New game** in the host toolbar
 before the real thing - it clears scores, teams and the player list. `Reset scores`
 keeps the teams and just clears the board.
+
+### What a deploy does and does not touch
+
+- **Open tabs keep the old code.** Deploying changes what the server hands out; a page
+  already loaded keeps running what it loaded. Everyone (phones included) has to reload.
+- **Game state survives**, because the Durable Object is separate from the code.
+- **Unless the state shape changed.** When `STATE_VERSION` in `src/state/gameState.ts`
+  is bumped, the Durable Object discards mismatched state instead of merging it - that is
+  what stops stale defaults surviving a rename. So a deploy carrying a version bump
+  resets the live game.
+
+**Do not deploy on game day.** Deploy, hit **New game**, then leave it alone.
 
 ## How the buzzer stays fair
 
