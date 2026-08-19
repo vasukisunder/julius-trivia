@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Buzz, Clue, CluePhase, PlayerStyle, Team, ViewMode, Wrong } from '../types'
 import { PlayerIcon } from './PlayerPill'
+import { WithNames } from './WithNames'
 import { useAwardFlash } from '../state/useAwardFlash'
 import { teamColor } from '../theme'
 
@@ -146,12 +147,15 @@ export function ClueStage({
       <div className="stage-body">
         {clue.kind === 'standard' ? (
           <>
-            <p className="clue">{clue.question}</p>
-            {clue.credit && <p className="credit">{clue.credit}</p>}
+            <p className="clue"><WithNames text={clue.question} /></p>
+            {clue.credit && <p className="credit"><WithNames text={clue.credit} /></p>}
           </>
         ) : (
           <>
-            <p className="clue">Which one is the lie about {clue.person}?</p>
+            <p className="lie-kind">Two truths and a lie</p>
+            <p className="clue">
+              Spot the lie about <span className="pname">{clue.person}</span>
+            </p>
             <ol className="statements">
               {clue.statements.map((st, i) => (
                 <li
@@ -165,7 +169,7 @@ export function ClueStage({
               ))}
             </ol>
             {phase === 'revealed' && clue.credit && (
-              <p className="credit">{clue.credit}</p>
+              <p className="credit"><WithNames text={clue.credit} /></p>
             )}
           </>
         )}

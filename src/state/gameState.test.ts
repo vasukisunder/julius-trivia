@@ -69,6 +69,27 @@ check('no duplicate questions', dupQuestions.length === 0)
 check('no duplicate category names',
   new Set(CATEGORIES.map(c => c.name)).size === CATEGORIES.length)
 
+console.log('\nname highlighting has something to work with')
+// Names are picked out of clue text at render time. If a credit stops naming
+// anyone, or a name is misspelled, the highlight silently does nothing — so the
+// data is checked rather than the rendering.
+const nameRe = new RegExp(
+  `\\b(${[...TEAMMATES].sort((a, b) => b.length - a.length).join('|')})\\b`,
+)
+const creditsWithoutNames = allClues
+  .filter(c => c.credit && !nameRe.test(c.credit))
+  .map(c => c.credit)
+check('every credit contains a matchable teammate name' +
+  (creditsWithoutNames.length ? ` (${creditsWithoutNames})` : ''),
+  creditsWithoutNames.length === 0)
+check('every lie card person is matchable',
+  lieClues.every(c => nameRe.test(c.person)))
+// "Ask" is a real name and an ordinary verb; a loose match would light up prose.
+const looseAskHits = standard.filter(c => /\bask\b/.test(c.question)).map(c => c.question)
+check('no clue text contains lowercase "ask" that a loose match would catch' +
+  (looseAskHits.length ? ` (${looseAskHits.length})` : ''),
+  looseAskHits.length === 0)
+
 console.log('\nteammate coverage')
 // A personal clue is one that names no specialty: the answer is a teammate.
 const personalText = allClues
