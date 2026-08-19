@@ -34,9 +34,14 @@ short columns are padded on the board automatically.
 
 | Path | Who | Shows answers |
 |---|---|---|
-| `/` | Host, marking answers right or wrong | Yes - on every tile and on the clue stage |
+| `/host` | Host, marking answers right or wrong | Yes - on every tile and on the clue stage |
 | `/present` | Whoever shares their screen | No, until the host reveals |
 | `/buzz` | Players, on their phones | n/a |
+| `/` | Nobody - deliberately empty | - |
+
+The empty root is the point: the host view prints the whole answer key, so if it lived at
+`/` a player could delete "buzz" off their link and read every answer. Nothing on the root
+page hints at the other paths either.
 
 The host clicks **Open presentation window** to launch the shared view. There is
 deliberately no toggle between modes - it was too easy to hit mid-game and would flash
@@ -82,6 +87,10 @@ free plan.
 
 State lives in a Durable Object - one per room, single-threaded, which is what makes
 buzz ordering authoritative with no races. Add `?room=<name>` to run separate games.
+
+Because that state persists between sessions, use **New game** in the host toolbar
+before the real thing - it clears scores, teams and the player list. `Reset scores`
+keeps the teams and just clears the board.
 
 ## How the buzzer stays fair
 
