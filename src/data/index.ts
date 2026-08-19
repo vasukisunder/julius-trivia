@@ -25,7 +25,14 @@ export const CATEGORIES: Category[] = [
     clues: [
       { kind: 'standard', points: 100, question: `Which teammate’s very first job was delivering newspapers?`, answer: `Greg` },
       { kind: 'standard', points: 200, question: `Which teammate’s first “real” job was in the men’s sportswear department at Nordstrom?`, answer: `Lucy` },
-      { kind: 'standard', points: 300, question: `Which teammate used to brew their own beer?`, answer: `Hannah` },
+      {
+        kind: 'lie', points: 300, person: 'Hannah', lieIndex: 2,
+        statements: [
+          `Believes in ghosts.`,
+          `Was on the ski team in high school.`,
+          `Won her first bike race.`,
+        ],
+      },
       { kind: 'standard', points: 400, question: `When this teammate was ten, their grandfather gave them a deer. Who?`, answer: `Jonattan` },
       { kind: 'standard', points: 500, question: `Which teammate worked on “Popstars,” the TV show that came before American Idol?`, answer: `Daniel` },
       {
