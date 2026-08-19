@@ -15,6 +15,13 @@ import type { Category } from '../types'
  * `credit` names whose specialist subject a question came from. It is left off
  * personal clues, where it would give the answer away.
  *
+ * These get read aloud to the whole company, so clues have to be fine to say out
+ * loud about a colleague. A question is not acceptable just because the fact is
+ * true or the person submitted it: framing matters. One earlier clue asked which
+ * player "whipped off her shirt" after a World Cup winner — a true and famous
+ * moment, but it reduced a landmark achievement to a woman's body and had no place
+ * here. When in doubt, ask what it sounds like read out to the room.
+ *
  * Nothing here leaks: no fact used as a plain clue also appears as a statement
  * on a spot-the-lie card. The tests check that too.
  */
