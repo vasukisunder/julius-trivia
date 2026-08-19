@@ -1,0 +1,18 @@
+name = "julius-trivia"
+main = "worker/index.ts"
+compatibility_date = "2025-04-01"
+
+# Serves the built SPA. single-page-application keeps deep links working.
+[assets]
+directory = "./dist/client"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+
+[[durable_objects.bindings]]
+name = "ROOM"
+class_name = "Room"
+
+# SQLite-backed Durable Objects are the ones included on the free plan.
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Room"]

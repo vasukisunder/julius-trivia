@@ -1,0 +1,10 @@
+node_modules
+dist
+.DS_Store
+*.local
+tsconfig.tsbuildinfo
+.wrangler
+
+# The raw sign-up export contains everyone's email addresses. The question bank
+# in src/data already holds everything the game needs, so the CSV stays local.
+*.csv

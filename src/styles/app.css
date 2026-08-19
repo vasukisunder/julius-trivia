@@ -1,0 +1,582 @@
+/* ============================================================================
+   Trivia Night — design tokens
+
+   Deep indigo canvas, soft rounded tiles with air between them, friendly
+   geometric type in sentence case. Bricolage Grotesque carries the big moments
+   (wordmark, point values, clue text); Plus Jakarta Sans does everything else.
+
+   Deliberately avoided: all-caps + letter-spaced mono labels (too severe),
+   fluorescent accents, gold.
+   ========================================================================== */
+:root{
+  /* Surfaces — deep indigo, so the blues and greens sit on family ground. */
+  --canvas:    #141A2E;
+  --surface:   #1E2540;
+  --surface-2: #29314F;
+  --stage:     #0E121F;   /* clue stage — the lights go down */
+  --rule:      #333C5C;
+  --on-color:  #101526;   /* text on a filled category/team colour */
+
+  /* Ink — cool off-white, never pure white */
+  --ink:   #EEF1F8;
+  --ink-2: #A6AFC9;
+  --ink-3: #757F9E;
+
+  /* Category hues are set per column; see theme.ts */
+  --cat:  #8B90E5;
+  --team: #8B90E5;
+
+  /* Reserved roles — no category uses red, so these always read as meaning
+     something rather than as decoration. */
+  --signal: #E5574D;   /* host mode */
+  --wrong:  #E5574D;   /* wrong answer / negative score */
+
+  --display: 'Bricolage Grotesque', system-ui, sans-serif;
+  --sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+
+  --t-12:12px; --t-13:13px; --t-15:15px; --t-17:17px;
+  --t-20:20px; --t-24:24px; --t-32:32px; --t-44:44px;
+
+  --r:   12px;   /* friendly, not severe */
+  --r-sm: 9px;
+  --ease: cubic-bezier(.2,.8,.3,1);
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--canvas);
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:var(--t-15);
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  font-variant-numeric:tabular-nums;
+  min-height:100vh;
+}
+button{font-family:inherit;color:inherit}
+
+/* Quiet caption. Sentence case, no tracking — the old all-caps mono read cold. */
+.label{font-size:var(--t-13);color:var(--ink-3);font-weight:500}
+
+/* ============================== shell ==================================== */
+.shell{max-width:1240px;margin:0 auto;padding:24px 24px 48px}
+
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:20px;
+  flex-wrap:wrap;margin-bottom:20px}
+.wordmark{
+  font-family:var(--display);font-size:var(--t-24);font-weight:700;
+  letter-spacing:-.02em;line-height:1.1;
+}
+.wordmark span{color:#8B90E5}
+/* The presentation board mirrors the host, so its tiles are inert. */
+.tile.static{cursor:default}
+.tile.static:hover{background:var(--surface);color:var(--cat);transform:none}
+.tile.static.used:hover{background:#1A2038;color:var(--ink-3)}
+.topbar-meta{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+
+.tbtn{
+  font-size:var(--t-13);font-weight:600;
+  background:var(--surface);border:1px solid transparent;border-radius:var(--r-sm);
+  padding:8px 13px;cursor:pointer;color:var(--ink-2);
+  transition:background .15s var(--ease), color .15s var(--ease);
+}
+.tbtn:hover{background:var(--surface-2);color:var(--ink)}
+.tbtn:focus-visible{outline:2px solid var(--cat);outline-offset:2px}
+.tbtn.go{background:var(--ink);color:var(--canvas)}
+.tbtn.go:hover{background:#fff;color:var(--canvas)}
+
+.chip{font-size:var(--t-12);font-weight:700;padding:5px 10px;border-radius:99px}
+.chip.host{background:rgba(229,87,77,.16);color:var(--signal)}
+.chip.present{background:var(--surface);color:var(--ink-3)}
+
+/* Host mode tints the viewport edge so a mis-shared window is obvious. */
+body[data-mode="host"]::before{
+  content:"";position:fixed;inset:0;z-index:200;pointer-events:none;
+  border:2px solid rgba(229,87,77,.55);border-radius:2px;
+}
+
+/* ============================== board ==================================== */
+/* Tiles are interactive, so they get to be tiles: air between them, soft
+   corners, flat fills, no shadows. */
+.board{
+  display:grid;
+  grid-template-columns:repeat(var(--cols),minmax(0,1fr));
+  gap:8px;
+}
+.cat{
+  background:var(--cat);color:var(--on-color);
+  border-radius:var(--r);padding:14px 12px;min-height:66px;
+  display:flex;align-items:center;justify-content:center;text-align:center;
+  font-family:var(--display);font-size:var(--t-15);font-weight:600;
+  line-height:1.25;letter-spacing:-.01em;text-wrap:balance;
+}
+.tile{
+  background:var(--surface);border:none;border-radius:var(--r);min-height:78px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  cursor:pointer;
+  font-family:var(--display);font-size:var(--t-32);font-weight:600;
+  letter-spacing:-.02em;color:var(--cat);
+  transition:background .15s var(--ease), color .15s var(--ease), transform .15s var(--ease);
+}
+.tile:hover{background:var(--cat);color:var(--on-color);transform:translateY(-2px)}
+.tile:focus-visible{outline:2px solid var(--cat);outline-offset:2px}
+.tile.used{background:#1A2038;color:var(--ink-3)}
+.tile.used .tile-pts{opacity:.5}
+.tile.used:hover{background:var(--surface-2);color:var(--ink-2);transform:none}
+/* Host mode prints the answer under the value — the answer key, in situ. */
+.tile-ans{
+  font-family:var(--sans);font-size:var(--t-12);font-weight:500;
+  color:var(--ink-3);line-height:1.3;letter-spacing:0;
+  max-width:94%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.tile:hover .tile-ans{color:rgba(16,21,38,.72)}
+.tile-placeholder{background:#1A2038;border-radius:var(--r)}
+
+/* ============================ scoreboard ================================= */
+.scores{margin-top:24px;display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:8px}
+.team{
+  background:var(--surface);border-radius:var(--r);overflow:hidden;
+  display:flex;flex-direction:column;
+}
+/* The team's colour is a header, not a stripe — same treatment as the board's
+   category blocks, so the two read as one system. */
+.team-head{
+  background:var(--team);color:var(--on-color);
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:9px 14px;
+}
+.team-name{
+  background:none;border:none;padding:0;width:100%;min-width:0;
+  font-family:var(--display);font-size:var(--t-15);font-weight:600;
+  letter-spacing:-.01em;color:var(--on-color);
+}
+.team-name::placeholder{color:rgba(16,21,38,.5)}
+.team-name:focus{outline:none}
+.lead{font-size:var(--t-12);font-weight:700;color:rgba(16,21,38,.72);flex:none}
+.team-body{padding:14px 16px 16px}
+.team-score{
+  font-family:var(--display);font-size:var(--t-44);font-weight:600;
+  letter-spacing:-.03em;line-height:1.1;margin:0 0 8px;color:var(--ink);
+}
+.team-score.neg{color:var(--wrong)}
+.roster{font-size:var(--t-13);color:var(--ink-2);line-height:1.6}
+.stepper{display:flex;gap:6px;margin-top:12px;align-items:center}
+.step{
+  width:32px;height:30px;border:none;border-radius:var(--r-sm);
+  background:var(--surface-2);cursor:pointer;font-size:var(--t-17);color:var(--ink-2);
+  display:flex;align-items:center;justify-content:center;transition:background .15s,color .15s;
+}
+.step:hover{background:var(--rule);color:var(--ink)}
+.step-amt{
+  font-size:var(--t-13);font-weight:600;color:var(--ink-3);
+  background:none;border:none;padding:6px 4px;cursor:pointer;
+}
+.step-amt:hover{color:var(--ink)}
+
+/* ============================ clue stage ================================= */
+.stage-scrim{
+  position:fixed;inset:0;z-index:100;background:var(--stage);
+  display:flex;flex-direction:column;animation:lightsdown .2s var(--ease) both;
+}
+@keyframes lightsdown{from{opacity:0}to{opacity:1}}
+
+.stage-top{display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:20px 26px;flex:none}
+.stage-cat{
+  font-family:var(--display);font-size:var(--t-15);font-weight:600;color:var(--cat);
+}
+.stage-pts{color:var(--ink-3);font-family:var(--sans);font-weight:500}
+.stage-close{
+  background:var(--surface);border:none;border-radius:var(--r-sm);color:var(--ink-2);
+  font-size:var(--t-13);font-weight:600;padding:8px 13px;cursor:pointer;transition:background .15s,color .15s;
+}
+.stage-close:hover{background:var(--surface-2);color:var(--ink)}
+
+/* Countdown depletes as a soft bar. Not a ring. */
+.timerbar{height:3px;background:var(--rule);flex:none;position:relative;overflow:hidden;
+  margin:0 26px;border-radius:99px}
+.timerbar i{
+  position:absolute;inset:0 auto 0 0;width:100%;background:var(--cat);
+  border-radius:99px;transform-origin:left;transition:transform .95s linear;
+}
+.timerbar.low i{background:var(--wrong)}
+.countdown{font-size:var(--t-13);font-weight:700;color:var(--cat)}
+.countdown.low{color:var(--wrong)}
+
+.stage-body{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:22px;padding:36px 32px;text-align:center;overflow-y:auto;
+}
+.clue{
+  font-family:var(--display);font-size:clamp(25px,4vw,var(--t-44));font-weight:500;
+  line-height:1.25;letter-spacing:-.02em;max-width:30ch;text-wrap:balance;margin:0;
+}
+.credit{
+  font-size:var(--t-17);font-weight:600;color:var(--cat);margin:0;
+  background:rgba(255,255,255,.05);border-radius:99px;padding:8px 18px;
+}
+
+.statements{list-style:none;counter-reset:s;margin:0;padding:0;
+  display:flex;flex-direction:column;gap:8px;max-width:60ch;width:100%}
+.statement{
+  counter-increment:s;background:var(--surface);border-radius:var(--r);
+  padding:16px 60px 16px 52px;position:relative;text-align:left;
+  font-size:clamp(15px,1.8vw,var(--t-20));line-height:1.4;
+  transition:background .2s var(--ease), color .2s var(--ease);
+}
+.statement::before{
+  content:counter(s);position:absolute;left:20px;top:50%;transform:translateY(-50%);
+  font-size:var(--t-13);font-weight:700;color:var(--ink-3);
+}
+.statement.truth{color:var(--ink-3)}
+.statement.lie{background:rgba(229,87,77,.14);color:var(--ink)}
+.statement.lie::after{
+  content:"Lie";position:absolute;right:18px;top:50%;transform:translateY(-50%);
+  font-size:var(--t-12);font-weight:700;color:var(--wrong);
+}
+
+.answer{display:flex;flex-direction:column;align-items:center;gap:6px;
+  animation:rise .22s var(--ease) both}
+@keyframes rise{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.answer-val{
+  font-family:var(--display);font-size:clamp(20px,2.8vw,var(--t-32));font-weight:600;
+  letter-spacing:-.02em;line-height:1.25;max-width:34ch;text-wrap:balance;color:var(--cat);
+}
+/* Host-only answers are framed in red so a mis-shared window is obvious. */
+.answer.host-only{border:1px solid rgba(229,87,77,.5);border-radius:var(--r);padding:14px 22px}
+.answer.host-only .label{color:var(--signal)}
+
+.stage-foot{flex:none;display:flex;align-items:center;justify-content:center;gap:8px;
+  flex-wrap:wrap;padding:16px 26px 22px}
+.sbtn{
+  font-size:var(--t-13);font-weight:600;background:var(--surface);border:none;
+  border-radius:var(--r-sm);padding:10px 15px;cursor:pointer;color:var(--ink-2);
+  transition:background .15s,color .15s;
+}
+.sbtn:hover{background:var(--surface-2);color:var(--ink)}
+.sbtn.primary{background:var(--cat);color:var(--on-color)}
+.sbtn.primary:hover{background:var(--cat);color:var(--on-color);filter:brightness(1.08)}
+.sbtn.award[aria-pressed="true"]{background:var(--team);color:var(--on-color)}
+
+/* ============================ team draft ================================= */
+.draft{
+  min-height:100vh;display:flex;flex-direction:column;justify-content:center;
+  align-items:center;padding:44px 24px;
+}
+/* One measure for every setup row, so the head, the chips and the footer all
+   share an edge instead of each finding its own width. */
+.draft > *{width:100%;max-width:940px}
+.draft-head{margin-bottom:26px}
+.draft-head .wordmark{font-size:var(--t-15);margin-bottom:14px;color:var(--ink-2)}
+.draft-title{
+  font-family:var(--display);font-size:clamp(32px,5.4vw,60px);font-weight:700;
+  letter-spacing:-.035em;line-height:1.02;margin:0 0 8px;
+}
+.draft-count{color:var(--ink-3);font-size:var(--t-15);margin:0}
+.draft-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.draft-col{
+  background:var(--surface);border-radius:var(--r);min-height:280px;overflow:hidden;
+}
+.draft-col-name{
+  background:var(--team);color:var(--on-color);
+  font-family:var(--display);font-size:var(--t-15);font-weight:600;padding:9px 16px;
+}
+.draft-list{padding:14px 20px 22px}
+.draft-member{
+  font-family:var(--display);font-size:var(--t-20);font-weight:500;
+  letter-spacing:-.015em;line-height:1.5;color:var(--ink);
+  display:flex;align-items:center;gap:8px;padding:3px 0;
+}
+.draft-remove{
+  margin-left:auto;background:none;border:none;cursor:pointer;padding:0 2px;
+  font-size:var(--t-20);line-height:1;color:var(--ink-3);opacity:0;
+  transition:opacity .15s,color .15s;
+}
+.draft-member:hover .draft-remove{opacity:1}
+.draft-remove:hover{color:var(--wrong)}
+.draft-remove:focus-visible{opacity:1;outline:2px solid var(--cat);outline-offset:2px}
+.draft-add{
+  margin-top:8px;background:none;border:none;padding:2px 0;cursor:pointer;
+  font-size:var(--t-13);font-weight:600;color:var(--ink-3);transition:color .15s;
+}
+.draft-add:hover{color:var(--ink)}
+.draft-add-input{
+  margin-top:8px;width:100%;background:var(--surface-2);border:none;border-radius:var(--r-sm);
+  padding:8px 10px;color:var(--ink);font-family:var(--display);font-size:var(--t-17);
+  font-weight:500;
+}
+.draft-add-input:focus{outline:2px solid var(--team);outline-offset:0}
+.draft-add-input::placeholder{color:var(--ink-3)}
+.draft-member.rolling{color:var(--ink-3)}
+.draft-member.landed{animation:land .28s var(--ease) both}
+@keyframes land{
+  0%{opacity:0;transform:translateY(-7px)}
+  65%{opacity:1;transform:translateY(1px)}
+  100%{transform:none}
+}
+.draft-foot{margin-top:24px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.bigbtn{
+  font-size:var(--t-15);font-weight:700;background:var(--ink);color:var(--canvas);
+  border:none;border-radius:var(--r-sm);padding:14px 24px;cursor:pointer;
+  transition:background .15s,transform .15s var(--ease);
+}
+.bigbtn:hover{background:#fff;transform:translateY(-1px)}
+.bigbtn:disabled{opacity:.35;cursor:default;transform:none}
+.bigbtn.ghost{background:var(--surface);color:var(--ink-2)}
+.bigbtn.ghost:hover{background:var(--surface-2);color:var(--ink)}
+
+/* ============================ responsive ================================= */
+@media (max-width:900px){
+  .board{overflow-x:auto}
+  .draft-grid{grid-template-columns:1fr}
+  .draft-col{min-height:0}
+  .team-score{font-size:var(--t-32)}
+}
+@media (max-width:640px){
+  .shell{padding:16px 14px 32px}
+  .tile{font-size:var(--t-24);min-height:62px}
+  .cat{font-size:var(--t-13);min-height:56px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none !important;transition:none !important}
+}
+
+
+/* ============================ connection ================================= */
+.conn{font-size:var(--t-12);font-weight:600;padding:5px 10px;border-radius:99px;
+  background:var(--surface);color:var(--ink-3)}
+.conn.online{color:#4FBD8F}
+.conn.reconnecting{color:#E4B063}
+.conn.unavailable{color:var(--wrong)}
+.floatbadge{position:fixed;top:16px;right:18px;z-index:50}
+.joinline{font-size:var(--t-13);color:var(--ink-3);margin:0 0 14px}
+.joinline strong{color:var(--ink);font-weight:600}
+
+/* ============================ roster stage =============================== */
+.roster-grid{display:flex;flex-wrap:wrap;gap:8px;align-content:flex-start}
+.roster-chip{
+  display:flex;align-items:center;gap:6px;background:var(--surface);
+  border-radius:99px;padding:9px 8px 9px 16px;
+  font-family:var(--display);font-size:var(--t-17);font-weight:500;
+}
+.roster-remove{
+  background:none;border:none;cursor:pointer;color:var(--ink-3);
+  font-size:var(--t-20);line-height:1;padding:0 6px;transition:color .15s;
+}
+.roster-remove:hover{color:var(--wrong)}
+.roster-chip.add{padding:0;background:none}
+.roster-chip.add input{
+  background:var(--surface-2);border:none;border-radius:99px;padding:10px 18px;
+  font-family:var(--display);font-size:var(--t-17);font-weight:500;color:var(--ink);width:170px;
+}
+.roster-chip.add input:focus{outline:2px solid var(--cat)}
+.roster-chip.add input::placeholder{color:var(--ink-3)}
+
+.teamcount{display:flex;align-items:center;gap:6px;margin-left:auto}
+.countbtn{
+  width:34px;height:34px;border:none;border-radius:var(--r-sm);background:var(--surface);
+  color:var(--ink-2);font-size:var(--t-15);font-weight:600;cursor:pointer;transition:background .15s,color .15s;
+}
+.countbtn:hover{background:var(--surface-2);color:var(--ink)}
+.countbtn[aria-pressed="true"]{background:var(--ink);color:var(--canvas)}
+
+/* ============================ drag and drop ============================== */
+.draft-member.draggable{cursor:grab}
+.draft-member.dragging{opacity:.35}
+.draft-col.dropping{outline:2px solid var(--team);outline-offset:-2px}
+
+/* ============================ buzz panel ================================= */
+.buzzpanel{width:100%;max-width:52ch;display:flex;flex-direction:column;gap:12px}
+.onspot{
+  border-radius:var(--r);padding:16px 20px;background:var(--team);color:var(--on-color);
+  display:flex;flex-direction:column;gap:2px;animation:pop .3s var(--ease) both;
+}
+.onspot-team{font-family:var(--display);font-size:var(--t-24);font-weight:700;letter-spacing:-.02em}
+.onspot-name{font-size:var(--t-13);font-weight:600;opacity:.75}
+.onspot.waiting,.onspot.none{
+  background:var(--surface);color:var(--ink-3);font-size:var(--t-15);font-weight:600;
+  align-items:center;
+}
+@keyframes pop{
+  0%{opacity:0;transform:scale(.94)}
+  70%{transform:scale(1.015)}
+  100%{opacity:1;transform:scale(1)}
+}
+
+.buzzlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+.buzzrow{
+  display:flex;align-items:center;gap:10px;padding:9px 14px;border-radius:var(--r-sm);
+  background:var(--surface);font-size:var(--t-15);text-align:left;
+  animation:slidein .2s var(--ease) both;
+}
+@keyframes slidein{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:none}}
+.buzzrank{
+  width:20px;height:20px;border-radius:99px;background:var(--team);color:var(--on-color);
+  font-size:var(--t-12);font-weight:700;display:flex;align-items:center;justify-content:center;flex:none;
+}
+.buzzname{font-weight:600}
+.buzzteam{color:var(--ink-3);font-size:var(--t-13)}
+.buzzms{margin-left:auto;color:var(--ink-3);font-size:var(--t-13);font-variant-numeric:tabular-nums}
+.buzzrow.live{background:var(--surface-2)}
+.buzzrow.out{opacity:.4}
+.buzzrow.out .buzzname{text-decoration:line-through}
+
+.sbtn.correct{background:#4FBD8F;color:var(--on-color);font-weight:700}
+.sbtn.correct:hover{background:#4FBD8F;color:var(--on-color);filter:brightness(1.08)}
+.sbtn.incorrect{background:rgba(229,87,77,.18);color:var(--wrong);font-weight:700}
+.sbtn.incorrect:hover{background:rgba(229,87,77,.28);color:var(--wrong)}
+
+/* ============================ celebration ================================ */
+.team.celebrating{animation:cheer .6s var(--ease) both}
+@keyframes cheer{
+  0%{transform:none}
+  25%{transform:translateY(-6px) scale(1.02)}
+  55%{transform:translateY(0) scale(1)}
+  75%{transform:translateY(-2px)}
+  100%{transform:none}
+}
+.team-score{position:relative}
+.score-pop{
+  position:absolute;left:100%;top:2px;margin-left:8px;white-space:nowrap;
+  font-family:var(--display);font-size:var(--t-20);font-weight:700;color:var(--team);
+  animation:floatup 1.1s var(--ease) both;pointer-events:none;
+}
+@keyframes floatup{
+  0%{opacity:0;transform:translateY(8px) scale(.9)}
+  20%{opacity:1;transform:translateY(0) scale(1.05)}
+  70%{opacity:1;transform:translateY(-10px)}
+  100%{opacity:0;transform:translateY(-22px)}
+}
+
+/* ============================ phone buzzer =============================== */
+.phone{
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:24px 20px 32px;gap:18px;
+}
+.phone-head{text-align:center}
+.phone-who{font-family:var(--display);font-size:var(--t-32);font-weight:700;letter-spacing:-.02em}
+.phone-team{font-size:var(--t-15);font-weight:600;color:var(--team)}
+.phone-pick-label{font-family:var(--display);font-size:var(--t-24);font-weight:600;margin:8px 0 0}
+.phone-names{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:520px}
+.phone-name{
+  background:var(--surface);border:none;border-radius:99px;padding:13px 20px;cursor:pointer;
+  font-family:var(--display);font-size:var(--t-17);font-weight:600;color:var(--ink);
+  transition:background .15s,color .15s;
+}
+.phone-name:hover,.phone-name:active{background:var(--team);color:var(--on-color)}
+
+.phone-buzz{
+  flex:1;width:100%;max-width:440px;border:none;border-radius:28px;
+  font-family:var(--display);font-size:clamp(40px,13vw,72px);font-weight:700;
+  letter-spacing:-.03em;display:flex;align-items:center;justify-content:center;
+}
+.phone-buzz.live{
+  background:var(--team);color:var(--on-color);cursor:pointer;
+  animation:armed .35s var(--ease) both;
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation;
+}
+.phone-buzz.live:active{transform:scale(.97)}
+@keyframes armed{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
+.phone-buzz.waiting{
+  background:var(--surface);color:var(--ink-3);font-size:var(--t-24);font-weight:600;
+  text-align:center;line-height:1.3;padding:20px;
+}
+.phone-buzz.waiting.small{font-size:var(--t-17);font-weight:500}
+.phone-result{
+  flex:1;width:100%;max-width:440px;background:var(--surface);border-radius:28px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+}
+.phone-place{
+  font-family:var(--display);font-size:clamp(36px,11vw,60px);font-weight:700;
+  letter-spacing:-.03em;color:var(--team);
+}
+.phone-ms{font-size:var(--t-17);color:var(--ink-3);font-variant-numeric:tabular-nums}
+.phone-switch{
+  background:none;border:none;color:var(--ink-3);font-size:var(--t-13);font-weight:600;cursor:pointer;
+}
+
+
+/* Controls mirrored onto the shared screen: visible, so the room can follow
+   what the host is doing, but plainly not live. */
+button:disabled{cursor:default}
+.tbtn:disabled,.sbtn:disabled,.step:disabled,.step-amt:disabled,
+.countbtn:disabled,.draft-add:disabled,.roster-remove:disabled{opacity:.45}
+/* ...except when it is showing state. A greyed-out "awarded" chip read as
+   broken on the shared screen. */
+.sbtn[aria-pressed="true"]:disabled,
+.countbtn[aria-pressed="true"]:disabled,
+.sbtn.correct:disabled,
+.sbtn.incorrect:disabled{opacity:1}
+.tbtn:disabled:hover,.sbtn:disabled:hover,.step:disabled:hover,
+.countbtn:disabled:hover,.draft-add:disabled:hover{
+  background:var(--surface);color:var(--ink-2);
+}
+.sbtn.primary:disabled:hover{background:var(--cat);color:var(--on-color)}
+.sbtn.correct:disabled:hover{background:#4FBD8F;color:var(--on-color)}
+.bigbtn:disabled:hover{background:var(--ink);transform:none}
+.bigbtn.ghost:disabled:hover{background:var(--surface)}
+.roster-chip.add input:disabled{opacity:.45}
+.draft-member .draft-remove:disabled{opacity:0}
+
+
+/* ============================ celebration ================================
+   Points landing should be the loudest moment on the screen. Full-bleed flood
+   in the team's colour, rings pushing outward, the score and team name arriving
+   on different beats.
+   ====================================================================== */
+.cheer{
+  position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;
+  pointer-events:none;overflow:hidden;
+  animation:cheerin .25s var(--ease) both, cheerout .45s var(--ease) 1.75s both;
+}
+.cheer::before{
+  content:"";position:absolute;inset:0;background:var(--team);opacity:.16;
+}
+@keyframes cheerin{from{opacity:0}to{opacity:1}}
+@keyframes cheerout{from{opacity:1}to{opacity:0}}
+
+.cheer-rings{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.cheer-rings i{
+  position:absolute;width:220px;height:220px;border-radius:50%;
+  border:2px solid var(--team);opacity:0;
+  animation:ring 1.5s var(--ease) both;
+}
+.cheer-rings i:nth-child(2){animation-delay:.18s}
+.cheer-rings i:nth-child(3){animation-delay:.36s}
+@keyframes ring{
+  0%{transform:scale(.35);opacity:.7}
+  100%{transform:scale(4.2);opacity:0}
+}
+
+.cheer-body{position:relative;text-align:center;display:flex;flex-direction:column;gap:2px}
+.cheer-points{
+  font-family:var(--display);font-size:clamp(64px,15vw,180px);font-weight:700;
+  letter-spacing:-.05em;line-height:.9;color:var(--team);
+  animation:cheerpop .5s cubic-bezier(.16,1.4,.3,1) both;
+}
+@keyframes cheerpop{
+  0%{opacity:0;transform:scale(.5)}
+  60%{opacity:1;transform:scale(1.06)}
+  100%{opacity:1;transform:scale(1)}
+}
+.cheer-team{
+  font-family:var(--display);font-size:clamp(20px,3.4vw,40px);font-weight:600;
+  letter-spacing:-.02em;color:var(--ink);
+  animation:cheerslide .45s var(--ease) .16s both;
+}
+@keyframes cheerslide{
+  from{opacity:0;transform:translateY(10px)}
+  to{opacity:1;transform:none}
+}
+
+/* The scoreboard panel joins in, so the points visibly land somewhere. */
+.team.celebrating{animation:cheer .6s var(--ease) both}
+
+
+/* The root path: a wordmark and nothing else. */
+.landing{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+}
+.landing .wordmark{font-size:var(--t-24);opacity:.5}

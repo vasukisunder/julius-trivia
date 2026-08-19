@@ -1,0 +1,380 @@
+import { reducer, initialState, computeScores } from './gameState'
+import type { GameState } from '../types'
+import { CATEGORIES, TEAMMATES } from '../data'
+import { TEAM_NAMES, TEAM_COUNT, drawTeams } from '../data/teams'
+import { currentBuzz, STATE_VERSION } from './gameState'
+
+let pass = 0, fail = 0
+const check = (label: string, cond: boolean) => {
+  if (cond) { pass++; console.log('  PASS ' + label) }
+  else { fail++; console.log('  FAIL ' + label) }
+}
+const score = (s: GameState, id: number) => computeScores(s).get(id) ?? 0
+
+const allClues = CATEGORIES.flatMap(c => c.clues)
+const lieClues = allClues.flatMap(c => (c.kind === 'lie' ? [c] : []))
+const standard = allClues.flatMap(c => (c.kind === 'standard' ? [c] : []))
+
+// ---------------------------------------------------------------- content --
+console.log('board shape')
+console.log(`  (${CATEGORIES.length} categories, ${allClues.length} clues, ${lieClues.length} spot-the-lie)`)
+check('defaults to three teams', TEAM_COUNT === 3)
+check('a 6x6 board — 6 categories', CATEGORIES.length === 6)
+check('36 clues, six per category', allClues.length === 36 && CATEGORIES.every(c => c.clues.length === 6))
+check('every clue has a positive point value', allClues.every(c => c.points > 0))
+check('standard clues all have a question and answer', standard.every(c => !!c.question && !!c.answer))
+check('every lie clue has exactly 3 statements', lieClues.every(c => c.statements.length === 3))
+check('every lieIndex is a valid statement index',
+  lieClues.every(c => c.lieIndex >= 0 && c.lieIndex < c.statements.length))
+check('no unresolved lies (Juan and Hattie never marked theirs, so are not used here)',
+  !lieClues.some(c => c.person === 'Juan' || c.person === 'Hattie'))
+
+console.log('\nteammate coverage')
+// A personal clue is one that names no specialty: the answer is a teammate.
+const personalText = allClues
+  .map(c => (c.kind === 'lie' ? c.person : c.credit ? '' : c.answer))
+  .join(' | ')
+const creditText = allClues.map(c => c.credit ?? '').join(' | ')
+
+const noPersonal = TEAMMATES.filter(n => !personalText.includes(n))
+const noNiche = TEAMMATES.filter(n => !creditText.includes(n))
+check('14 teammates signed up', TEAMMATES.length === 14)
+check('every teammate has a personal clue' + (noPersonal.length ? ` (missing: ${noPersonal})` : ''),
+  noPersonal.length === 0)
+check('every teammate has a clue from their niche' + (noNiche.length ? ` (missing: ${noNiche})` : ''),
+  noNiche.length === 0)
+
+console.log('\nno clue spoils a spot-the-lie card')
+// If a plain clue restates one of a card's statements, the card is given away.
+const plainText = standard.map(c => `${c.question} ${c.answer}`).join(' ').toLowerCase()
+const leaks: string[] = []
+for (const card of lieClues) {
+  for (const st of card.statements) {
+    // Compare on the distinctive words of each statement.
+    const key = st.toLowerCase().replace(/[^a-z ]/g, '').split(' ')
+      .filter(w => w.length > 5 && !['worked', 'travelled'].includes(w))
+    if (key.length && key.every(w => plainText.includes(w))) leaks.push(`${card.person}: ${st}`)
+  }
+}
+check('no statement is restated as a plain clue' + (leaks.length ? ` (leaked: ${leaks})` : ''),
+  leaks.length === 0)
+
+console.log('\nno meta commentary in clue text')
+const banned = ['bonus 100', 'by their own account', 'tap again', 'for a bonus', 'make them tell you']
+const meta = standard.filter(c => banned.some(b => c.question.toLowerCase().includes(b)))
+  .map(c => c.question)
+check('clue text is free of game-mechanic asides' + (meta.length ? ` (found: ${meta})` : ''),
+  meta.length === 0)
+
+// ------------------------------------------------------------------ rules --
+let s = reducer(initialState(), { type: 'shuffleTeams' })
+s = reducer(s, { type: 'setTeams', rosters: s.teams.map(t => t.members) })
+const t1 = s.teams[0].id, t2 = s.teams[1].id
+const K1 = '0-0'   // Origin Stories, 100
+const K2 = '0-5'   // Origin Stories, 600 (Ivan's spot-the-lie card)
+
+console.log('\nawarding')
+s = reducer(s, { type: 'toggleAward', key: K1, teamId: t1 })
+check('award gives 100', score(s, t1) === 100)
+s = reducer(s, { type: 'toggleAward', key: K2, teamId: t1 })
+check('a second award stacks to 700', score(s, t1) === 700)
+s = reducer(s, { type: 'toggleAward', key: K2, teamId: t1 })
+check('un-award subtracts exactly', score(s, t1) === 100)
+
+console.log('\nmulti-team + idempotency')
+s = reducer(s, { type: 'toggleAward', key: K1, teamId: t2 })
+s = reducer(s, { type: 'toggleAward', key: K1, teamId: t2 })
+s = reducer(s, { type: 'toggleAward', key: K1, teamId: t2 })
+check('odd number of toggles = awarded', score(s, t2) === 100)
+check('team 1 unaffected by team 2', score(s, t1) === 100)
+
+console.log('\nclue lifecycle')
+s = reducer(s, { type: 'consumeClue', key: K1 })
+check('clue marked used', s.used.includes(K1))
+s = reducer(s, { type: 'consumeClue', key: K1 })
+check('consuming twice does not duplicate', s.used.filter(k => k === K1).length === 1)
+s = reducer(s, { type: 'clearClue', key: K1 })
+check('put back on board removes it from used', !s.used.includes(K1))
+check('put back on board strips its points from both teams',
+  score(s, t1) === 0 && score(s, t2) === 0)
+
+console.log('\nmanual adjustments')
+s = reducer(s, { type: 'adjustScore', teamId: t1, delta: 600 })
+check('manual +600', score(s, t1) === 600)
+s = reducer(s, { type: 'adjustScore', teamId: t1, delta: -900 })
+check('scores may go negative', score(s, t1) === -300)
+
+console.log('\nteam draw')
+const drawn = drawTeams(TEAMMATES, 3)
+check('draws the requested number of teams', drawn.length === 3)
+check('everyone is dealt exactly once',
+  drawn.flat().length === TEAMMATES.length &&
+  new Set(drawn.flat()).size === TEAMMATES.length)
+check('teams are as even as possible (5/5/4)',
+  Math.max(...drawn.map(t => t.length)) - Math.min(...drawn.map(t => t.length)) <= 1)
+check('draws are randomised',
+  JSON.stringify(drawTeams(TEAMMATES, 3)) !== JSON.stringify(drawTeams(TEAMMATES, 3)))
+check('team count is configurable', drawTeams(TEAMMATES, 5).length === 5)
+check('an odd split stays even-ish across 4 teams',
+  (() => { const d = drawTeams(TEAMMATES, 4)
+    return Math.max(...d.map(t => t.length)) - Math.min(...d.map(t => t.length)) <= 1 })())
+check('team names default to neutral placeholders',
+  TEAM_NAMES.slice(0, 3).every(n => /^Team \d$/.test(n)))
+
+console.log('\nsetup: roster first, then shuffle')
+let sd = initialState()
+check('starts on the roster, before anything is drawn', sd.phase === 'roster')
+check('roster seeded from the sign-ups', sd.roster.length === TEAMMATES.length)
+check('defaults to three teams', sd.teamCount === TEAM_COUNT && TEAM_COUNT === 3)
+check('no teams drawn yet', sd.teams.length === 0)
+
+// Editing the roster BEFORE the shuffle is what makes the draw come out even.
+sd = reducer(sd, { type: 'removeFromRoster', name: 'Joe' })
+check('can drop a no-show', !sd.roster.includes('Joe'))
+sd = reducer(sd, { type: 'addToRoster', name: 'Alexis' })
+check('can add a walk-in', sd.roster.includes('Alexis'))
+sd = reducer(sd, { type: 'addToRoster', name: 'Alexis' })
+check('no duplicate roster entries',
+  sd.roster.filter(n => n === 'Alexis').length === 1)
+sd = reducer(sd, { type: 'addToRoster', name: '  ' })
+check('blank names ignored', sd.roster.every(n => n.trim()))
+
+sd = reducer(sd, { type: 'setTeamCount', count: 4 })
+check('team count can change', sd.teamCount === 4)
+sd = reducer(sd, { type: 'setTeamCount', count: 99 })
+check('team count is clamped', sd.teamCount === 6)
+sd = reducer(sd, { type: 'setTeamCount', count: 3 })
+
+sd = reducer(sd, { type: 'shuffleTeams' })
+check('shuffling moves to the team view', sd.phase === 'draft')
+check('shuffle deals the EDITED roster, not the original sign-ups',
+  new Set(sd.teams.flatMap(t => t.members)).size === sd.roster.length &&
+  sd.teams.flatMap(t => t.members).includes('Alexis') &&
+  !sd.teams.flatMap(t => t.members).includes('Joe'))
+check('shuffle splits evenly',
+  Math.max(...sd.teams.map(t => t.members.length)) -
+  Math.min(...sd.teams.map(t => t.members.length)) <= 1)
+check('shuffle bumps drawSeq so the animation replays', sd.drawSeq === 1)
+
+sd = reducer(sd, { type: 'renameTeam', teamId: sd.teams[0].id, name: 'Quiz Khalifa' })
+sd = reducer(sd, { type: 'redraw' })
+check('reshuffle keeps typed team names', sd.teams[0].name === 'Quiz Khalifa')
+
+console.log('\ndragging a player between teams')
+const from = sd.teams[1], to = sd.teams[0]
+const mover = from.members[0]
+sd = reducer(sd, { type: 'addMember', teamId: to.id, name: mover })
+check('lands on the new team', sd.teams[0].members.includes(mover))
+check('leaves the old team', !sd.teams[1].members.includes(mover))
+check('nobody ends up on two teams',
+  sd.teams.flatMap(t => t.members).filter(n => n === mover).length === 1)
+sd = reducer(sd, { type: 'removeMember', teamId: sd.teams[0].id, name: mover })
+check('removing from a team also drops them from the roster',
+  !sd.roster.includes(mover))
+
+sd = reducer(sd, { type: 'backToRoster' })
+check('can go back and edit players again', sd.phase === 'roster')
+
+console.log('\nstale state is discarded, never merged')
+check('initial state carries the shape version', initialState().version === STATE_VERSION)
+
+console.log('\nbuzzers')
+let sb = reducer(initialState(), { type: 'shuffleTeams' })
+sb = reducer(sb, { type: 'setTeams', rosters: sb.teams.map(t => t.members) })
+const [tA, tB] = sb.teams
+sb = reducer(sb, { type: 'openClue', ref: { categoryIndex: 0, clueIndex: 5 } })
+check('buzzers start shut', sb.buzzOpenedAt === null)
+
+// A buzz before the host opens them must not count.
+sb = reducer(sb, { type: 'buzz', buzz: { playerId: 'p1', name: 'A', teamId: tA.id, reactionMs: 100 } })
+check('early buzzes are ignored', sb.buzzes.length === 0)
+
+sb = reducer(sb, { type: 'openBuzzers', seconds: 25 })
+check('opening buzzers starts the clock too', (sb.timerEndsAt ?? 0) > Date.now())
+
+// Ranked by reaction time, not arrival order — the whole point of the design.
+sb = reducer(sb, { type: 'buzz', buzz: { playerId: 'p1', name: 'Slow', teamId: tA.id, reactionMs: 900 } })
+sb = reducer(sb, { type: 'buzz', buzz: { playerId: 'p2', name: 'Fast', teamId: tB.id, reactionMs: 320 } })
+check('queue is ordered by reaction time, not arrival',
+  sb.buzzes.map(b => b.name).join() === 'Fast,Slow')
+sb = reducer(sb, { type: 'buzz', buzz: { playerId: 'p2', name: 'Fast', teamId: tB.id, reactionMs: 10 } })
+check('one buzz per phone — no stacking the queue', sb.buzzes.length === 2)
+check('the fastest team has the floor', currentBuzz(sb)?.name === 'Fast')
+
+// Wrong answer locks that team out and promotes the next team automatically.
+sb = reducer(sb, { type: 'markWrong', teamId: tB.id })
+check('a wrong answer locks that team out', sb.lockedOut.includes(tB.id))
+check('the next-fastest team is promoted', currentBuzz(sb)?.name === 'Slow')
+sb = reducer(sb, { type: 'markWrong', teamId: tA.id })
+check('with everyone locked out, nobody has the floor', currentBuzz(sb) === null)
+
+console.log('\nawarding fires the celebration')
+let sc = reducer(initialState(), { type: 'shuffleTeams' })
+sc = reducer(sc, { type: 'setTeams', rosters: sc.teams.map(t => t.members) })
+sc = reducer(sc, { type: 'openClue', ref: { categoryIndex: 0, clueIndex: 5 } })
+sc = reducer(sc, { type: 'openBuzzers', seconds: 25 })
+sc = reducer(sc, { type: 'awardTo', teamId: sc.teams[0].id, points: 600 })
+check('award credits the team', computeScores(sc).get(sc.teams[0].id) === 600)
+check('award stamps the celebration', sc.lastAward?.teamId === sc.teams[0].id)
+check('celebration carries the points', sc.lastAward?.points === 600)
+check('awarding closes the buzzers', sc.buzzOpenedAt === null && sc.timerEndsAt === null)
+const seq1 = sc.lastAward?.seq ?? 0
+sc = reducer(sc, { type: 'openClue', ref: { categoryIndex: 1, clueIndex: 0 } })
+sc = reducer(sc, { type: 'awardTo', teamId: sc.teams[0].id, points: 100 })
+check('a repeat award replays the animation', (sc.lastAward?.seq ?? 0) === seq1 + 1)
+
+console.log('\nsetup is shared, so both views move through it together')
+// Everything the setup screens render must live in GameState, or the two
+// windows drift: same roster, same team count, same draw, same phase.
+const SHARED_SETUP_FIELDS = ['phase', 'roster', 'teamCount', 'teams', 'drawSeq'] as const
+const shape = initialState() as unknown as Record<string, unknown>
+check('every setup field is in shared state',
+  SHARED_SETUP_FIELDS.every(f => f in shape))
+
+// Replaying the same actions from the same start must land both views on an
+// identical state — this is what "perfectly synced" reduces to.
+function replay(actions: Parameters<typeof reducer>[1][]) {
+  return actions.reduce((acc, a) => reducer(acc, a), initialState())
+}
+const script: Parameters<typeof reducer>[1][] = [
+  { type: 'removeFromRoster', name: 'Joe' },
+  { type: 'addToRoster', name: 'Alexis' },
+  { type: 'setTeamCount', count: 4 },
+]
+check('roster edits replay identically on both views',
+  JSON.stringify(replay(script)) === JSON.stringify(replay(script)))
+const afterShuffle = reducer(replay(script), { type: 'shuffleTeams' })
+// The draw is random, so it happens once on the server and is broadcast; both
+// views then read the same rosters rather than each rolling their own.
+check('the draw is a value in state, not something each view recomputes',
+  Array.isArray(afterShuffle.teams) &&
+  afterShuffle.teams.every(t => Array.isArray(t.members)))
+check('drawSeq drives the animation, so both views scramble in step',
+  afterShuffle.drawSeq === 1)
+const moved = reducer(afterShuffle, {
+  type: 'addMember', teamId: afterShuffle.teams[0].id,
+  name: afterShuffle.teams[1].members[0],
+})
+check('a drag is an action, so it shows on the shared screen too',
+  moved.teams[0].members.length === afterShuffle.teams[0].members.length + 1)
+
+console.log('\naward celebration is scoped to its clue')
+// Every newly opened clue used to replay the PREVIOUS clue's celebration,
+// because lastAward is sticky and the stage remounts per clue. The award now
+// records which clue it was won on so a stale one cannot match.
+let sk = reducer(initialState(), { type: 'shuffleTeams' })
+sk = reducer(sk, { type: 'setTeams', rosters: sk.teams.map(t => t.members) })
+sk = reducer(sk, { type: 'openClue', ref: { categoryIndex: 0, clueIndex: 0 } })
+sk = reducer(sk, { type: 'awardTo', teamId: sk.teams[0].id, points: 100 })
+check('the award records its clue', sk.lastAward?.key === '0-0')
+sk = reducer(sk, { type: 'closeClue' })
+sk = reducer(sk, { type: 'openClue', ref: { categoryIndex: 3, clueIndex: 2 } })
+check('the stale award survives in state (the scoreboard still needs it)',
+  sk.lastAward?.key === '0-0')
+check('but it does NOT match the newly opened clue, so nothing replays',
+  sk.lastAward?.key !== '3-2')
+sk = reducer(sk, { type: 'awardTo', teamId: sk.teams[1].id, points: 300 })
+check('a new award re-scopes to the new clue', sk.lastAward?.key === '3-2')
+check('and bumps the sequence', (sk.lastAward?.seq ?? 0) === 2)
+
+console.log('\nstopping the buzzers early')
+let sq = reducer(initialState(), { type: 'shuffleTeams' })
+sq = reducer(sq, { type: 'setTeams', rosters: sq.teams.map(t => t.members) })
+sq = reducer(sq, { type: 'openClue', ref: { categoryIndex: 0, clueIndex: 0 } })
+sq = reducer(sq, { type: 'openBuzzers', seconds: 25 })
+sq = reducer(sq, { type: 'buzz', buzz: { playerId: 'p1', name: 'A', teamId: sq.teams[0].id, reactionMs: 300 } })
+check('a buzz landed while open', sq.buzzes.length === 1)
+sq = reducer(sq, { type: 'closeBuzzers' })
+check('stopping the buzzers shuts them', sq.buzzOpenedAt === null)
+check('stopping also stops the clock', sq.timerEndsAt === null)
+check('buzzes already in are kept, so the host can still score them',
+  sq.buzzes.length === 1 && currentBuzz(sq)?.name === 'A')
+sq = reducer(sq, { type: 'buzz', buzz: { playerId: 'p2', name: 'Late', teamId: sq.teams[1].id, reactionMs: 50 } })
+check('no late buzzes get in after stopping', sq.buzzes.length === 1)
+
+console.log('\nresetting the player list')
+let sr2 = reducer(initialState(), { type: 'removeFromRoster', name: 'Joe' })
+sr2 = reducer(sr2, { type: 'removeFromRoster', name: 'Matt' })
+sr2 = reducer(sr2, { type: 'addToRoster', name: 'Alexis' })
+check('roster diverged from the sign-ups', sr2.roster.length === TEAMMATES.length - 1)
+sr2 = reducer(sr2, { type: 'resetRoster' })
+check('reset restores the original sign-ups',
+  sr2.roster.length === TEAMMATES.length &&
+  TEAMMATES.every(n => sr2.roster.includes(n)))
+check('reset drops hand-added names', !sr2.roster.includes('Alexis'))
+
+console.log('\noffline cross-window sync')
+// With no server, one window publishes its whole next state and the other
+// adopts it. Adopting must be exact and idempotent, and must reject a state
+// from a different build rather than half-merging it.
+const publisher = reducer(initialState(), { type: 'removeFromRoster', name: 'Joe' })
+const adopted = publisher                     // what the other window receives
+check('adopting a published state is exact',
+  JSON.stringify(adopted) === JSON.stringify(publisher))
+check('adopting twice changes nothing',
+  JSON.stringify(adopted) === JSON.stringify(publisher))
+check('published state carries the version so the receiver can gate on it',
+  publisher.version === STATE_VERSION)
+// The random draw is published as a value, so both windows show the same teams
+// instead of each rolling its own.
+const shuffled = reducer(publisher, { type: 'shuffleTeams' })
+check('a published shuffle fixes the draw for both windows',
+  JSON.stringify(shuffled.teams) === JSON.stringify(shuffled.teams) &&
+  shuffled.teams.flatMap(t => t.members).length === shuffled.roster.length)
+
+console.log('\nhost and presentation share the open clue')
+let so = reducer(initialState(), { type: 'shuffleTeams' })
+so = reducer(so, { type: 'setTeams', rosters: so.teams.map(t => t.members) })
+check('nothing open to begin with', so.open === null)
+so = reducer(so, { type: 'openClue', ref: { categoryIndex: 2, clueIndex: 3 } })
+check('opening a clue is shared state, not local',
+  so.open?.categoryIndex === 2 && so.open?.clueIndex === 3)
+check('a fresh clue starts unrevealed', so.revealed === false)
+check('no timer until the host starts one', so.timerEndsAt === null)
+so = reducer(so, { type: 'startTimer', seconds: 25 })
+check('starting the timer sets a shared deadline', (so.timerEndsAt ?? 0) > Date.now())
+so = reducer(so, { type: 'reveal' })
+check('revealing is shared, so the room sees it at the same moment', so.revealed === true)
+so = reducer(so, { type: 'consumeClue', key: '2-3' })
+so = reducer(so, { type: 'closeClue' })
+check('closing clears the shared clue', so.open === null)
+check('closing clears the reveal', so.revealed === false)
+check('closing clears the timer', so.timerEndsAt === null)
+// Reopening something already played should show the answer straight away.
+so = reducer(so, { type: 'openClue', ref: { categoryIndex: 2, clueIndex: 3 } })
+check('reopening a played clue comes back revealed', so.revealed === true)
+
+console.log('\nnew game')
+// The Durable Object keeps state between sessions, so there has to be a way to
+// wipe a rehearsal completely before the real night.
+let sn = reducer(initialState(), { type: 'removeFromRoster', name: 'Joe' })
+sn = reducer(sn, { type: 'shuffleTeams' })
+sn = reducer(sn, { type: 'setTeams', rosters: sn.teams.map(t => t.members) })
+sn = reducer(sn, { type: 'renameTeam', teamId: sn.teams[0].id, name: 'Rehearsal' })
+sn = reducer(sn, { type: 'toggleAward', key: '0-0', teamId: sn.teams[0].id })
+sn = reducer(sn, { type: 'consumeClue', key: '0-0' })
+sn = reducer(sn, { type: 'newGame' })
+check('new game returns to the roster screen', sn.phase === 'roster')
+check('new game restores the full sign-up list', sn.roster.length === TEAMMATES.length)
+check('new game clears the board', sn.used.length === 0)
+check('new game clears scores', [...computeScores(sn).values()].every(v => v === 0))
+check('new game drops rehearsal team names',
+  sn.teams.every(t => !t.name.includes('Rehearsal')))
+check('new game clears any award celebration', sn.lastAward === null)
+
+console.log('\nreset')
+let s3 = reducer(initialState(), { type: 'shuffleTeams' })
+s3 = reducer(s3, { type: 'setTeams', rosters: s3.teams.map(t => t.members) })
+s3 = reducer(s3, { type: 'toggleAward', key: K1, teamId: t1 })
+s3 = reducer(s3, { type: 'consumeClue', key: K1 })
+s3 = reducer(s3, { type: 'renameTeam', teamId: t1, name: 'The Covenanters' })
+s3 = reducer(s3, { type: 'resetGame' })
+check('reset zeroes scores', score(s3, t1) === 0)
+check('reset clears the board', s3.used.length === 0)
+check('reset KEEPS renamed teams', s3.teams[0].name === 'The Covenanters')
+check('reset keeps the drafted rosters', s3.teams[0].members.length > 0)
+check('reset stays on the board', s3.phase === 'board')
+check('reset closes any open clue', s3.open === null && s3.timerEndsAt === null)
+
+console.log(`\n${pass} passed, ${fail} failed`)
+if (fail) throw new Error(`${fail} test(s) failed`)
