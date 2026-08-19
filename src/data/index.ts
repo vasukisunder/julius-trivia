@@ -114,8 +114,8 @@ export const CATEGORIES: Category[] = [
   {
     name: 'Words & History',
     clues: [
-      { kind: 'standard', points: 100, question: `The wave of uprisings that swept the Middle East and North Africa in 2010–2011 is commonly known as what?`, answer: `The Arab Spring`, credit: `Hattie’s specialty — recent Middle East, Europe & US history` },
-      { kind: 'standard', points: 200, question: `This children’s author drew wartime political cartoons, wrote under a pen name, and was really named Theodor Geisel.`, answer: `Dr. Seuss`, credit: `Matt’s specialty — children’s books` },
+      { kind: 'standard', points: 100, question: `This children’s author drew wartime political cartoons, wrote under a pen name, and was really named Theodor Geisel.`, answer: `Dr. Seuss`, credit: `Matt’s specialty — children’s books` },
+      { kind: 'standard', points: 200, question: `The wave of uprisings that swept the Middle East and North Africa in 2010–2011 is commonly known as what?`, answer: `The Arab Spring`, credit: `Hattie’s specialty — recent Middle East, Europe & US history` },
       { kind: 'standard', points: 300, question: `Name three foods that start with the letter Q.`, answer: `e.g. quiche, quinoa, quince, quail, quesadilla`, credit: `Daniel’s specialty — foods starting with Q` },
       { kind: 'standard', points: 400, question: `AI companies now pay a fortune for “.ai” web addresses. The domain actually belongs to which Caribbean island?`, answer: `Anguilla`, credit: `Antonela’s specialty — countries by internet domain` },
       { kind: 'standard', points: 500, question: `English borrowed the word “tycoon,” meaning a powerful businessman, in the 1800s — from the language of which country?`, answer: `Japan (from “taikun”)`, credit: `Ask’s specialty — English loanwords` },
