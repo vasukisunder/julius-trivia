@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { GameState } from '../types'
 import { reducer, initialState, type Action } from '../state/gameState'
+import { routeFromUrl } from '../routes'
 
 /**
  * Connects to the room's Durable Object over a WebSocket. Every screen sends
@@ -83,7 +84,9 @@ export function useRoom(): {
         lastSeen.current = Date.now()
         everConnected.current = true
         setConnection('online')
-        socket.send(JSON.stringify({ type: 'hello' }))
+        // Identify the surface so the server can target hover at the shared
+        // screen instead of spending a message on every phone.
+        socket.send(JSON.stringify({ type: 'hello', role: routeFromUrl() }))
       }
 
       socket.onmessage = (e) => {
@@ -133,7 +136,9 @@ export function useRoom(): {
         return
       }
       try {
-        socket.send(JSON.stringify({ type: 'hello' }))
+        // Identify the surface so the server can target hover at the shared
+        // screen instead of spending a message on every phone.
+        socket.send(JSON.stringify({ type: 'hello', role: routeFromUrl() }))
       } catch {
         socket.close()
       }

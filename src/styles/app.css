@@ -122,7 +122,11 @@ body[data-mode="host"]::before{
   letter-spacing:-.02em;color:var(--cat);
   transition:background .15s var(--ease), color .15s var(--ease), transform .15s var(--ease);
 }
-.tile:hover{background:var(--cat);color:var(--on-color);transform:translateY(-2px)}
+.tile:hover,
+.tile.remote-hover,
+.tile.static.remote-hover,
+.tile.used.remote-hover{background:var(--cat);color:var(--on-color);transform:translateY(-2px)}
+.tile.remote-hover .tile-pts{opacity:1}
 .tile:focus-visible{outline:2px solid var(--cat);outline-offset:2px}
 .tile.used{background:#1A2038;color:var(--ink-3)}
 .tile.used .tile-pts{opacity:.5}

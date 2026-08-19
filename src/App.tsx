@@ -219,10 +219,8 @@ export default function App() {
           playerStyles={state.playerStyles}
           lockedOut={state.lockedOut}
           onTheSpot={currentBuzz(state)}
-          lastAward={state.lastAward}
           onReveal={() => dispatch({ type: 'reveal' })}
           onOpenBuzzers={() => dispatch({ type: 'openBuzzers', seconds: COUNTDOWN })}
-          onCloseBuzzers={() => dispatch({ type: 'closeBuzzers' })}
           onCloseBuzzers={() => dispatch({ type: 'closeBuzzers' })}
           onMarkWrong={(teamId: number) => dispatch({ type: 'markWrong', teamId })}
           onAwardTo={(teamId: number) =>

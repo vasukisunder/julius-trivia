@@ -9,9 +9,11 @@
 import { reducer, initialState, STATE_VERSION, type Action } from '../src/state/gameState'
 import type { GameState } from '../src/types'
 
+type Role = 'host' | 'present' | 'buzz'
+
 type ClientMsg =
   | { type: 'action'; action: Action }
-  | { type: 'hello' }
+  | { type: 'hello'; role?: Role }
   | { type: 'hover'; key: string | null }
 
 type ServerMsg =
@@ -50,6 +52,15 @@ export class Room {
   private async save(game: GameState) {
     this.game = game
     await this.state.storage.put('game', game)
+  }
+
+  /** The surface a socket identified itself as, if it did. */
+  private roleOf(ws: WebSocket): Role | undefined {
+    try {
+      return (ws.deserializeAttachment() as { role?: Role } | null)?.role
+    } catch {
+      return undefined
+    }
   }
 
   private broadcast(msg: ServerMsg, except?: WebSocket) {
@@ -102,16 +113,37 @@ export class Room {
     const game = await this.load()
 
     /**
-     * Which tile the host has under the cursor. Relayed, never stored: hover is
+     * Which tile the host has under the cursor. Relayed, never stored — hover is
      * ephemeral, and putting it in game state would persist every mouse movement
-     * and re-broadcast the whole state to every phone in the room.
+     * and re-broadcast the whole state to everyone.
+     *
+     * Sent ONLY to the presentation screens. The phones have no board to light
+     * up, so there is no reason to spend a message on each of them.
      */
     if (msg.type === 'hover') {
-      this.broadcast({ type: 'hover', key: msg.key }, _ws)
+      const payload = JSON.stringify({ type: 'hover', key: msg.key } satisfies ServerMsg)
+      for (const ws of this.state.getWebSockets()) {
+        if (ws === _ws) continue
+        if (this.roleOf(ws) !== 'present') continue
+        try {
+          ws.send(payload)
+        } catch {
+          // Gone; the runtime cleans it up.
+        }
+      }
       return
     }
 
     if (msg.type === 'hello') {
+      // Remember which surface this socket is, so hover can be targeted. Stored
+      // as an attachment rather than in memory so it survives hibernation.
+      if (msg.role) {
+        try {
+          _ws.serializeAttachment({ role: msg.role })
+        } catch {
+          // Attachment unsupported; hover just falls back to reaching nobody.
+        }
+      }
       _ws.send(JSON.stringify({ type: 'state', state: game } satisfies ServerMsg))
       return
     }

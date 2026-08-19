@@ -93,8 +93,19 @@ a.send(JSON.stringify({ type: 'action', action: { type: 'closeBuzzers' } }))
 const sD2 = await dWaits
 check('a connected phone hears the buzzers close', sD2.buzzOpenedAt === null)
 
-// Hover is relayed, not stored: the shared screen has no cursor of its own, but
-// mouse movement must not persist or re-broadcast the whole game state.
+// Hover is relayed only to screens that identified as the presentation view, so
+// a phone never spends a message on a board it does not have.
+const phone = new WebSocket(URL); await open(phone)
+await nextState(phone)
+phone.send(JSON.stringify({ type: 'hello', role: 'buzz' }))
+b.send(JSON.stringify({ type: 'hello', role: 'present' }))
+await new Promise(r => setTimeout(r, 200))
+
+let phoneGotHover = false
+phone.addEventListener('message', (e) => {
+  if (JSON.parse(e.data).type === 'hover') phoneGotHover = true
+})
+
 const hoverSeen = new Promise((res) => {
   b.addEventListener('message', function h(e) {
     const m = JSON.parse(e.data)
@@ -103,6 +114,7 @@ const hoverSeen = new Promise((res) => {
 })
 a.send(JSON.stringify({ type: 'hover', key: '3-4' }))
 check('the host\'s hover reaches the shared screen', (await hoverSeen) === '3-4')
+check('the phones are not sent hover at all', phoneGotHover === false)
 
 // It must not have touched the game state.
 const stateAfter = nextState(b)
@@ -110,6 +122,6 @@ a.send(JSON.stringify({ type: 'action', action: { type: 'reveal' } }))
 const sAfterHover = await stateAfter
 check('hover left no trace in game state', !('hovered' in sAfterHover))
 
-a.close(); b.close(); d.close()
+a.close(); b.close(); d.close(); phone.close()
 console.log(`\n${pass} passed, ${fail} failed`)
 if (fail) process.exit(1)

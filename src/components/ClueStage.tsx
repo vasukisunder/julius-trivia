@@ -27,12 +27,9 @@ type Props = {
   lockedOut: number[]
   /** The buzz with the floor — fastest from a team not already wrong. */
   onTheSpot: Buzz | null
-  /** Latest award. Drives the celebration, on every screen at once. */
-  lastAward: Award | null
   onReveal: () => void
   onOpenBuzzers: () => void
   /** Shuts the buzzers before the clock runs out. */
-  onCloseBuzzers: () => void
   onCloseBuzzers: () => void
   onMarkWrong: (teamId: number) => void
   onAwardTo: (teamId: number) => void
@@ -68,16 +65,6 @@ export function ClueStage({
   const showAnswer = hostSees || revealed
   const left = useCountdown(timerEndsAt)
   const stageRef = useRef<HTMLDivElement>(null)
-
-  // Fires on the stage rather than on the scoreboard, which is hidden behind it.
-  // Keyed on seq so a repeat score still celebrates.
-  const [cheer, setCheer] = useState<Award | null>(null)
-  useEffect(() => {
-    if (!lastAward) return
-    setCheer(lastAward)
-    const id = window.setTimeout(() => setCheer(null), 2600)
-    return () => clearTimeout(id)
-  }, [lastAward?.seq, lastAward])
 
   useEffect(() => {
     if (mode !== 'host') return
