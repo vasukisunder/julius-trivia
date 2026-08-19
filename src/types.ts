@@ -13,6 +13,8 @@ export type LieClue = {
   kind: 'lie'
   points: number
   person: string
+  /** Overrides the default "Spot the lie about X" wording. */
+  prompt?: string
   statements: string[]
   /** Index of the false statement. */
   lieIndex: number

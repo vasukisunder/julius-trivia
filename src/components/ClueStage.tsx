@@ -154,7 +154,11 @@ export function ClueStage({
           <>
             <p className="lie-kind">Two truths and a lie</p>
             <p className="clue">
-              Spot the lie about <span className="pname">{clue.person}</span>
+              {clue.prompt ? (
+                <WithNames text={clue.prompt} />
+              ) : (
+                <>Spot the lie about <span className="pname">{clue.person}</span></>
+              )}
             </p>
             <ol className="statements">
               {clue.statements.map((st, i) => (

@@ -69,7 +69,16 @@ export const CATEGORIES: Category[] = [
       { kind: 'standard', points: 200, question: `Which teammate has travelled through 48 of the 50 US states?`, answer: `Joe` },
       { kind: 'standard', points: 300, question: `Which teammate lived in Madagascar for a year, then backpacked four months across India and four more through China and Japan?`, answer: `Juan` },
       { kind: 'standard', points: 400, question: `Which teammate says they intend never to go to South Dakota?`, answer: `Matt` },
-      { kind: 'standard', points: 500, question: `The War of the Triple Alliance pitted Paraguay against Brazil, Argentina and which third country?`, answer: `Uruguay`, credit: `Jonattan’s specialty — Paraguayan history` },
+      {
+        kind: 'lie', points: 500, person: 'Daniel',
+        prompt: `Daniel has an unusual list of former addresses. Which one is he inventing?`,
+        lieIndex: 2,
+        statements: [
+          `A bed and breakfast.`,
+          `A commune.`,
+          `A capsule hotel.`,
+        ],
+      },
       {
         kind: 'lie', points: 600, person: 'Greg', lieIndex: 2,
         statements: [
@@ -92,14 +101,14 @@ export const CATEGORIES: Category[] = [
     ],
   },
   {
-    name: 'Under the Hood',
+    name: 'Odds & Ends',
     clues: [
       { kind: 'standard', points: 100, question: `Launched by Bandai in 1996, which egg-shaped handheld pet had to be fed and cleaned or it would die?`, answer: `The Tamagotchi`, credit: `Juan’s specialty — iconic 90s/00s objects` },
-      { kind: 'standard', points: 200, question: `Name three foods that start with the letter Q.`, answer: `e.g. quiche, quinoa, quince, quail, quesadilla`, credit: `Daniel’s specialty — foods starting with Q` },
-      { kind: 'standard', points: 300, question: `On Windows, which keyboard shortcut reopens the browser tab you just closed?`, answer: `Ctrl + Shift + T`, credit: `Antonela’s specialty — keyboard shortcuts` },
+      { kind: 'standard', points: 200, question: `On Windows, which keyboard shortcut reopens the browser tab you just closed?`, answer: `Ctrl + Shift + T`, credit: `Antonela’s specialty — keyboard shortcuts` },
+      { kind: 'standard', points: 300, question: `Which teammate was once a rabbit at the White House Easter Egg Roll?`, answer: `Lucy` },
       { kind: 'standard', points: 400, question: `A turbocharger forces extra air into an engine. What spins it?`, answer: `The engine’s own exhaust gases`, credit: `Ivan’s specialty — car mechanics` },
       { kind: 'standard', points: 500, question: `Crude oil is separated into petrol, kerosene and diesel by which refining process, which relies on their different boiling points?`, answer: `Fractional distillation`, credit: `Ask’s specialty — oil & petroleum products` },
-      { kind: 'standard', points: 600, question: `What does the “OBD” stand for in a car’s OBD-II diagnostic port?`, answer: `On-Board Diagnostics`, credit: `Ivan’s specialty — car mechanics` },
+      { kind: 'standard', points: 600, question: `Match each to the right teammate: is a twin · believes in ghosts · is ambidextrous.`, answer: `Matt (twin) · Hannah (ghosts) · Ask (ambidextrous)` },
     ],
   },
   {
@@ -107,10 +116,10 @@ export const CATEGORIES: Category[] = [
     clues: [
       { kind: 'standard', points: 100, question: `The wave of uprisings that swept the Middle East and North Africa in 2010–2011 is commonly known as what?`, answer: `The Arab Spring`, credit: `Hattie’s specialty — recent Middle East, Europe & US history` },
       { kind: 'standard', points: 200, question: `This children’s author drew wartime political cartoons, wrote under a pen name, and was really named Theodor Geisel.`, answer: `Dr. Seuss`, credit: `Matt’s specialty — children’s books` },
-      { kind: 'standard', points: 300, question: `Which 1787 gathering in Philadelphia produced the United States Constitution?`, answer: `The Constitutional Convention`, credit: `Joe’s specialty — early American history` },
+      { kind: 'standard', points: 300, question: `Name three foods that start with the letter Q.`, answer: `e.g. quiche, quinoa, quince, quail, quesadilla`, credit: `Daniel’s specialty — foods starting with Q` },
       { kind: 'standard', points: 400, question: `AI companies now pay a fortune for “.ai” web addresses. The domain actually belongs to which Caribbean island?`, answer: `Anguilla`, credit: `Antonela’s specialty — countries by internet domain` },
       { kind: 'standard', points: 500, question: `English borrowed the word “tycoon,” meaning a powerful businessman, in the 1800s — from the language of which country?`, answer: `Japan (from “taikun”)`, credit: `Ask’s specialty — English loanwords` },
-      { kind: 'standard', points: 600, question: `Which 17th-century English sect had no churches, no clergy, and refused to preach?`, answer: `The Muggletonians`, credit: `Ask’s specialty — 16th–17th century Scottish & English sects` },
+      { kind: 'standard', points: 600, question: `The War of the Triple Alliance pitted Paraguay against Brazil, Argentina and which third country?`, answer: `Uruguay`, credit: `Jonattan’s specialty — Paraguayan history` },
     ],
   },
 ]
