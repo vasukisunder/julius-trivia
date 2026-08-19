@@ -8,3 +8,4 @@ tsconfig.tsbuildinfo
 # The raw sign-up export contains everyone's email addresses. The question bank
 # in src/data already holds everything the game needs, so the CSV stays local.
 *.csv
+fact-coverage.csv

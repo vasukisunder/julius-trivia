@@ -9,7 +9,8 @@
     "typecheck": "tsc -b --noEmit",
     "test": "esbuild src/state/gameState.test.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/tests.mjs --log-level=error && node node_modules/.cache/tests.mjs && node test/css.mjs",
     "deploy": "npm run build && wrangler deploy",
-    "test:sync": "node test/sync.mjs"
+    "test:sync": "node test/sync.mjs",
+    "facts": "esbuild src/data/index.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/board.mjs --log-level=error && node scripts/fact-coverage.mjs"
   },
   "dependencies": {
     "qrcode-generator": "^2.0.4",
