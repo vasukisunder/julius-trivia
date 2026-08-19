@@ -51,7 +51,7 @@ export const CATEGORIES: Category[] = [
       { kind: 'standard', points: 200, question: `Only one nation has appeared at every FIFA World Cup since 1930. Which country?`, answer: `Brazil`, credit: `Shakir’s specialty — sports` },
       { kind: 'standard', points: 300, question: `Which teammate did fifteen years of kung fu?`, answer: `Ivan` },
       { kind: 'standard', points: 400, question: `The NFL’s championship trophy carries the name of which legendary Green Bay Packers coach?`, answer: `Vince Lombardi`, credit: `Joe’s specialty — American football` },
-      { kind: 'standard', points: 500, question: `Four straight World Cup qualifiers against Mexico in Columbus, Ohio finished with the same score, and US fans turned it into a chant. What are the two Spanish words?`, answer: `“Dos a Cero” — two–nil`, credit: `Greg’s specialty — US soccer` },
+      { kind: 'standard', points: 500, question: `Where did the US men’s team finish at the very first World Cup?`, answer: `Third — still their best ever`, credit: `Greg’s specialty — US soccer` },
       {
         kind: 'lie', points: 600, person: 'Ask', lieIndex: 2,
         statements: [
