@@ -10,7 +10,7 @@ export type Cue =
   | 'select'     // a tile opens
   | 'buzzOpen'   // buzzers go live
   | 'buzz'       // someone buzzes in
-  | 'tick'       // final seconds
+  | 'tick'       // legacy single tick
   | 'timeUp'     // the clock runs out
   | 'correct'    // right answer
   | 'wrong'      // wrong answer
@@ -76,6 +76,38 @@ function tone({ freq, dur, type = 'sine', gain = 0.5, at = 0, to }: ToneOpts) {
   osc.connect(env).connect(master)
   osc.start(t)
   osc.stop(t + dur + 0.02)
+}
+
+/**
+ * The tick-tock bed that runs while the buzzers are open.
+ *
+ * Deliberately generic — a two-note clock alternation that accelerates as the
+ * window closes — rather than the Jeopardy think-music, which is a copyrighted
+ * melody. The tension comes from the tempo, not from a tune.
+ *
+ * `progress` is 0 at the start of the window and 1 at the end.
+ */
+export function playTock(beat: number, progress: number) {
+  const urgent = progress > 0.8
+  // Alternating pitch is what reads as a clock rather than a metronome.
+  const base = beat % 2 === 0 ? 320 : 244
+  const lift = 1 + progress * 0.35
+  tone({
+    freq: base * lift,
+    dur: urgent ? 0.075 : 0.055,
+    type: 'square',
+    gain: (urgent ? 0.2 : 0.11) + progress * 0.08,
+  })
+  // A woodblock-ish knock under it, so the bed has some body on a laptop speaker.
+  tone({ freq: base * 0.5 * lift, dur: 0.09, type: 'triangle', gain: 0.07 + progress * 0.05 })
+}
+
+/**
+ * Gap to the next tock, in ms. Starts loose and closes right up, which is what
+ * makes a countdown feel like it is getting away from you.
+ */
+export function tockGap(progress: number): number {
+  return 720 - progress * 520
 }
 
 /** Position in the buzz queue, so first place is unmistakably brighter. */

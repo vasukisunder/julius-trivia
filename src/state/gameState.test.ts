@@ -580,6 +580,16 @@ ss2 = reducer(ss2, { type: 'openClue', ref: { categoryIndex: 0, clueIndex: 0 } }
 ss2 = reducer(ss2, { type: 'awardTo', teamId: ss2.teams[0].id, points: 100 })
 check('an award bumps lastAward.seq (correct cue)', (ss2.lastAward?.seq ?? 0) === 1)
 
+// The clock bed and the phones' countdown both read the same shared deadline, so
+// the room and every phone agree on how much time is left.
+let sc2 = reducer(initialState(), { type: 'shuffleTeams' })
+sc2 = reducer(sc2, { type: 'openClue', ref: { categoryIndex: 0, clueIndex: 0 } })
+sc2 = reducer(sc2, { type: 'openBuzzers', seconds: 25 })
+check('the deadline is a shared absolute time, not a per-device duration',
+  typeof sc2.timerEndsAt === 'number' && sc2.timerEndsAt > Date.now())
+check('stopping the buzzers clears it for every screen at once',
+  reducer(sc2, { type: 'endBuzzing' }).timerEndsAt === null)
+
 console.log('\nreset')
 let s3 = reducer(initialState(), { type: 'shuffleTeams' })
 s3 = reducer(s3, { type: 'setTeams', rosters: s3.teams.map(t => t.members) })

@@ -21,6 +21,19 @@ type Props = {
  * actually paints and stops when the player taps. That number is what gets sent,
  * so ranking reflects reflexes rather than whose wifi is fastest.
  */
+/** Seconds left on the shared clock, or null when it is not running. */
+function useSecondsLeft(endsAt: number | null): number | null {
+  const [, tick] = useState(0)
+  useEffect(() => {
+    if (endsAt === null) return
+    const id = window.setInterval(() => tick((n) => n + 1), 200)
+    return () => clearInterval(id)
+  }, [endsAt])
+  return endsAt === null ? null : Math.max(0, Math.ceil((endsAt - Date.now()) / 1000))
+}
+
+const ORDINALS = ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th']
+
 export function BuzzerScreen({ state, connection, onBuzz, onPickStyle }: Props) {
   const [name, setName] = useState<string | null>(savedName)
   // Opens by default the first time, because a picker you have to discover is a
@@ -35,6 +48,10 @@ export function BuzzerScreen({ state, connection, onBuzz, onPickStyle }: Props) 
   const open = state.buzzOpenedAt !== null
   const myBuzz = state.buzzes.find((b) => b.playerId === playerId())
   const place = myBuzz ? state.buzzes.indexOf(myBuzz) + 1 : null
+  const left = useSecondsLeft(state.timerEndsAt)
+  // Same threshold the shared screen uses, so the room and the phones agree on
+  // when it has become urgent.
+  const urgent = left !== null && left <= 5
   const style = name ? state.playerStyles[name] : undefined
 
   // Start the local clock the moment the live button paints.
@@ -147,9 +164,13 @@ export function BuzzerScreen({ state, connection, onBuzz, onPickStyle }: Props) 
       )}
 
       {myBuzz ? (
-        <div className="phone-result">
-          <div className="phone-place">{place === 1 ? 'First!' : `#${place}`}</div>
+        <div className={`phone-result${place === 1 ? ' first' : ''}`}>
+          <div className="phone-rings" aria-hidden="true"><i /><i /><i /></div>
+          <div className="phone-place">
+            {place === 1 ? 'IN!' : ORDINALS[(place ?? 1) - 1] ?? `#${place}`}
+          </div>
           <div className="phone-ms">{(myBuzz.reactionMs / 1000).toFixed(2)}s</div>
+          {place !== 1 && <div className="phone-behind">{place === 2 ? 'just missed it' : 'in the queue'}</div>}
         </div>
       ) : connection === 'reconnecting' ? (
         <div className="phone-buzz waiting">Reconnecting…</div>
@@ -163,14 +184,21 @@ export function BuzzerScreen({ state, connection, onBuzz, onPickStyle }: Props) 
         <div className="phone-buzz waiting small">Teams haven’t been drawn yet</div>
       ) : open ? (
         <button
-          className="phone-buzz live"
+          className={`phone-buzz live${urgent ? ' urgent' : ''}`}
           onClick={() => {
             const started = armedAt.current
             if (started === null) return
+            // A kick in the hand at the moment of pressing. No-ops where the API
+            // is unsupported, which includes iOS Safari.
+            navigator.vibrate?.([18, 40, 28])
             onBuzz(name, me.id, Math.max(0, Math.round(performance.now() - started)))
           }}
         >
-          Buzz
+          <span className="phone-buzz-label">Buzz</span>
+          {left !== null && <span className="phone-buzz-clock">{left}</span>}
+          <span className="phone-buzz-bar" aria-hidden="true">
+            <i style={{ transform: `scaleX(${(left ?? 0) / 25})` }} />
+          </span>
         </button>
       ) : (
         <div className="phone-buzz waiting">Hold tight</div>

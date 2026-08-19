@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import type { GameState } from '../types'
-import { play, playBuzz } from './sfx'
+import { play, playBuzz, playTock, tockGap } from './sfx'
 
 /**
  * Fires sound cues off changes in shared game state.
@@ -54,21 +54,34 @@ export function useGameSounds(state: GameState, enabled: boolean) {
     state.lastWrong?.seq, state.drawSeq, state.phase, enabled,
   ])
 
-  // Ticks over the closing seconds. Driven off the shared deadline, so the beats
-  // land where the number changes on screen.
-  const lastTick = useRef<number | null>(null)
+  /**
+   * The clock bed. Runs for the whole buzzer window rather than only the last few
+   * seconds, and speeds up as the window closes — a countdown you can hear
+   * draining is far more useful to the room than five ticks at the end.
+   *
+   * Self-scheduling rather than a fixed interval, because the gap between beats
+   * is what changes.
+   */
+  const beat = useRef(0)
   useEffect(() => {
-    if (!enabled || state.timerEndsAt === null) {
-      lastTick.current = null
-      return
+    const endsAt = state.timerEndsAt
+    if (!enabled || endsAt === null || state.cluePhase !== 'buzzing') return
+
+    let timer: number | undefined
+    const total = (endsAt - Date.now()) / 1000
+    beat.current = 0
+
+    const step = () => {
+      const left = (endsAt - Date.now()) / 1000
+      if (left <= 0) return
+      const progress = total > 0 ? Math.min(1, Math.max(0, 1 - left / total)) : 0
+      playTock(beat.current++, progress)
+      timer = window.setTimeout(step, tockGap(progress))
     }
-    const id = window.setInterval(() => {
-      const left = Math.ceil((state.timerEndsAt! - Date.now()) / 1000)
-      if (left > 0 && left <= 5 && left !== lastTick.current) {
-        lastTick.current = left
-        play('tick')
-      }
-    }, 120)
-    return () => clearInterval(id)
-  }, [enabled, state.timerEndsAt])
+    step()
+
+    return () => {
+      if (timer) clearTimeout(timer)
+    }
+  }, [enabled, state.timerEndsAt, state.cluePhase])
 }
