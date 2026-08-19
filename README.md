@@ -77,8 +77,7 @@ testing.
 One Cloudflare Worker serves the app *and* the buzzer, so it is one URL with no CORS.
 
 **Automatic** - every push to `main` builds and deploys, via Cloudflare Workers Builds.
-Settings live in the dashboard under Workers & Pages -> julius-trivia -> Settings ->
-Builds:
+Settings live in the dashboard under Workers & Pages -> trivia -> Settings -> Builds:
 
 | Setting | Value |
 |---|---|
@@ -97,7 +96,8 @@ npx wrangler login   # once per machine
 npm run deploy
 ```
 
-Either way you get a public HTTPS URL. Hand the host `/`, the presenter `/present`, and the
+Live at **https://trivia.juliusedu.workers.dev** - the host gets `/host`, the presenter
+`/present`, and the room `/buzz`. Hand the host `/`, the presenter `/present`, and the
 room `/buzz`. Nothing runs locally during the game, and it fits inside the Cloudflare
 free plan.
 

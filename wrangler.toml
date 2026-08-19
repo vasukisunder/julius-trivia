@@ -1,4 +1,7 @@
-name = "julius-trivia"
+# Must match the Worker name in the Cloudflare dashboard, or Workers Builds
+# fails its name check. This is also the first half of the workers.dev URL:
+#   trivia.juliusedu.workers.dev
+name = "trivia"
 main = "worker/index.ts"
 compatibility_date = "2025-04-01"
 
