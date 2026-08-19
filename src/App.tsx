@@ -217,6 +217,8 @@ export default function App() {
           lastAward={state.lastAward}
           lastWrong={state.lastWrong}
           clueKeyStr={openKey}
+          hoveredKey={mode === 'present' ? hoveredKey : null}
+          onHover={mode === 'host' ? sendHover : undefined}
           onOpenBuzzers={() => dispatch({ type: 'openBuzzers', seconds: COUNTDOWN })}
           onEndBuzzing={() => dispatch({ type: 'endBuzzing' })}
           onCorrect={(teamId: number) =>

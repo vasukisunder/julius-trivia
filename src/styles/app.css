@@ -274,7 +274,16 @@ body[data-mode="host"]::before{
   transition:transform .12s var(--ease),filter .15s,background .15s;
 }
 .step-btn:hover:not(:disabled){transform:translateY(-2px);filter:brightness(1.06)}
-.step-btn:disabled{opacity:.5;cursor:default}
+.step-btn:disabled{cursor:default}
+/* Mirrored from the host's cursor: the room can see which button is about to be
+   pressed, instead of the outcome arriving with no warning. */
+.step-btn.remote-hover{transform:translateY(-2px);filter:brightness(1.12)}
+.step-btn.remote-hover::after{
+  content:"";position:absolute;inset:-4px;border-radius:inherit;
+  border:2px solid currentColor;opacity:.45;
+}
+.step-btn{position:relative}
+.step-skip.remote-hover{color:var(--ink)}
 .step-btn.go{background:var(--cat);color:var(--on-color)}
 .step-btn.stop{background:var(--surface-2);color:var(--ink)}
 .step-btn.right{background:#4FBD8F;color:var(--on-color)}
@@ -285,7 +294,7 @@ body[data-mode="host"]::before{
   cursor:pointer;padding:10px 8px;
 }
 .step-skip:hover:not(:disabled){color:var(--ink-2)}
-.step-skip:disabled{opacity:.4;cursor:default}
+.step-skip:disabled{cursor:default}
 
 /* Names the current step, so nobody has to infer where they are. */
 .stage-step{
@@ -326,18 +335,27 @@ body[data-mode="host"]::before{
   font-family:var(--display);font-size:var(--t-20);font-weight:600;color:var(--ink-2);margin:0;
 }
 
-/* A wrong answer flashes the whole stage, so it lands as an event. */
-.stage-scrim.wrong-flash{animation:wrongflash .55s var(--ease) both}
-@keyframes wrongflash{
-  0%{box-shadow:inset 0 0 0 0 rgba(229,87,77,0)}
-  25%{box-shadow:inset 0 0 140px 0 rgba(229,87,77,.45)}
-  100%{box-shadow:inset 0 0 0 0 rgba(229,87,77,0)}
+/* A wrong answer names the team that went out and gets out of the way. Contained
+   rather than a flash across the whole screen, which read as an error state. */
+.buzzedout{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(229,87,77,.16);color:#FF8A7E;
+  border-radius:99px;padding:9px 20px;
+  font-family:var(--display);font-size:var(--t-17);font-weight:600;
+  animation:outin .3s var(--ease) both, outfade .4s var(--ease) .9s both;
 }
+.buzzedout::before{
+  content:"";width:9px;height:9px;border-radius:99px;background:#FF8A7E;flex:none;
+}
+@keyframes outin{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+@keyframes outfade{from{opacity:1}to{opacity:0}}
 
 /* Reading and revealed keep the question central; buzzing tightens it up so the
    clock is the thing you look at. */
 .phase-buzzing .clue{font-size:clamp(19px,2.4vw,var(--t-24))}
 .phase-verdict .clue{font-size:clamp(18px,2.2vw,var(--t-22));color:var(--ink-2)}
+.phase-revealed .clue{font-size:clamp(17px,2vw,var(--t-20));color:var(--ink-2)}
+.phase-revealed .answer-val{font-size:clamp(26px,4vw,var(--t-48))}
 .sbtn:hover{background:var(--surface-2);color:var(--ink)}
 .sbtn.primary{background:var(--cat);color:var(--on-color)}
 .sbtn.primary:hover{background:var(--cat);color:var(--on-color);filter:brightness(1.08)}
@@ -515,7 +533,44 @@ body[data-mode="host"]::before{
 .sbtn.incorrect{background:rgba(229,87,77,.18);color:var(--wrong);font-weight:700}
 .sbtn.incorrect:hover{background:rgba(229,87,77,.28);color:var(--wrong)}
 
-/* ============================ celebration ================================ */
+/* ==================== the result, in the flow ============================
+   This used to be a full-bleed overlay, which sat on top of the question and the
+   answer and made all three hard to read. It is now the last block of the
+   revealed step, so the eye goes question -> answer -> who scored.
+   ==================================================================== */
+.result{
+  position:relative;overflow:hidden;
+  background:var(--team);color:var(--on-color);border-radius:var(--r);
+  padding:22px 44px;display:flex;flex-direction:column;align-items:center;gap:0;
+  animation:resultin .42s cubic-bezier(.16,1.3,.3,1) both;
+}
+@keyframes resultin{
+  0%{opacity:0;transform:scale(.9)}
+  100%{opacity:1;transform:scale(1)}
+}
+.result-points{
+  position:relative;font-family:var(--display);
+  font-size:clamp(44px,7vw,84px);font-weight:700;letter-spacing:-.04em;line-height:1;
+}
+.result-team{
+  position:relative;font-family:var(--display);font-size:var(--t-20);font-weight:600;
+  opacity:.85;letter-spacing:-.01em;
+}
+/* Rings stay inside the panel, so nothing sweeps across the text above it. */
+.result-rings{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.result-rings i{
+  position:absolute;width:140px;height:140px;border-radius:50%;
+  border:2px solid currentColor;opacity:0;
+  animation:ring 1.4s var(--ease) both;
+}
+.result-rings i:nth-child(2){animation-delay:.16s}
+.result-rings i:nth-child(3){animation-delay:.32s}
+@keyframes ring{
+  0%{transform:scale(.4);opacity:.5}
+  100%{transform:scale(3.4);opacity:0}
+}
+
+/* The scoreboard panel still reacts, so the points visibly land somewhere. */
 .team.celebrating{animation:cheer .6s var(--ease) both}
 @keyframes cheer{
   0%{transform:none}
@@ -589,14 +644,10 @@ body[data-mode="host"]::before{
 /* Controls mirrored onto the shared screen: visible, so the room can follow
    what the host is doing, but plainly not live. */
 button:disabled{cursor:default}
-.tbtn:disabled,.sbtn:disabled,.step:disabled,.step-amt:disabled,
-.countbtn:disabled,.draft-add:disabled,.roster-remove:disabled{opacity:.45}
-/* ...except when it is showing state. A greyed-out "awarded" chip read as
-   broken on the shared screen. */
-.sbtn[aria-pressed="true"]:disabled,
-.countbtn[aria-pressed="true"]:disabled,
-.sbtn.correct:disabled,
-.sbtn.incorrect:disabled{opacity:1}
+/* Controls mirrored onto the shared screen stay at full strength — the room is
+   watching them, not using them. Only genuinely secondary affordances dim. */
+.roster-remove:disabled{opacity:0}
+.draft-add:disabled{opacity:.5}
 .tbtn:disabled:hover,.sbtn:disabled:hover,.step:disabled:hover,
 .countbtn:disabled:hover,.draft-add:disabled:hover{
   background:var(--surface);color:var(--ink-2);
@@ -607,60 +658,6 @@ button:disabled{cursor:default}
 .bigbtn.ghost:disabled:hover{background:var(--surface)}
 .roster-chip.add input:disabled{opacity:.45}
 .draft-member .draft-remove:disabled{opacity:0}
-
-
-/* ============================ celebration ================================
-   Points landing should be the loudest moment on the screen. Full-bleed flood
-   in the team's colour, rings pushing outward, the score and team name arriving
-   on different beats.
-   ====================================================================== */
-.cheer{
-  position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;
-  pointer-events:none;overflow:hidden;
-  animation:cheerin .25s var(--ease) both, cheerout .45s var(--ease) 1.75s both;
-}
-.cheer::before{
-  content:"";position:absolute;inset:0;background:var(--team);opacity:.16;
-}
-@keyframes cheerin{from{opacity:0}to{opacity:1}}
-@keyframes cheerout{from{opacity:1}to{opacity:0}}
-
-.cheer-rings{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
-.cheer-rings i{
-  position:absolute;width:220px;height:220px;border-radius:50%;
-  border:2px solid var(--team);opacity:0;
-  animation:ring 1.5s var(--ease) both;
-}
-.cheer-rings i:nth-child(2){animation-delay:.18s}
-.cheer-rings i:nth-child(3){animation-delay:.36s}
-@keyframes ring{
-  0%{transform:scale(.35);opacity:.7}
-  100%{transform:scale(4.2);opacity:0}
-}
-
-.cheer-body{position:relative;text-align:center;display:flex;flex-direction:column;gap:2px}
-.cheer-points{
-  font-family:var(--display);font-size:clamp(64px,15vw,180px);font-weight:700;
-  letter-spacing:-.05em;line-height:.9;color:var(--team);
-  animation:cheerpop .5s cubic-bezier(.16,1.4,.3,1) both;
-}
-@keyframes cheerpop{
-  0%{opacity:0;transform:scale(.5)}
-  60%{opacity:1;transform:scale(1.06)}
-  100%{opacity:1;transform:scale(1)}
-}
-.cheer-team{
-  font-family:var(--display);font-size:clamp(20px,3.4vw,40px);font-weight:600;
-  letter-spacing:-.02em;color:var(--ink);
-  animation:cheerslide .45s var(--ease) .16s both;
-}
-@keyframes cheerslide{
-  from{opacity:0;transform:translateY(10px)}
-  to{opacity:1;transform:none}
-}
-
-/* The scoreboard panel joins in, so the points visibly land somewhere. */
-.team.celebrating{animation:cheer .6s var(--ease) both}
 
 
 /* The root path: a wordmark and nothing else. */

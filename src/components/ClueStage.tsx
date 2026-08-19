@@ -22,6 +22,10 @@ type Props = {
   lastWrong: Wrong | null
   /** This clue's key, so a previous clue's award cannot replay here. */
   clueKeyStr: string
+  /** Which control the host has under the cursor, mirrored from their screen. */
+  hoveredKey?: string | null
+  /** Host only: report what is under the cursor so the room can follow along. */
+  onHover?: (key: string | null) => void
   onOpenBuzzers: () => void
   onEndBuzzing: () => void
   onCorrect: (teamId: number) => void
@@ -62,7 +66,7 @@ function useCountdown(endsAt: number | null, onZero: () => void): number | null 
 
 export function ClueStage({
   clue, categoryName, accent, mode, teams, phase, timerEndsAt, buzzes, playerStyles,
-  lockedOut, onTheSpot, lastAward, lastWrong, clueKeyStr,
+  lockedOut, onTheSpot, lastAward, lastWrong, clueKeyStr, hoveredKey, onHover,
   onOpenBuzzers, onEndBuzzing, onCorrect, onWrong, onSkipToAnswer, onDone, onDismiss,
   onReturnToBoard,
 }: Props) {
@@ -73,7 +77,6 @@ export function ClueStage({
   // fire the transition twice.
   const left = useCountdown(timerEndsAt, isHost ? onEndBuzzing : () => {})
 
-  const cheer = useAwardFlash(lastAward, 2200, clueKeyStr)
   const wrongFlash = useAwardFlash(
     lastWrong ? { ...lastWrong, points: 0 } : null,
     1200,
@@ -83,7 +86,6 @@ export function ClueStage({
   const teamOf = (id: number) => teams.find((t) => t.id === id)
   const indexOf = (id: number) => Math.max(0, teams.findIndex((t) => t.id === id))
 
-  const cheerTeam = cheer ? teamOf(cheer.teamId) : null
   const spotTeam = onTheSpot ? teamOf(onTheSpot.teamId) : null
   const winner = phase === 'revealed' && lastAward?.key === clueKeyStr
     ? teamOf(lastAward.teamId)
@@ -101,6 +103,17 @@ export function ClueStage({
   const heading = clue.kind === 'lie' ? clue.person : categoryName
   const low = left !== null && left <= 5
 
+  /**
+   * Mirrors the host's cursor onto the shared screen. Without it the room sees two
+   * buttons and no idea which one the host is about to press — the outcome arrives
+   * with no warning.
+   */
+  const hoverClass = (id: string) => (hoveredKey === `btn:${id}` ? ' remote-hover' : '')
+  const hoverProps = (id: string) => ({
+    onMouseEnter: () => onHover?.(`btn:${id}`),
+    onMouseLeave: () => onHover?.(null),
+  })
+
   /** The step, named on screen so nobody has to infer where they are. */
   const stepLabel =
     phase === 'reading' ? 'Read the question' :
@@ -112,20 +125,10 @@ export function ClueStage({
 
   return (
     <div
-      className={`stage-scrim phase-${phase}${wrongFlash ? ' wrong-flash' : ''}`}
+      className={`stage-scrim phase-${phase}`}
       style={{ ['--cat' as string]: accent }}
       ref={stageRef}
     >
-      {cheer && cheerTeam && (
-        <div className="cheer" style={{ ['--team' as string]: teamColor(indexOf(cheer.teamId)) }}>
-          <div className="cheer-rings" aria-hidden="true"><i /><i /><i /></div>
-          <div className="cheer-body">
-            <div className="cheer-points">+{cheer.points}</div>
-            <div className="cheer-team">{cheerTeam.name}</div>
-          </div>
-        </div>
-      )}
-
       <div className="stage-top">
         <div className="stage-cat">
           {heading} <span className="stage-pts">· {clue.points} points</span>
@@ -191,6 +194,12 @@ export function ClueStage({
           </div>
         )}
 
+        {wrongFlash && teamOf(wrongFlash.teamId) && (
+          <div className="buzzedout">
+            {teamOf(wrongFlash.teamId)?.name} is out
+          </div>
+        )}
+
         {/* ---- step 3: exactly one team has the floor ---- */}
         {phase === 'verdict' && onTheSpot && spotTeam && (
           <div className="verdict" style={{ ['--team' as string]: teamColor(indexOf(onTheSpot.teamId)) }}>
@@ -217,13 +226,20 @@ export function ClueStage({
           </div>
         )}
         {phase === 'revealed' && (
-          <p className="outcome">
-            {winner
-              ? `${winner.name} takes ${clue.points}`
-              : lockedOut.length > 0
-                ? 'Nobody got it'
-                : 'No takers'}
-          </p>
+          winner ? (
+            <div
+              className="result"
+              style={{ ['--team' as string]: teamColor(indexOf(winner.id)) }}
+            >
+              <div className="result-rings" aria-hidden="true"><i /><i /><i /></div>
+              <div className="result-points">+{clue.points}</div>
+              <div className="result-team">{winner.name}</div>
+            </div>
+          ) : (
+            <p className="outcome">
+              {lockedOut.length > 0 ? 'Nobody got it' : 'No takers'}
+            </p>
+          )
         )}
 
         {/* The host's copy of the answer, before the room sees it. */}
@@ -239,17 +255,32 @@ export function ClueStage({
       <div className="stage-foot">
         {phase === 'reading' && (
           <>
-            <button className="step-btn go" disabled={!isHost} onClick={onOpenBuzzers}>
+            <button
+              className={`step-btn go${hoverClass('open')}`}
+              disabled={!isHost}
+              {...hoverProps('open')}
+              onClick={onOpenBuzzers}
+            >
               Open buzzers
             </button>
-            <button className="step-skip" disabled={!isHost} onClick={onSkipToAnswer}>
+            <button
+              className={`step-skip${hoverClass('skip')}`}
+              disabled={!isHost}
+              {...hoverProps('skip')}
+              onClick={onSkipToAnswer}
+            >
               Skip to answer
             </button>
           </>
         )}
 
         {phase === 'buzzing' && (
-          <button className="step-btn stop" disabled={!isHost} onClick={onEndBuzzing}>
+          <button
+            className={`step-btn stop${hoverClass('stop')}`}
+            disabled={!isHost}
+            {...hoverProps('stop')}
+            onClick={onEndBuzzing}
+          >
             Stop buzzers
           </button>
         )}
@@ -257,15 +288,17 @@ export function ClueStage({
         {phase === 'verdict' && onTheSpot && (
           <>
             <button
-              className="step-btn right"
+              className={`step-btn right${hoverClass('right')}`}
               disabled={!isHost}
+              {...hoverProps('right')}
               onClick={() => onCorrect(onTheSpot.teamId)}
             >
               Correct
             </button>
             <button
-              className="step-btn wrong"
+              className={`step-btn wrong${hoverClass('wrong')}`}
               disabled={!isHost}
+              {...hoverProps('wrong')}
               onClick={() => onWrong(onTheSpot.teamId)}
             >
               Wrong
@@ -275,10 +308,20 @@ export function ClueStage({
 
         {phase === 'revealed' && (
           <>
-            <button className="step-btn go" disabled={!isHost} onClick={onDone}>
+            <button
+              className={`step-btn go${hoverClass('next')}`}
+              disabled={!isHost}
+              {...hoverProps('next')}
+              onClick={onDone}
+            >
               Next question
             </button>
-            <button className="step-skip" disabled={!isHost} onClick={onReturnToBoard}>
+            <button
+              className={`step-skip${hoverClass('putback')}`}
+              disabled={!isHost}
+              {...hoverProps('putback')}
+              onClick={onReturnToBoard}
+            >
               Put back on the board
             </button>
           </>
