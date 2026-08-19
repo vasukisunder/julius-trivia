@@ -93,6 +93,23 @@ a.send(JSON.stringify({ type: 'action', action: { type: 'closeBuzzers' } }))
 const sD2 = await dWaits
 check('a connected phone hears the buzzers close', sD2.buzzOpenedAt === null)
 
+// Hover is relayed, not stored: the shared screen has no cursor of its own, but
+// mouse movement must not persist or re-broadcast the whole game state.
+const hoverSeen = new Promise((res) => {
+  b.addEventListener('message', function h(e) {
+    const m = JSON.parse(e.data)
+    if (m.type === 'hover') { b.removeEventListener('message', h); res(m.key) }
+  })
+})
+a.send(JSON.stringify({ type: 'hover', key: '3-4' }))
+check('the host\'s hover reaches the shared screen', (await hoverSeen) === '3-4')
+
+// It must not have touched the game state.
+const stateAfter = nextState(b)
+a.send(JSON.stringify({ type: 'action', action: { type: 'reveal' } }))
+const sAfterHover = await stateAfter
+check('hover left no trace in game state', !('hovered' in sAfterHover))
+
 a.close(); b.close(); d.close()
 console.log(`\n${pass} passed, ${fail} failed`)
 if (fail) process.exit(1)

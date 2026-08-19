@@ -73,6 +73,9 @@ button{font-family:inherit;color:inherit}
 .tile.static{cursor:default}
 .tile.static:hover{background:var(--surface);color:var(--cat);transform:none}
 .tile.static.used:hover{background:#1A2038;color:var(--ink-3)}
+/* The mirrored hover must still win on the inert board. */
+.tile.static.remote-hover{background:var(--cat);color:var(--on-color);transform:translateY(-2px)}
+.tile.static.used.remote-hover{background:var(--cat);color:var(--on-color)}
 .topbar-meta{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
 
 .tbtn{

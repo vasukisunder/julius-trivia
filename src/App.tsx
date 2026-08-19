@@ -44,7 +44,7 @@ function SyncBadge({ connection, mode }: { connection: Connection; mode: ViewMod
 
 export default function App() {
   const route = routeFromUrl()
-  const { state, dispatch, connection } = useGame()
+  const { state, dispatch, connection, hoveredKey, sendHover } = useGame()
   // Which clue is open lives in shared state, so the presentation screen opens
   // the same tile at the same moment the host picks it.
   const openRef = state.open
@@ -187,6 +187,8 @@ export default function App() {
         mode={mode}
         // Only the host drives the board; the shared screen is a mirror.
         onOpen={mode === 'host' ? (ref) => dispatch({ type: 'openClue', ref }) : undefined}
+        hoveredKey={mode === 'present' ? hoveredKey : null}
+        onHover={mode === 'host' ? sendHover : undefined}
       />
 
       <Scoreboard
@@ -217,8 +219,10 @@ export default function App() {
           playerStyles={state.playerStyles}
           lockedOut={state.lockedOut}
           onTheSpot={currentBuzz(state)}
+          lastAward={state.lastAward}
           onReveal={() => dispatch({ type: 'reveal' })}
           onOpenBuzzers={() => dispatch({ type: 'openBuzzers', seconds: COUNTDOWN })}
+          onCloseBuzzers={() => dispatch({ type: 'closeBuzzers' })}
           onCloseBuzzers={() => dispatch({ type: 'closeBuzzers' })}
           onMarkWrong={(teamId: number) => dispatch({ type: 'markWrong', teamId })}
           onAwardTo={(teamId: number) =>

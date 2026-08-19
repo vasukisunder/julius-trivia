@@ -48,8 +48,12 @@ export function useRoom(): {
   state: GameState
   dispatch: (action: Action) => void
   connection: Connection
+  /** Tile the host has under the cursor, mirrored from the host's screen. */
+  hoveredKey: string | null
+  sendHover: (key: string | null) => void
 } {
   const [state, setState] = useState<GameState>(initialState)
+  const [hoveredKey, setHoveredKey] = useState<string | null>(null)
   const [connection, setConnection] = useState<Connection>('connecting')
   const ws = useRef<WebSocket | null>(null)
   const retry = useRef(0)
@@ -87,6 +91,7 @@ export function useRoom(): {
         try {
           const msg = JSON.parse(e.data as string)
           if (msg.type === 'state') setState(msg.state as GameState)
+          else if (msg.type === 'hover') setHoveredKey(msg.key as string | null)
         } catch {
           // Ignore anything unparseable.
         }
@@ -165,5 +170,16 @@ export function useRoom(): {
     }
   }, [])
 
-  return { state, dispatch, connection }
+  /** Ephemeral, so it goes straight out rather than through the reducer. */
+  const lastHover = useRef<string | null>(null)
+  const sendHover = useCallback((key: string | null) => {
+    if (lastHover.current === key) return
+    lastHover.current = key
+    const socket = ws.current
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      socket.send(JSON.stringify({ type: 'hover', key }))
+    }
+  }, [])
+
+  return { state, dispatch, connection, hoveredKey, sendHover }
 }

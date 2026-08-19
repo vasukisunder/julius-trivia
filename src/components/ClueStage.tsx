@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Award, Buzz, Clue, PlayerStyle, Team, ViewMode } from '../types'
 import { PlayerIcon } from './PlayerPill'
 import { useAwardFlash } from '../state/useAwardFlash'
@@ -27,8 +27,12 @@ type Props = {
   lockedOut: number[]
   /** The buzz with the floor — fastest from a team not already wrong. */
   onTheSpot: Buzz | null
+  /** Latest award. Drives the celebration, on every screen at once. */
+  lastAward: Award | null
   onReveal: () => void
   onOpenBuzzers: () => void
+  /** Shuts the buzzers before the clock runs out. */
+  onCloseBuzzers: () => void
   onCloseBuzzers: () => void
   onMarkWrong: (teamId: number) => void
   onAwardTo: (teamId: number) => void
@@ -64,6 +68,16 @@ export function ClueStage({
   const showAnswer = hostSees || revealed
   const left = useCountdown(timerEndsAt)
   const stageRef = useRef<HTMLDivElement>(null)
+
+  // Fires on the stage rather than on the scoreboard, which is hidden behind it.
+  // Keyed on seq so a repeat score still celebrates.
+  const [cheer, setCheer] = useState<Award | null>(null)
+  useEffect(() => {
+    if (!lastAward) return
+    setCheer(lastAward)
+    const id = window.setTimeout(() => setCheer(null), 2600)
+    return () => clearTimeout(id)
+  }, [lastAward?.seq, lastAward])
 
   useEffect(() => {
     if (mode !== 'host') return
@@ -205,6 +219,15 @@ export function ClueStage({
         )}
       </div>
 
+      {cheer && (
+        <Celebration
+          teamName={teams.find((t) => t.id === cheer.teamId)?.name ?? ''}
+          colour={teamColor(Math.max(0, teams.findIndex((t) => t.id === cheer.teamId)))}
+          points={cheer.points}
+          seq={cheer.seq}
+        />
+      )}
+
       {/* The room sees the same controls the host is working; they are inert
           here, and the answer is the only thing withheld. */}
       <div className="stage-foot">
@@ -268,3 +291,56 @@ export function ClueStage({
     </div>
   )
 }
+
+/**
+ * The points landing, full-stage so it reads from across a video call. Confetti
+ * is plain spans with per-piece inline styles — no library, and it sits behind
+ * the text so it never hurts legibility.
+ */
+function Celebration({
+  teamName, colour, points, seq,
+}: { teamName: string; colour: string; points: number; seq: number }) {
+  const pieces = useMemo(
+    () =>
+      Array.from({ length: 26 }, () => ({
+        left: Math.random() * 100,
+        delay: Math.random() * 0.5,
+        duration: 1.5 + Math.random() * 0.9,
+        drift: (Math.random() - 0.5) * 90,
+        spin: 180 + Math.random() * 540,
+        size: 7 + Math.random() * 7,
+        hue: CONFETTI[Math.floor(Math.random() * CONFETTI.length)],
+      })),
+    // A fresh burst per award.
+    [seq],
+  )
+
+  return (
+    <div className="cheer" style={{ ['--team' as string]: colour }} aria-live="polite">
+      <div className="confetti" aria-hidden="true">
+        {pieces.map((p, i) => (
+          <span
+            key={i}
+            style={{
+              left: `${p.left}%`,
+              width: p.size,
+              height: p.size * 1.6,
+              background: p.hue,
+              animationDelay: `${p.delay}s`,
+              animationDuration: `${p.duration}s`,
+              ['--drift' as string]: `${p.drift}px`,
+              ['--spin' as string]: `${p.spin}deg`,
+            }}
+          />
+        ))}
+      </div>
+
+      <div className="cheer-card">
+        <div className="cheer-points">+{points}</div>
+        <div className="cheer-team">{teamName}</div>
+      </div>
+    </div>
+  )
+}
+
+const CONFETTI = ['#8B90E5', '#6D9EE8', '#4FBAC7', '#4FBD8F', '#A2C86E', '#A98BE0']

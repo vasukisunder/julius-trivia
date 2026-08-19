@@ -21,6 +21,8 @@ export function useGame(): {
   state: GameState
   dispatch: (action: Action) => void
   connection: Connection
+  hoveredKey: string | null
+  sendHover: (key: string | null) => void
 } {
   const room = useRoom()
   const [local, setLocal] = useState<GameState>(load)
@@ -72,5 +74,11 @@ export function useGame(): {
   // Only trust server state once it is actually the current shape.
   const state = online && room.state.version === STATE_VERSION ? room.state : local
 
-  return { state, dispatch, connection: room.connection }
+  return {
+    state,
+    dispatch,
+    connection: room.connection,
+    hoveredKey: room.hoveredKey,
+    sendHover: room.sendHover,
+  }
 }

@@ -8,6 +8,10 @@ type Props = {
   mode: ViewMode
   /** Omitted in presentation mode: the shared screen mirrors, it does not drive. */
   onOpen?: (ref: ClueRef) => void
+  /** The tile the host has under the cursor, mirrored onto the shared screen. */
+  hoveredKey?: string | null
+  /** Host only: report what is under the cursor so the room can follow along. */
+  onHover?: (key: string | null) => void
 }
 
 /** Short answer text for the host's in-situ answer key. */
@@ -15,7 +19,7 @@ function answerFor(clue: Category['clues'][number]): string {
   return clue.kind === 'lie' ? `${clue.person} · #${clue.lieIndex + 1}` : clue.answer
 }
 
-export function Board({ categories, used, mode, onOpen }: Props) {
+export function Board({ categories, used, mode, onOpen, hoveredKey, onHover }: Props) {
   // Categories may hold different numbers of clues; pad the short ones so the
   // rows across the board stay level.
   const rows = Math.max(...categories.map((c) => c.clues.length))
@@ -44,9 +48,16 @@ export function Board({ categories, used, mode, onOpen }: Props) {
           return (
             <button
               key={key}
-              className={`tile${isUsed ? ' used' : ''}${onOpen ? '' : ' static'}`}
+              className={
+                `tile${isUsed ? ' used' : ''}${onOpen ? '' : ' static'}` +
+                // The shared screen has no cursor of its own, so the host's
+                // hover is mirrored in as a class.
+                (hoveredKey === key ? ' remote-hover' : '')
+              }
               style={{ ['--cat' as string]: catColor(c) }}
               disabled={!onOpen}
+              onMouseEnter={() => onHover?.(key)}
+              onMouseLeave={() => onHover?.(null)}
               onClick={() => onOpen?.({ categoryIndex: c, clueIndex: r })}
               aria-label={
                 isUsed

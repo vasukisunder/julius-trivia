@@ -12,9 +12,11 @@ import type { GameState } from '../src/types'
 type ClientMsg =
   | { type: 'action'; action: Action }
   | { type: 'hello' }
+  | { type: 'hover'; key: string | null }
 
 type ServerMsg =
   | { type: 'state'; state: GameState }
+  | { type: 'hover'; key: string | null }
   | { type: 'error'; message: string }
 
 export class Room {
@@ -50,9 +52,10 @@ export class Room {
     await this.state.storage.put('game', game)
   }
 
-  private broadcast(msg: ServerMsg) {
+  private broadcast(msg: ServerMsg, except?: WebSocket) {
     const payload = JSON.stringify(msg)
     for (const ws of this.state.getWebSockets()) {
+      if (ws === except) continue
       try {
         ws.send(payload)
       } catch {
@@ -97,6 +100,16 @@ export class Room {
     }
 
     const game = await this.load()
+
+    /**
+     * Which tile the host has under the cursor. Relayed, never stored: hover is
+     * ephemeral, and putting it in game state would persist every mouse movement
+     * and re-broadcast the whole state to every phone in the room.
+     */
+    if (msg.type === 'hover') {
+      this.broadcast({ type: 'hover', key: msg.key }, _ws)
+      return
+    }
 
     if (msg.type === 'hello') {
       _ws.send(JSON.stringify({ type: 'state', state: game } satisfies ServerMsg))
