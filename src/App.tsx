@@ -11,41 +11,12 @@ import { BuzzerScreen } from './components/BuzzerScreen'
 import { playerId } from './net/player'
 import { catColor } from './theme'
 import { clueKey, type ViewMode } from './types'
+import { PRESENT_URL, buzzUrl, routeFromUrl } from './routes'
 import type { Connection } from './net/useRoom'
 import { Wordmark } from './components/Wordmark'
 
 /** Seconds on the clock when the host starts the timer. */
 const COUNTDOWN = 25
-
-/**
- * Every view has its own path, and nothing is served at the root:
- *
- *   /host      the host, marking answers
- *   /present   the window shared with the room
- *   /buzz      the phone screen
- *   /          deliberately empty
- *
- * The empty root matters. The host view prints the whole answer key, so if it
- * lived at `/` a player could delete "buzz" off their link and read every
- * answer. Now that lands on nothing, and nothing on the page hints at the other
- * paths.
- *
- * Mode is never toggled in-session either — a toggle was too easy to hit
- * mid-game and would flash the answers to the room. Both the dev server and the
- * Worker fall back to index.html, so these are real paths.
- */
-const PRESENT_URL = '/present'
-const BUZZ_URL = '/buzz'
-
-type Route = ViewMode | 'none'
-
-function routeFromUrl(): Route {
-  const last = window.location.pathname.split('/').filter(Boolean).pop()
-  if (last === 'host') return 'host'
-  if (last === 'present') return 'present'
-  if (last === 'buzz') return 'buzz'
-  return 'none'
-}
 
 /** The root: a wordmark and nothing else. No links, no hints. */
 function Landing() {
@@ -54,11 +25,6 @@ function Landing() {
       <Wordmark />
     </div>
   )
-}
-
-/** The link players open on their phones. */
-function buzzUrl(): string {
-  return `${window.location.origin}${BUZZ_URL}`
 }
 
 /**
@@ -108,6 +74,9 @@ export default function App() {
         onBuzz={(name, teamId, reactionMs) =>
           dispatch({ type: 'buzz', buzz: { playerId: playerId(), name, teamId, reactionMs } })
         }
+        onPickStyle={(name, color, icon) =>
+          dispatch({ type: 'setPlayerStyle', name, color, icon })
+        }
       />
     )
   }
@@ -152,18 +121,10 @@ export default function App() {
     )
   }
 
-  const played = state.used.length
-  const total = CATEGORIES.reduce((n, c) => n + c.clues.length, 0)
-
   return (
     <div className="shell">
       <header className="topbar">
-        <div>
-          <div className="label">
-            {played} of {total} played
-          </div>
-          <Wordmark />
-        </div>
+        <Wordmark />
 
         <div className="topbar-meta">
           <span className={`chip ${mode}`}>
@@ -231,6 +192,7 @@ export default function App() {
       <Scoreboard
         teams={state.teams}
         scores={scores}
+        playerStyles={state.playerStyles}
         mode={mode}
         lastAward={state.lastAward}
         onRename={(teamId, name) => dispatch({ type: 'renameTeam', teamId, name })}
@@ -252,6 +214,7 @@ export default function App() {
           clueKeyStr={openKey}
           buzzOpen={state.buzzOpenedAt !== null}
           buzzes={state.buzzes}
+          playerStyles={state.playerStyles}
           lockedOut={state.lockedOut}
           onTheSpot={currentBuzz(state)}
           onReveal={() => dispatch({ type: 'reveal' })}

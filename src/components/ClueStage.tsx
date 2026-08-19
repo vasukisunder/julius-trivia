@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import type { Award, Buzz, Clue, Team, ViewMode } from '../types'
+import type { Award, Buzz, Clue, PlayerStyle, Team, ViewMode } from '../types'
+import { PlayerIcon } from './PlayerPill'
 import { useAwardFlash } from '../state/useAwardFlash'
 import { teamColor } from '../theme'
 
@@ -22,6 +23,7 @@ type Props = {
   clueKeyStr: string
   buzzOpen: boolean
   buzzes: Buzz[]
+  playerStyles: Record<string, PlayerStyle>
   lockedOut: number[]
   /** The buzz with the floor — fastest from a team not already wrong. */
   onTheSpot: Buzz | null
@@ -52,7 +54,7 @@ function useCountdown(endsAt: number | null): number | null {
 
 export function ClueStage({
   clue, categoryName, accent, mode, teams, awardedIds, wasPlayed, revealed, timerEndsAt,
-  lastAward, clueKeyStr, buzzOpen, buzzes, lockedOut, onTheSpot,
+  lastAward, clueKeyStr, buzzOpen, buzzes, playerStyles, lockedOut, onTheSpot,
   onReveal, onOpenBuzzers, onCloseBuzzers, onMarkWrong, onAwardTo, onDone, onDismiss,
   onReturnToBoard,
 }: Props) {
@@ -183,6 +185,14 @@ export function ClueStage({
                       style={{ ['--team' as string]: teamColor(teamIndexOf(b.teamId)) }}
                     >
                       <span className="buzzrank">{i + 1}</span>
+                      {playerStyles[b.name] && (
+                        <span
+                          className="buzzicon"
+                          style={{ color: playerStyles[b.name].color }}
+                        >
+                          <PlayerIcon icon={playerStyles[b.name].icon} size={15} />
+                        </span>
+                      )}
                       <span className="buzzname">{b.name}</span>
                       <span className="buzzteam">{teamName(b.teamId)}</span>
                       <span className="buzzms">{(b.reactionMs / 1000).toFixed(2)}s</span>

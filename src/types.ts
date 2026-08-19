@@ -32,6 +32,9 @@ export type ClueRef = { categoryIndex: number; clueIndex: number }
 /** Stable key for a clue, used by the award ledger and the used set. */
 export const clueKey = (ref: ClueRef) => `${ref.categoryIndex}-${ref.clueIndex}`
 
+/** A player's chosen colour and shape, keyed by name in GameState. */
+export type PlayerStyle = { color: string; icon: string }
+
 export type Team = {
   id: number
   name: string
@@ -66,6 +69,11 @@ export type GameState = {
   version: number
   /** Everyone playing. The authoritative list; teams are drawn from it. */
   roster: string[]
+  /**
+   * name -> colour and shape. Assigned when a player opens the buzzer, and
+   * changeable there. Kept unique so a pill identifies exactly one person.
+   */
+  playerStyles: Record<string, PlayerStyle>
   /** How many teams to draw. Three by default. */
   teamCount: number
   teams: Team[]

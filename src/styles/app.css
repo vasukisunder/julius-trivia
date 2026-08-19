@@ -161,7 +161,7 @@ body[data-mode="host"]::before{
   letter-spacing:-.03em;line-height:1.1;margin:0 0 8px;color:var(--ink);
 }
 .team-score.neg{color:var(--wrong)}
-.roster{font-size:var(--t-13);color:var(--ink-2);line-height:1.6}
+.roster{display:flex;flex-wrap:wrap;gap:5px}
 .stepper{display:flex;gap:6px;margin-top:12px;align-items:center}
 .step{
   width:32px;height:30px;border:none;border-radius:var(--r-sm);
@@ -268,7 +268,11 @@ body[data-mode="host"]::before{
 /* One measure for every setup row, so the head, the chips and the footer all
    share an edge instead of each finding its own width. */
 .draft > *{width:100%;max-width:940px}
-.draft-head{margin-bottom:26px}
+.draft-head{
+  margin-bottom:26px;display:flex;align-items:flex-start;justify-content:space-between;
+  gap:28px;flex-wrap:wrap;
+}
+.draft-head-text{min-width:0}
 .draft-head .wordmark{font-size:var(--t-15);margin-bottom:14px;color:var(--ink-2)}
 .draft-title{
   font-family:var(--display);font-size:clamp(32px,5.4vw,60px);font-weight:700;
@@ -580,3 +584,69 @@ button:disabled{cursor:default}
   min-height:100vh;display:flex;align-items:center;justify-content:center;
 }
 .landing .wordmark{font-size:var(--t-24);opacity:.5}
+
+
+/* ============================ join QR ==================================== */
+.joinqr{display:flex;flex-direction:column;align-items:center;gap:8px;flex:none}
+/* Dark-on-light inside a pale panel: inverting it would suit the UI and scan
+   worse, and this has exactly one job. */
+.joinqr-panel{
+  background:#F4F2ED;border-radius:var(--r);padding:10px;
+  display:flex;align-items:center;justify-content:center;
+}
+.joinqr-url{font-size:var(--t-13);font-weight:600;color:var(--ink-2);letter-spacing:-.01em}
+
+/* ============================ player pills =============================== */
+.ppill{
+  display:inline-flex;align-items:center;gap:5px;border-radius:99px;
+  background:color-mix(in oklab, var(--p) 20%, transparent);
+  color:var(--p);
+  padding:4px 11px 4px 9px;font-weight:600;font-size:var(--t-13);
+  line-height:1.25;white-space:nowrap;
+}
+.ppill.sm{font-size:var(--t-12);padding:3px 9px 3px 7px;gap:4px}
+.ppill.blank{background:var(--surface-2);color:var(--ink-2)}
+.ppill svg{flex:none}
+
+/* Buzz queue picks up the same identity. */
+.buzzicon{display:flex;align-items:center;flex:none}
+
+/* ============================ phone identity ============================= */
+.phone-id{
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  background:none;border:none;cursor:pointer;color:var(--ink);padding:4px 12px;
+  border-radius:var(--r);
+}
+.phone-id:hover{background:var(--surface)}
+.phone-id > svg{color:var(--team)}
+
+.picker{
+  width:100%;max-width:440px;background:var(--surface);border-radius:var(--r);
+  padding:14px;display:flex;flex-direction:column;gap:10px;flex:none;
+}
+.picker-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.swatch{
+  width:34px;height:34px;border-radius:99px;border:2px solid transparent;cursor:pointer;
+  padding:0;transition:transform .12s var(--ease);
+}
+.swatch:hover:not(:disabled){transform:scale(1.08)}
+.swatch.on{border-color:var(--ink)}
+.swatch:disabled{opacity:.2;cursor:default}
+.shape{
+  width:34px;height:34px;border-radius:var(--r-sm);border:none;cursor:pointer;
+  background:var(--surface-2);color:var(--ink-2);
+  display:flex;align-items:center;justify-content:center;transition:color .12s,background .12s;
+}
+.shape:hover:not(:disabled){color:var(--ink)}
+.shape.on{background:var(--team);color:var(--on-color)}
+.shape:disabled{opacity:.2;cursor:default}
+.picker-done{
+  background:var(--ink);color:var(--canvas);border:none;border-radius:var(--r-sm);
+  padding:10px;font-size:var(--t-13);font-weight:700;cursor:pointer;
+}
+.phone-name{display:inline-flex;align-items:center;gap:7px}
+
+@media (max-width:640px){
+  .draft-head{gap:18px}
+  .joinqr-panel{width:120px !important;height:120px !important}
+}

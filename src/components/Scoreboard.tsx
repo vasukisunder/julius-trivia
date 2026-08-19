@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import type { Award, Team, ViewMode } from '../types'
+import type { Award, PlayerStyle, Team, ViewMode } from '../types'
 import { teamColor } from '../theme'
 import { useAwardFlash } from '../state/useAwardFlash'
+import { PlayerPill } from './PlayerPill'
 
 /**
  * Rolls a score up to its new value instead of snapping, so points landing is
@@ -36,6 +37,7 @@ function useCountUp(target: number): number {
 type Props = {
   teams: Team[]
   scores: Map<number, number>
+  playerStyles: Record<string, PlayerStyle>
   mode: ViewMode
   /** The latest award, so the winning team's panel can celebrate. */
   lastAward: Award | null
@@ -45,7 +47,9 @@ type Props = {
 
 const STEPS = [100, 200, 300, 400, 500, 600]
 
-export function Scoreboard({ teams, scores, mode, lastAward, onRename, onAdjust }: Props) {
+export function Scoreboard({
+  teams, scores, playerStyles, mode, lastAward, onRename, onAdjust,
+}: Props) {
   // Same guards as the stage: no flash on mount, and it clears itself.
   const flash = useAwardFlash(lastAward, 1400)
   // The old board only stepped by 100, so undoing a mis-awarded 600 took six
@@ -80,7 +84,11 @@ export function Scoreboard({ teams, scores, mode, lastAward, onRename, onAdjust 
 
             <div className="team-body">
               <TeamScore score={score} celebrating={celebrating} points={flash?.points ?? 0} />
-              <div className="roster">{team.members.join(' · ')}</div>
+              <div className="roster">
+                {team.members.map((m) => (
+                  <PlayerPill key={m} name={m} style={playerStyles[m]} size="sm" />
+                ))}
+              </div>
 
               <div className="stepper">
                 <button

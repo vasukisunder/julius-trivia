@@ -3,6 +3,7 @@ import { clueKey } from '../types'
 import { CATEGORIES } from '../data'
 import { TEAMMATES } from '../data'
 import { MAX_TEAMS, MIN_TEAMS, TEAM_COUNT, drawTeams, teamNameFor } from '../data/teams'
+import { freeStyle } from '../data/avatars'
 
 export type Action =
   | { type: 'toggleAward'; key: string; teamId: number }
@@ -14,6 +15,7 @@ export type Action =
   | { type: 'setTeams'; rosters: string[][] }
   | { type: 'redraw' }
   | { type: 'resetRoster' }
+  | { type: 'setPlayerStyle'; name: string; color: string; icon: string }
   | { type: 'addToRoster'; name: string }
   | { type: 'removeFromRoster'; name: string }
   | { type: 'setTeamCount'; count: number }
@@ -35,12 +37,13 @@ export type Action =
   | { type: 'clearClue'; key: string }
 
 /** Bump on any change to the saved shape or to the seeded defaults. */
-export const STATE_VERSION = 9
+export const STATE_VERSION = 10
 
 export function initialState(): GameState {
   return {
     version: STATE_VERSION,
     roster: TEAMMATES.slice(),
+    playerStyles: {},
     teamCount: TEAM_COUNT,
     teams: [],
     awards: {},
@@ -192,6 +195,29 @@ export function reducer(state: GameState, action: Action): GameState {
         members,
       }))
       return { ...state, teams, teamSeq: teams.length + 1, phase: 'board' }
+    }
+
+    /**
+     * Claims a colour and shape. Uniqueness is settled here rather than in the
+     * UI: two phones can pick at the same moment, and the Durable Object is the
+     * only place that can arbitrate. A clash falls back to the next free one, so
+     * the second player still ends up with something of their own.
+     */
+    case 'setPlayerStyle': {
+      const others = Object.entries(state.playerStyles)
+        .filter(([n]) => n !== action.name)
+        .map(([, s]) => s)
+
+      const wanted = { color: action.color, icon: action.icon }
+      const clashes = others.some(
+        (s) => s.color === wanted.color || s.icon === wanted.icon,
+      )
+      const style = clashes ? freeStyle(others) : wanted
+
+      return {
+        ...state,
+        playerStyles: { ...state.playerStyles, [action.name]: style },
+      }
     }
 
     // Puts the sign-up list back, for when too many people got x-ed out.

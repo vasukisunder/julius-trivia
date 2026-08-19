@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { MAX_TEAMS, MIN_TEAMS } from '../data/teams'
 import type { ViewMode } from '../types'
 import { Wordmark } from './Wordmark'
+import { JoinQR } from './JoinQR'
+import { buzzUrl } from '../routes'
 
 type Props = {
   roster: string[]
@@ -41,11 +43,14 @@ export function RosterStage({
   return (
     <div className="draft">
       <div className="draft-head">
+        <div className="draft-head-text">
         <Wordmark />
         <h1 className="draft-title">Who's here?</h1>
         <p className="draft-count">
           {roster.length} playing · {teamCount} teams of {split.join('/')}
         </p>
+        </div>
+        <JoinQR url={buzzUrl()} />
       </div>
 
       <div className="roster-grid">

@@ -4,6 +4,8 @@ import { shuffle } from '../data/teams'
 import { teamColor } from '../theme'
 import type { Team, ViewMode } from '../types'
 import { Wordmark } from './Wordmark'
+import { JoinQR } from './JoinQR'
+import { buzzUrl } from '../routes'
 
 type Props = {
   /** Teams live in shared state, so host and presentation show the same draw. */
@@ -82,11 +84,14 @@ export function TeamDraft({
   return (
     <div className="draft">
       <div className="draft-head">
+        <div className="draft-head-text">
         <Wordmark />
         <h1 className="draft-title">Teams</h1>
         <p className="draft-count">
           {total} players · {teams.length} teams
         </p>
+        </div>
+        <JoinQR url={buzzUrl()} />
       </div>
 
       <div className="draft-grid">
