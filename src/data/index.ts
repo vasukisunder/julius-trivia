@@ -14,13 +14,7 @@ import type { Category } from '../types'
  *
  * `credit` names whose specialist subject a question came from. It is left off
  * personal clues, where it would give the answer away.
- *
- * These get read aloud to the whole company, so clues have to be fine to say out
- * loud about a colleague. A question is not acceptable just because the fact is
- * true or the person submitted it: framing matters. One earlier clue asked which
- * player "whipped off her shirt" after a World Cup winner — a true and famous
- * moment, but it reduced a landmark achievement to a woman's body and had no place
- * here. When in doubt, ask what it sounds like read out to the room.
+
  *
  * Nothing here leaks: no fact used as a plain clue also appears as a statement
  * on a spot-the-lie card. The tests check that too.
@@ -69,7 +63,7 @@ export const CATEGORIES: Category[] = [
       {
         kind: 'lie', points: 200, person: 'Joe', lieIndex: 2,
         statements: [
-          `Has travelled through 48 of the 50 US states.`,
+          `Likes to sunbathe in the nude.`,
           `Could throw an 80 mph fastball at sixty.`,
           `Challenged President Obama to a basketball game.`,
         ],
@@ -110,19 +104,19 @@ export const CATEGORIES: Category[] = [
   {
     name: 'Odds & Ends',
     clues: [
-      {
-        kind: 'lie', points: 100, person: 'Hannah', lieIndex: 2,
-        statements: [
-          `Believes in ghosts.`,
-          `Was on the ski team in high school.`,
-          `Won her first bike race.`,
-        ],
-      },
+      { kind: 'standard', points: 100, question: `Launched by Bandai in 1996, which egg-shaped handheld pet had to be fed and cleaned or it would die?`, answer: `The Tamagotchi`, credit: `Juan’s specialty — iconic 90s/00s objects` },
       { kind: 'standard', points: 200, question: `On Windows, which keyboard shortcut reopens the browser tab you just closed?`, answer: `Ctrl + Shift + T`, credit: `Antonela’s specialty — keyboard shortcuts` },
       { kind: 'standard', points: 300, question: `Which teammate was once a rabbit at the White House Easter Egg Roll?`, answer: `Lucy` },
       { kind: 'standard', points: 400, question: `A turbocharger forces extra air into an engine. What spins it?`, answer: `The engine’s own exhaust gases`, credit: `Ivan’s specialty — car mechanics` },
       { kind: 'standard', points: 500, question: `Crude oil is separated into petrol, kerosene and diesel by which refining process, which relies on their different boiling points?`, answer: `Fractional distillation`, credit: `Ask’s specialty — oil & petroleum products` },
-      { kind: 'standard', points: 600, question: `Match each to the right teammate: is a twin · is ambidextrous · has never had a cup of coffee.`, answer: `Matt (twin) · Ask (ambidextrous) · Antonela (coffee)` },
+      {
+        kind: 'lie', points: 600, person: 'Antonela', lieIndex: 2,
+        statements: [
+          `Can do a handstand.`,
+          `Has never had a cup of coffee.`,
+          `Can whistle.`,
+        ],
+      },
     ],
   },
   {
