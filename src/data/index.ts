@@ -52,7 +52,6 @@ export const CATEGORIES: Category[] = [
           `Ran a marathon on a drunken bet.`,
           `Joined a rowing team on a drunken bet.`,
         ],
-        credit: `Ask’s note: the rowing team was real — they were sober and just stupid.`,
       },
     ],
   },
