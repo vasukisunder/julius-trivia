@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import type { Award, Buzz, Clue, CluePhase, PlayerStyle, Team, ViewMode, Wrong } from '../types'
+import type { Buzz, Clue, CluePhase, PlayerStyle, Team, ViewMode, Wrong } from '../types'
 import { PlayerIcon } from './PlayerPill'
 import { useAwardFlash } from '../state/useAwardFlash'
 import { teamColor } from '../theme'
@@ -10,6 +10,8 @@ type Props = {
   accent: string
   mode: ViewMode
   teams: Team[]
+  /** Teams credited with this clue, from the award ledger. */
+  awardedIds: number[]
   /** Where this clue is in its sequence. Drives everything below. */
   phase: CluePhase
   timerEndsAt: number | null
@@ -18,7 +20,6 @@ type Props = {
   lockedOut: number[]
   /** The buzz with the floor — fastest from a team not already ruled wrong. */
   onTheSpot: Buzz | null
-  lastAward: Award | null
   lastWrong: Wrong | null
   /** This clue's key, so a previous clue's award cannot replay here. */
   clueKeyStr: string
@@ -65,8 +66,8 @@ function useCountdown(endsAt: number | null, onZero: () => void): number | null 
 }
 
 export function ClueStage({
-  clue, categoryName, accent, mode, teams, phase, timerEndsAt, buzzes, playerStyles,
-  lockedOut, onTheSpot, lastAward, lastWrong, clueKeyStr, hoveredKey, onHover,
+  clue, categoryName, accent, mode, teams, awardedIds, phase, timerEndsAt, buzzes, playerStyles,
+  lockedOut, onTheSpot, lastWrong, clueKeyStr, hoveredKey, onHover,
   onOpenBuzzers, onEndBuzzing, onCorrect, onWrong, onSkipToAnswer, onDone, onDismiss,
   onReturnToBoard,
 }: Props) {
@@ -87,8 +88,10 @@ export function ClueStage({
   const indexOf = (id: number) => Math.max(0, teams.findIndex((t) => t.id === id))
 
   const spotTeam = onTheSpot ? teamOf(onTheSpot.teamId) : null
-  const winner = phase === 'revealed' && lastAward?.key === clueKeyStr
-    ? teamOf(lastAward.teamId)
+  // From the ledger, not from lastAward: lastAward is the most recent award in
+  // the whole game, so reopening an earlier clue reported nobody having won it.
+  const winner = phase === 'revealed' && awardedIds.length > 0
+    ? teamOf(awardedIds[0])
     : null
 
   useEffect(() => {
@@ -100,7 +103,10 @@ export function ClueStage({
     return () => document.removeEventListener('keydown', onKey)
   }, [isHost, onDismiss])
 
-  const heading = clue.kind === 'lie' ? clue.person : categoryName
+  // Always the category. This used to swap in the person's name for spot-the-lie
+  // clues, so Around the World's 600 announced itself as "Greg · 600 points".
+  // Who the card is about belongs in the question, where it already is.
+  const heading = categoryName
   const low = left !== null && left <= 5
 
   /**
@@ -158,6 +164,9 @@ export function ClueStage({
                 </li>
               ))}
             </ol>
+            {phase === 'revealed' && clue.credit && (
+              <p className="credit">{clue.credit}</p>
+            )}
           </>
         )}
 

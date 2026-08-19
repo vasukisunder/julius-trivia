@@ -14,9 +14,14 @@ type Props = {
   onHover?: (key: string | null) => void
 }
 
-/** Short answer text for the host's in-situ answer key. */
+/**
+ * Short answer text for the host's in-situ answer key. For a spot-the-lie card
+ * the useful thing is which statement is false, so it leads with that.
+ */
 function answerFor(clue: Category['clues'][number]): string {
-  return clue.kind === 'lie' ? `${clue.person} · #${clue.lieIndex + 1}` : clue.answer
+  return clue.kind === 'lie'
+    ? `${clue.person}: lie is #${clue.lieIndex + 1}`
+    : clue.answer
 }
 
 export function Board({ categories, used, mode, onOpen, hoveredKey, onHover }: Props) {

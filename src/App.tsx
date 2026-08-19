@@ -230,13 +230,13 @@ export default function App() {
           accent={catColor(openRef.categoryIndex)}
           mode={mode}
           teams={state.teams}
+          awardedIds={state.awards[openKey] ?? []}
           phase={state.cluePhase}
           timerEndsAt={state.timerEndsAt}
           buzzes={state.buzzes}
           playerStyles={state.playerStyles}
           lockedOut={state.lockedOut}
           onTheSpot={currentBuzz(state)}
-          lastAward={state.lastAward}
           lastWrong={state.lastWrong}
           clueKeyStr={openKey}
           hoveredKey={mode === 'present' ? hoveredKey : null}

@@ -29,6 +29,46 @@ check('every lieIndex is a valid statement index',
 check('no unresolved lies (Juan and Hattie never marked theirs, so are not used here)',
   !lieClues.some(c => c.person === 'Juan' || c.person === 'Hattie'))
 
+console.log('\nauthoring mistakes that would show up mid-game')
+// A spot-the-lie card names a person; if that name is not a real teammate, the
+// pills and team lookups have nothing to resolve.
+const unknownPeople = lieClues.filter(c => !TEAMMATES.includes(c.person)).map(c => c.person)
+check('every lie card names a real teammate' + (unknownPeople.length ? ` (${unknownPeople})` : ''),
+  unknownPeople.length === 0)
+
+// A credit naming nobody real is a typo waiting to be read out loud.
+const badCredits = allClues
+  .filter(c => c.credit && !TEAMMATES.some(n => c.credit!.includes(n)))
+  .map(c => c.credit)
+check('every credit names a known teammate' + (badCredits.length ? ` (${badCredits})` : ''),
+  badCredits.length === 0)
+
+// Points must climb down a column or the values mean nothing.
+const badLadder = CATEGORIES
+  .filter(c => c.clues.some((cl, i) => i > 0 && cl.points <= c.clues[i - 1].points))
+  .map(c => c.name)
+check('points ascend down every column' + (badLadder.length ? ` (${badLadder})` : ''),
+  badLadder.length === 0)
+
+// A question containing its own answer gives itself away.
+const selfAnswering = standard.filter(c => {
+  const a = c.answer.replace(/^(The|A|An) /i, '').split(/[—·(]/)[0].trim()
+  return a.length > 3 && c.question.toLowerCase().includes(a.toLowerCase())
+}).map(c => c.answer)
+check('no question contains its own answer' + (selfAnswering.length ? ` (${selfAnswering})` : ''),
+  selfAnswering.length === 0)
+
+// A clue whose answer is a teammate must not carry a credit: the credit says
+// whose specialty it is, which would hand over the answer.
+const leaky = standard.filter(c => TEAMMATES.includes(c.answer) && c.credit).map(c => c.answer)
+check('no personal clue leaks its answer through a credit' + (leaky.length ? ` (${leaky})` : ''),
+  leaky.length === 0)
+
+const dupQuestions = standard.map(c => c.question).filter((q, i, a) => a.indexOf(q) !== i)
+check('no duplicate questions', dupQuestions.length === 0)
+check('no duplicate category names',
+  new Set(CATEGORIES.map(c => c.name)).size === CATEGORIES.length)
+
 console.log('\nteammate coverage')
 // A personal clue is one that names no specialty: the answer is a teammate.
 const personalText = allClues
@@ -386,6 +426,30 @@ console.log('\nskipping the buzzers')
 let sk2 = reducer(initialState(), { type: 'openClue', ref: { categoryIndex: 3, clueIndex: 1 } })
 sk2 = reducer(sk2, { type: 'reveal' })
 check('the host can jump straight to the answer', sk2.cluePhase === 'revealed')
+
+console.log('\nreopening a clue a team already won')
+// The winner has to come from the award ledger, not from lastAward: lastAward is
+// the most recent award in the WHOLE game, so reopening an earlier clue reported
+// nobody having won it.
+let sw = reducer(initialState(), { type: 'shuffleTeams' })
+sw = reducer(sw, { type: 'setTeams', rosters: sw.teams.map(t => t.members) })
+const first = sw.teams[0], second = sw.teams[1]
+sw = reducer(sw, { type: 'openClue', ref: { categoryIndex: 0, clueIndex: 0 } })
+sw = reducer(sw, { type: 'awardTo', teamId: first.id, points: 100 })
+sw = reducer(sw, { type: 'consumeClue', key: '0-0' })
+sw = reducer(sw, { type: 'closeClue' })
+// A later clue moves lastAward on.
+sw = reducer(sw, { type: 'openClue', ref: { categoryIndex: 1, clueIndex: 1 } })
+sw = reducer(sw, { type: 'awardTo', teamId: second.id, points: 200 })
+sw = reducer(sw, { type: 'consumeClue', key: '1-1' })
+sw = reducer(sw, { type: 'closeClue' })
+check('lastAward has moved on to the later clue', sw.lastAward?.key === '1-1')
+check('but the ledger still records who won the earlier one',
+  (sw.awards['0-0'] ?? []).includes(first.id))
+check('so reopening it can still name the winner',
+  (sw.awards['0-0'] ?? []).length === 1)
+sw = reducer(sw, { type: 'openClue', ref: { categoryIndex: 0, clueIndex: 0 } })
+check('and it reopens straight to the answer', sw.cluePhase === 'revealed')
 
 console.log('\nreopening a played clue')
 let sx2 = reducer(initialState(), { type: 'shuffleTeams' })
