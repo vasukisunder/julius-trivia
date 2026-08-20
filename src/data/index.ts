@@ -156,7 +156,7 @@ export const CATEGORIES: Category[] = [
 export const FINAL_CLUE: Clue = {
   kind: 'match',
   points: 1000,
-  prompt: `Three facts. Three people. No overlap.`,
+  prompt: `Match each fact to the right teammate.`,
   items: [
     { fact: `Delivered newspapers as a first job.`, person: `Greg` },
     { fact: `Is ambidextrous.`, person: `Ask` },
