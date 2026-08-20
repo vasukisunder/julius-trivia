@@ -172,8 +172,11 @@ export const FINAL_CLUE: Clue = {
 }
 
 export const FINAL_CATEGORY = 'Final question'
-/** Outside the six category hues, so the closing question reads as its own thing. */
-export const FINAL_ACCENT = '#F0A6B4'
+/**
+ * Near-white rather than a hue. It has to read as distinct from all six category
+ * colours, and the previous blush pink read as an error state on a dark screen.
+ */
+export const FINAL_ACCENT = '#EEF1F8'
 
 /**
  * Everyone playing. This seeds the roster and gets drawn into teams, so it is

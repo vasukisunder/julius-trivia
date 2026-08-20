@@ -205,14 +205,6 @@ export default function App() {
             </button>
           )}
           <button
-            className="finalbtn"
-            disabled={mode !== 'host'}
-            onClick={() => dispatch({ type: 'openClue', ref: FINAL_REF })}
-          >
-            Final question
-            <span className="finalbtn-pts">{FINAL_CLUE.points}</span>
-          </button>
-          <button
             className="tbtn end"
             disabled={mode !== 'host'}
             onClick={() =>
@@ -271,6 +263,17 @@ export default function App() {
         onHover={mode === 'host' ? sendHover : undefined}
       />
 
+      {/* Sits with the board rather than in the toolbar: it is the question after
+          the last row, not a piece of chrome. */}
+      <button
+        className="finalbar"
+        disabled={mode !== 'host'}
+        onClick={() => dispatch({ type: 'openClue', ref: FINAL_REF })}
+      >
+        <span className="finalbar-label">Final question</span>
+        <span className="finalbar-pts">{FINAL_CLUE.points}</span>
+      </button>
+
       <Scoreboard
         teams={state.teams}
         scores={scores}
@@ -322,6 +325,8 @@ export default function App() {
             if (openIsFinal) dispatch({ type: 'startCeremony', seconds: CEREMONY_COUNTDOWN })
             else dispatch({ type: 'closeClue' })
           }}
+          doneLabel={openIsFinal ? 'And the winner is…' : 'Next question'}
+          canReturnToBoard={!openIsFinal}
           onDismiss={() => dispatch({ type: 'closeClue' })}
           onReturnToBoard={() => {
             dispatch({ type: 'clearClue', key: openKey })

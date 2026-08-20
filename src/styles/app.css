@@ -89,26 +89,24 @@ button{font-family:inherit;color:inherit}
 .tbtn.go{background:var(--ink);color:var(--canvas)}
 /* The closing question is worth more than anything on the board, so its control
    does not look like the rest of the toolbar. */
-/* The closing question is worth more than the whole bottom row of the board, and
-   it was sitting in the toolbar looking like one tab among several. Filled, larger,
-   carrying its own point value, and breathing so the eye finds it. */
-.finalbtn{
-  display:inline-flex;align-items:center;gap:10px;
-  background:#F0A6B4;color:var(--on-color);border:none;border-radius:99px;
-  font-family:var(--display);font-size:var(--t-15);font-weight:700;
-  padding:9px 10px 9px 18px;cursor:pointer;
-  animation:finalglow 2.6s ease-in-out infinite;
+/* The closing question, sitting under the last row of the board.
+   Full width and near-white: it has to look like the biggest thing on the page
+   without borrowing a category hue, and the blush pink it used to wear read as an
+   error rather than a prize. */
+.finalbar{
+  display:flex;align-items:center;justify-content:center;gap:16px;
+  width:100%;margin-top:8px;
+  background:var(--ink);color:var(--canvas);border:none;border-radius:var(--r);
+  padding:20px 24px;cursor:pointer;
+  font-family:var(--display);font-size:clamp(17px,2.2vw,var(--t-24));font-weight:700;
+  letter-spacing:-.02em;
   transition:transform .14s var(--ease),filter .15s;
 }
-.finalbtn:hover:not(:disabled){transform:translateY(-1px);filter:brightness(1.06)}
-.finalbtn:disabled{cursor:default}
-.finalbtn-pts{
-  background:rgba(16,21,38,.22);border-radius:99px;padding:4px 12px;
-  font-size:var(--t-15);font-weight:700;letter-spacing:-.01em;
-}
-@keyframes finalglow{
-  0%,100%{box-shadow:0 0 0 0 rgba(240,166,180,0)}
-  50%{box-shadow:0 0 0 7px rgba(240,166,180,.16)}
+.finalbar:hover:not(:disabled){transform:translateY(-2px);filter:brightness(1.04)}
+.finalbar:disabled{cursor:default}
+.finalbar-pts{
+  background:rgba(20,26,46,.14);border-radius:99px;padding:5px 16px;
+  font-size:clamp(15px,1.9vw,var(--t-20));font-weight:700;
 }
 .tbtn.go:hover{background:#fff;color:var(--canvas)}
 

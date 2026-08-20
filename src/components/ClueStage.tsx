@@ -33,6 +33,10 @@ type Props = {
   onCorrect: (teamId: number) => void
   onWrong: (teamId: number) => void
   onSkipToAnswer: () => void
+  /** "Next question" normally; the closing question leads into the ceremony. */
+  doneLabel: string
+  /** The closing question has no tile, so it cannot be put back on one. */
+  canReturnToBoard: boolean
   onDone: () => void
   onDismiss: () => void
   onReturnToBoard: () => void
@@ -69,8 +73,8 @@ function useCountdown(endsAt: number | null, onZero: () => void): number | null 
 export function ClueStage({
   clue, categoryName, accent, mode, teams, awardedIds, phase, timerEndsAt, buzzes, playerStyles,
   lockedOut, onTheSpot, lastWrong, clueKeyStr, hoveredKey, onHover,
-  onOpenBuzzers, onEndBuzzing, onCorrect, onWrong, onSkipToAnswer, onDone, onDismiss,
-  onReturnToBoard,
+  onOpenBuzzers, onEndBuzzing, onCorrect, onWrong, onSkipToAnswer, doneLabel,
+  canReturnToBoard, onDone, onDismiss, onReturnToBoard,
 }: Props) {
   const isHost = mode === 'host'
   const stageRef = useRef<HTMLDivElement>(null)
@@ -368,16 +372,18 @@ export function ClueStage({
               {...hoverProps('next')}
               onClick={onDone}
             >
-              Next question
+              {doneLabel}
             </button>
-            <button
-              className={`step-skip${hoverClass('putback')}`}
-              disabled={!isHost}
-              {...hoverProps('putback')}
-              onClick={onReturnToBoard}
-            >
-              Put back on the board
-            </button>
+            {canReturnToBoard && (
+              <button
+                className={`step-skip${hoverClass('putback')}`}
+                disabled={!isHost}
+                {...hoverProps('putback')}
+                onClick={onReturnToBoard}
+              >
+                Put back on the board
+              </button>
+            )}
           </>
         )}
       </div>
