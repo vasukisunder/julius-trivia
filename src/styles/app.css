@@ -237,6 +237,8 @@ body[data-mode="host"]::before{
   background:var(--cat);color:var(--on-color);border-radius:99px;
   padding:4px 12px;font-size:var(--t-13);font-weight:700;flex:none;
 }
+/* One flex item, so the container's gap cannot open up inside the sentence. */
+.credit-text{display:inline}
 
 /* A teammate's name, wherever it appears in clue text. */
 .pname{

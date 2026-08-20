@@ -163,7 +163,7 @@ export function ClueStage({
             {clue.credit && (
               <p className="credit">
                 <span className="credit-tag">Hint</span>
-                <WithNames text={clue.credit} />
+                <span className="credit-text"><WithNames text={clue.credit} /></span>
               </p>
             )}
           </>
@@ -209,7 +209,7 @@ export function ClueStage({
             {phase === 'revealed' && clue.credit && (
               <p className="credit">
                 <span className="credit-tag">Hint</span>
-                <WithNames text={clue.credit} />
+                <span className="credit-text"><WithNames text={clue.credit} /></span>
               </p>
             )}
           </>
