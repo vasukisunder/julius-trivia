@@ -148,16 +148,7 @@ export const CATEGORIES: Category[] = [
         stickers: ['mic', 'guitar', 'frog'],
       },
       {
-        kind: 'lie', points: 400, person: 'Hannah', lieIndex: 0,
-        statements: [
-          `Won her first bike race.`,
-          `Believes in ghosts.`,
-          `Was on the ski team in high school.`,
-        ],
-        stickers: ['bicycle', 'ghost', 'mountain-snow'],
-      },
-      {
-        kind: 'lie', points: 500, person: 'Joe', lieIndex: 1,
+        kind: 'lie', points: 400, person: 'Joe', lieIndex: 1,
         statements: [
           `Likes to sunbathe in the nude.`,
           `Challenged President Obama to a basketball game.`,
@@ -165,6 +156,7 @@ export const CATEGORIES: Category[] = [
         ],
         stickers: ['sun-umbrella', 'basketball', 'baseball'],
       },
+      { kind: 'standard', points: 500, question: `What time does Benja go to bed on a typical workday?`, answer: `4 or 5am`, stickers: ['bed', 'clock', 'keyboard', 'mouse'] },
       { kind: 'standard', points: 600, question: `When this teammate was ten, their grandfather gave them a deer. Who?`, answer: `Jonattan`, stickers: ['deer', 'pine', 'barn'] },
     ],
   },
@@ -172,7 +164,15 @@ export const CATEGORIES: Category[] = [
     name: 'Odds & Ends',
     clues: [
       { kind: 'standard', points: 100, question: `This children’s author drew wartime political cartoons, wrote under a pen name, and was really named Theodor Geisel.`, answer: `Dr. Seuss`, credit: `Matt’s specialty`, stickers: ['fountain-pen', 'open-book', 'inkwell'] },
-      { kind: 'standard', points: 200, question: `On Windows, which keyboard shortcut reopens the browser tab you just closed?`, answer: `Ctrl + Shift + T`, credit: `Antonela’s specialty`, stickers: ['keyboard', 'laptop', 'mouse'] },
+      {
+        kind: 'lie', points: 200, person: 'Hannah', lieIndex: 0,
+        statements: [
+          `Won her first bike race.`,
+          `Believes in ghosts.`,
+          `Was on the ski team in high school.`,
+        ],
+        stickers: ['bicycle', 'ghost', 'mountain-snow'],
+      },
       {
         kind: 'lie', points: 300, person: 'Matt', lieIndex: 1,
         statements: [
@@ -229,7 +229,7 @@ export const FINAL_ACCENT = '#EEF1F8'
  */
 export const TEAMMATES = [
   'Matt', 'Hannah', 'Ivan', 'Daniel', 'Shakir', 'Lucy', 'Ask',
-  'Juan', 'Antonela', 'Hattie', 'Ana', 'Greg', 'Joe', 'Jonattan',
+  'Juan', 'Antonela', 'Hattie', 'Ana', 'Greg', 'Joe', 'Jonattan', 'Benja',
 ]
 
 /** Hosting rather than playing, so not in the draw — but still on the board. */

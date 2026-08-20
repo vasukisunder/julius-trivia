@@ -353,21 +353,22 @@ const creditText = allClues.map(c => c.credit ?? '').join(' | ')
 
 const noPersonal = TEAMMATES.filter(n => !personalText.includes(n))
 const noNiche = TEAMMATES.filter(n => !creditText.includes(n))
-check('14 players on the roster', TEAMMATES.length === 14)
+check('15 players on the roster', TEAMMATES.length === 15)
 // The host is nameable in clues but must never be drafted into a team.
 check('the host is not on the roster', !TEAMMATES.includes(HOST))
 check('but the host can still be named in a clue', PEOPLE.includes(HOST))
 check('every teammate has a personal clue' + (noPersonal.length ? ` (missing: ${noPersonal})` : ''),
   noPersonal.length === 0)
 /**
- * Players whose only specialist-subject clue was replaced by a personal one:
- * Ivan's car mechanics became Jonattan's card, Daniel's foods-starting-with-Q
- * became the pediatric doctor question. Both are still represented personally.
+ * Players with no specialist-subject clue. Ivan's car mechanics became Jonattan's
+ * card and Daniel's foods-starting-with-Q became the pediatric doctor question;
+ * Benja joined after the sign-up form, so there is no niche of his on record. All
+ * three are still represented personally.
  *
  * Pinned as an exact set rather than exempted, so this still fails the moment
  * anyone else loses their niche question.
  */
-const NO_NICHE_BY_DESIGN = ['Ivan', 'Daniel']
+const NO_NICHE_BY_DESIGN = ['Ivan', 'Daniel', 'Benja']
 check(`only ${NO_NICHE_BY_DESIGN.join(', ')} lacks a niche clue (found: ${noNiche.join(', ') || 'none'})`,
   JSON.stringify(noNiche) === JSON.stringify(NO_NICHE_BY_DESIGN))
 
