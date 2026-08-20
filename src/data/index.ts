@@ -79,8 +79,8 @@ export const CATEGORIES: Category[] = [
       { kind: 'standard', points: 200, question: `Which teammate lived in Madagascar for a year, then backpacked four months across India and four more through China and Japan?`, answer: `Juan` },
       { kind: 'standard', points: 300, question: `Which teammate was born in the Philippines?`, answer: `Shakir` },
       { kind: 'standard', points: 400, question: `AI companies now pay a fortune for “.ai” web addresses. The domain actually belongs to which Caribbean island?`, answer: `Anguilla`, credit: `Antonela’s specialty` },
-      { kind: 'standard', points: 500, question: `Which state does Matt intend to never visit?`, answer: `South Dakota` },
-      { kind: 'standard', points: 600, question: `The War of the Triple Alliance pitted Paraguay against Brazil, Argentina and which third country?`, answer: `Uruguay`, credit: `Jonattan’s specialty` },
+      { kind: 'standard', points: 500, question: `The War of the Triple Alliance pitted Paraguay against Brazil, Argentina and which third country?`, answer: `Uruguay`, credit: `Jonattan’s specialty` },
+      { kind: 'standard', points: 600, question: `Which state does Matt intend to never visit?`, answer: `South Dakota` },
     ],
   },
   {
