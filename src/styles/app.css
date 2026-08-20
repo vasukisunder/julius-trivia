@@ -193,8 +193,9 @@ body[data-mode="host"]::before{
 }
 @keyframes lightsdown{from{opacity:0}to{opacity:1}}
 
-.stage-top{display:flex;align-items:center;justify-content:space-between;gap:16px;
+.stage-top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;
   padding:20px 26px;flex:none}
+.stage-top .stage-close{margin-left:auto}
 .stage-cat{
   font-family:var(--display);font-size:var(--t-15);font-weight:600;color:var(--cat);
 }
@@ -318,13 +319,21 @@ body[data-mode="host"]::before{
 .step-skip:hover:not(:disabled){color:var(--ink-2)}
 .step-skip:disabled{cursor:default}
 
-/* Names the current step, so nobody has to infer where they are. */
+/* Names the current step and shows how far through the clue we are. A pill, not a
+   bare line of text: it sits beside the clue info rather than floating. */
 .stage-step{
-  font-family:var(--display);font-size:var(--t-15);font-weight:600;color:var(--ink-2);
-  text-align:center;flex:1;
+  display:inline-flex;align-items:center;gap:10px;flex:none;
+  background:var(--surface);border-radius:99px;padding:7px 16px 7px 12px;
+  font-family:var(--display);font-size:var(--t-13);font-weight:600;color:var(--ink-2);
 }
+.stage-dots{display:flex;align-items:center;gap:4px}
+.stage-dots i{
+  width:6px;height:6px;border-radius:99px;background:var(--rule);
+  transition:background .2s var(--ease), transform .2s var(--ease);
+}
+.stage-dots i.on{background:var(--cat);transform:scale(1.5)}
 .phase-buzzing .stage-step{color:var(--cat)}
-.phase-verdict .stage-step{color:var(--ink)}
+.phase-verdict .stage-step,.phase-revealed .stage-step{color:var(--ink)}
 
 /* ---- step 2: the clock dominates ---- */
 .buzzstage{display:flex;flex-direction:column;align-items:center;gap:14px;width:100%;max-width:52ch}

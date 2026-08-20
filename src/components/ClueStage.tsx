@@ -140,7 +140,19 @@ export function ClueStage({
         <div className="stage-cat">
           {heading} <span className="stage-pts">· {clue.points} points</span>
         </div>
-        <div className="stage-step">{stepLabel}</div>
+
+        {/* Grouped with the clue info rather than floating between it and the
+            Close button, which only exists in host mode and so pulled any
+            centring off anyway. The dots say how far through the clue we are. */}
+        <div className="stage-step">
+          <span className="stage-dots" aria-hidden="true">
+            {(['reading', 'buzzing', 'verdict', 'revealed'] as CluePhase[]).map((p) => (
+              <i key={p} className={p === phase ? 'on' : ''} />
+            ))}
+          </span>
+          {stepLabel}
+        </div>
+
         {isHost && <button className="stage-close" onClick={onDismiss}>Close</button>}
       </div>
 
