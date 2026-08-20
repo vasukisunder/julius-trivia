@@ -144,15 +144,15 @@ export const CATEGORIES: Category[] = [
     name: 'Odds & Ends',
     clues: [
       { kind: 'standard', points: 100, question: `This children’s author drew wartime political cartoons, wrote under a pen name, and was really named Theodor Geisel.`, answer: `Dr. Seuss`, credit: `Matt’s specialty` },
+      { kind: 'standard', points: 200, question: `On Windows, which keyboard shortcut reopens the browser tab you just closed?`, answer: `Ctrl + Shift + T`, credit: `Antonela’s specialty` },
       {
-        kind: 'lie', points: 200, person: 'Matt', lieIndex: 1,
+        kind: 'lie', points: 300, person: 'Matt', lieIndex: 1,
         statements: [
           `Had Sean Connery play through him on a golf course.`,
           `Hit with John McEnroe for thirty minutes.`,
           `Is a twin.`,
         ],
       },
-      { kind: 'standard', points: 300, question: `On Windows, which keyboard shortcut reopens the browser tab you just closed?`, answer: `Ctrl + Shift + T`, credit: `Antonela’s specialty` },
       {
         kind: 'lie', points: 400, person: 'Jonattan', lieIndex: 2,
         statements: [
