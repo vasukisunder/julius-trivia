@@ -13,7 +13,13 @@ import { isPhoto, isPostcard, isWide, stickerSrc, type Sticker } from '../data/s
  * Slots hug the left and right edges — see SLOTS below for why.
  */
 
-/** FNV-1a. Small, stable, and good enough to shuffle a tilt. */
+/**
+ * FNV-1a. Small, stable, and good enough to shuffle a tilt.
+ *
+ * Every read of the result below uses `>>>`, not `>>`. The hash fills all 32 bits,
+ * and a signed shift on anything above 2^31 comes out negative — which quietly
+ * turned a band index into -1 and took the whole stage down with it.
+ */
 function hash(s: string): number {
   let h = 2166136261
   for (let i = 0; i < s.length; i++) {
@@ -72,18 +78,18 @@ export function Stickers({ stickers, seed }: Props) {
         // Which side and band this one takes. The two flips give four arrangements,
         // so clues do not all deal their stickers out in the same order.
         const onLeft = (i % 2 === 0) !== (base % 2 === 1)
-        const band = (Math.floor(i / 2) + ((base >> 1) % 2)) % 2
+        const band = (Math.floor(i / 2) + ((base >>> 1) % 2)) % 2
         const { t, drift } = BANDS[wide ? 'wide' : 'object'][band]
 
         const style: Record<string, string | number> = {
-          ['--rot']: `${((h >> 11) % 27) - 13}deg`,
-          ['--scale']: 0.87 + ((h >> 17) % 7) / 26,
+          ['--rot']: `${((h >>> 11) % 27) - 13}deg`,
+          ['--scale']: 0.87 + ((h >>> 17) % 7) / 26,
           ['--d']: `${i * 80}ms`,
-          top: `${t + ((h >> 7) % drift)}%`,
+          top: `${t + ((h >>> 7) % drift)}%`,
         }
         // Anchored as an inset from the edge, and the jitter only ever adds to it —
         // more inset is further in, so no amount of it can push a sticker out.
-        const inset = `${2 + ((h >> 3) % 5)}%`
+        const inset = `${2 + ((h >>> 3) % 5)}%`
         if (onLeft) style.left = inset
         else style.right = inset
 
