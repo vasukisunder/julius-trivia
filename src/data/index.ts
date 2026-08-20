@@ -21,7 +21,81 @@ import type { Category, Clue } from '../types'
  */
 export const CATEGORIES: Category[] = [
   {
-    name: 'Origin Stories',
+    name: 'Past Lives',
+    clues: [
+      {
+        kind: 'lie', points: 100, person: 'Ivan', lieIndex: 2,
+        statements: [
+          `Worked for a cat litter box company.`,
+          `Worked for a wine delivery company.`,
+          `Worked at a bike repair shop.`,
+        ],
+      },
+      {
+        kind: 'lie', points: 200, person: 'Greg', lieIndex: 2,
+        statements: [
+          `Once worked at Outback Steakhouse.`,
+          `Has travelled north of the Arctic Circle.`,
+          `Once worked as a ski instructor.`,
+        ],
+      },
+      { kind: 'standard', points: 300, question: `Which teammate was the lead singer of a rock band, with a song they wrote still floating around on YouTube?`, answer: `Ana` },
+      { kind: 'standard', points: 400, question: `Which teammate worked on “Popstars,” the TV show that came before American Idol?`, answer: `Daniel` },
+      { kind: 'standard', points: 500, question: `Which teammate’s first “real” job was in the men’s sportswear department at Nordstrom?`, answer: `Lucy` },
+      { kind: 'standard', points: 600, question: `Which team member used to be a pediatric doctor?`, answer: `Juan` },
+    ],
+  },
+  {
+    name: 'Game On',
+    clues: [
+      { kind: 'standard', points: 100, question: `Only one nation has appeared at every FIFA World Cup since 1930. Which country?`, answer: `Brazil`, credit: `Shakir’s specialty — sports` },
+      { kind: 'standard', points: 200, question: `The NFL’s championship trophy carries the name of which legendary Green Bay Packers coach?`, answer: `Vince Lombardi`, credit: `Joe’s specialty — American football` },
+      {
+        kind: 'lie', points: 300, person: 'Ask', lieIndex: 0,
+        statements: [
+          `Joined a rowing team on a drunken bet.`,
+          `Biked 120 km on a drunken bet.`,
+          `Ran a marathon on a drunken bet.`,
+        ],
+      },
+      { kind: 'standard', points: 400, question: `Which teammate did fifteen years of kung fu?`, answer: `Ivan` },
+      { kind: 'standard', points: 500, question: `Which teammate used to be a competitive figure skater?`, answer: `Hattie` },
+      { kind: 'standard', points: 600, question: `Where did the US men’s team finish at the very first World Cup?`, answer: `Third — still their best ever`, credit: `Greg’s specialty — US soccer` },
+    ],
+  },
+  {
+    name: 'Around the World',
+    clues: [
+      {
+        kind: 'lie', points: 100, person: 'Daniel',
+        prompt: `Daniel has an unusual list of former addresses. Which one is he inventing?`,
+        lieIndex: 0,
+        statements: [
+          `A capsule hotel.`,
+          `A bed and breakfast.`,
+          `A commune.`,
+        ],
+      },
+      { kind: 'standard', points: 200, question: `Which teammate lived in Madagascar for a year, then backpacked four months across India and four more through China and Japan?`, answer: `Juan` },
+      { kind: 'standard', points: 300, question: `Which teammate was born in the Philippines?`, answer: `Shakir` },
+      { kind: 'standard', points: 400, question: `AI companies now pay a fortune for “.ai” web addresses. The domain actually belongs to which Caribbean island?`, answer: `Anguilla`, credit: `Antonela’s specialty — countries by internet domain` },
+      { kind: 'standard', points: 500, question: `Which state does Matt intend to never visit?`, answer: `South Dakota` },
+      { kind: 'standard', points: 600, question: `The War of the Triple Alliance pitted Paraguay against Brazil, Argentina and which third country?`, answer: `Uruguay`, credit: `Jonattan’s specialty — Paraguayan history` },
+    ],
+  },
+  {
+    name: 'Pop Culture',
+    clues: [
+      { kind: 'standard', points: 100, question: `Premiering in 1989, this animated sitcom is the longest-running scripted prime-time show in US TV history.`, answer: `The Simpsons`, credit: `Ana & Juan’s specialty — cartoons` },
+      { kind: 'standard', points: 200, question: `This HBO drama became the network’s most-watched series ever before it ended in 2019.`, answer: `Game of Thrones`, credit: `Hattie’s specialty — TV shows` },
+      { kind: 'standard', points: 300, question: `Launched by Bandai in 1996, which egg-shaped handheld pet had to be fed and cleaned or it would die?`, answer: `The Tamagotchi`, credit: `Juan’s specialty — iconic 90s/00s objects` },
+      { kind: 'standard', points: 400, question: `In the US the first Harry Potter book is “Harry Potter and the Sorcerer’s Stone.” What is it called in the rest of the world?`, answer: `“Harry Potter and the Philosopher’s Stone”`, credit: `Lucy’s specialty — Harry Potter` },
+      { kind: 'standard', points: 500, question: `Which teammate has watched all three Lord of the Rings films more than twenty times?`, answer: `Antonela` },
+      { kind: 'standard', points: 600, question: `In 1991 this became the first animated film ever nominated for the Best Picture Oscar.`, answer: `Beauty and the Beast`, credit: `Hannah’s specialty — Disney` },
+    ],
+  },
+  {
+    name: 'Hard to Believe',
     clues: [
       {
         kind: 'lie', points: 100, person: 'Hattie', lieIndex: 1,
@@ -31,7 +105,14 @@ export const CATEGORIES: Category[] = [
           `Was recruited for a reality dating show.`,
         ],
       },
-      { kind: 'standard', points: 200, question: `Which teammate’s first “real” job was in the men’s sportswear department at Nordstrom?`, answer: `Lucy` },
+      {
+        kind: 'lie', points: 200, person: 'Alexis', lieIndex: 1,
+        statements: [
+          `Started a podcast in 2012.`,
+          `Is pretty good at playing the electric guitar.`,
+          `Collects frog-themed things, but doesn’t like real frogs.`,
+        ],
+      },
       {
         kind: 'lie', points: 300, person: 'Hannah', lieIndex: 0,
         statements: [
@@ -40,87 +121,24 @@ export const CATEGORIES: Category[] = [
           `Was on the ski team in high school.`,
         ],
       },
-      { kind: 'standard', points: 400, question: `When this teammate was ten, their grandfather gave them a deer. Who?`, answer: `Jonattan` },
-      { kind: 'standard', points: 500, question: `Which teammate worked on “Popstars,” the TV show that came before American Idol?`, answer: `Daniel` },
       {
-        kind: 'lie', points: 600, person: 'Ivan', lieIndex: 2,
-        statements: [
-          `Worked for a cat litter box company.`,
-          `Worked for a wine delivery company.`,
-          `Worked at a bike repair shop.`,
-        ],
-      },
-    ],
-  },
-  {
-    name: 'Game On',
-    clues: [
-      { kind: 'standard', points: 100, question: `Which teammate used to be a competitive figure skater?`, answer: `Hattie` },
-      { kind: 'standard', points: 200, question: `Only one nation has appeared at every FIFA World Cup since 1930. Which country?`, answer: `Brazil`, credit: `Shakir’s specialty — sports` },
-      { kind: 'standard', points: 300, question: `Which teammate did fifteen years of kung fu?`, answer: `Ivan` },
-      { kind: 'standard', points: 400, question: `The NFL’s championship trophy carries the name of which legendary Green Bay Packers coach?`, answer: `Vince Lombardi`, credit: `Joe’s specialty — American football` },
-      { kind: 'standard', points: 500, question: `Where did the US men’s team finish at the very first World Cup?`, answer: `Third — still their best ever`, credit: `Greg’s specialty — US soccer` },
-      {
-        kind: 'lie', points: 600, person: 'Ask', lieIndex: 0,
-        statements: [
-          `Joined a rowing team on a drunken bet.`,
-          `Biked 120 km on a drunken bet.`,
-          `Ran a marathon on a drunken bet.`,
-        ],
-      },
-    ],
-  },
-  {
-    name: 'Around the World',
-    clues: [
-      { kind: 'standard', points: 100, question: `Which teammate was born in the Philippines?`, answer: `Shakir` },
-      {
-        kind: 'lie', points: 200, person: 'Joe', lieIndex: 1,
+        kind: 'lie', points: 400, person: 'Joe', lieIndex: 1,
         statements: [
           `Likes to sunbathe in the nude.`,
           `Challenged President Obama to a basketball game.`,
           `Could throw an 80 mph fastball at sixty.`,
         ],
       },
-      { kind: 'standard', points: 300, question: `Which teammate lived in Madagascar for a year, then backpacked four months across India and four more through China and Japan?`, answer: `Juan` },
-      { kind: 'standard', points: 400, question: `Which state does Matt intend to never visit?`, answer: `South Dakota` },
-      {
-        kind: 'lie', points: 500, person: 'Daniel',
-        prompt: `Daniel has an unusual list of former addresses. Which one is he inventing?`,
-        lieIndex: 0,
-        statements: [
-          `A capsule hotel.`,
-          `A bed and breakfast.`,
-          `A commune.`,
-        ],
-      },
-      {
-        kind: 'lie', points: 600, person: 'Greg', lieIndex: 2,
-        statements: [
-          `Once worked at Outback Steakhouse.`,
-          `Has travelled north of the Arctic Circle.`,
-          `Once worked as a ski instructor.`,
-        ],
-      },
-    ],
-  },
-  {
-    name: 'Stage & Screen',
-    clues: [
-      { kind: 'standard', points: 100, question: `Premiering in 1989, this animated sitcom is the longest-running scripted prime-time show in US TV history.`, answer: `The Simpsons`, credit: `Ana & Juan’s specialty — cartoons` },
-      { kind: 'standard', points: 200, question: `In 1991 this became the first animated film ever nominated for the Best Picture Oscar.`, answer: `Beauty and the Beast`, credit: `Hannah’s specialty — Disney` },
-      { kind: 'standard', points: 300, question: `In the US the first Harry Potter book is “Harry Potter and the Sorcerer’s Stone.” What is it called in the rest of the world?`, answer: `“Harry Potter and the Philosopher’s Stone”`, credit: `Lucy’s specialty — Harry Potter` },
-      { kind: 'standard', points: 400, question: `Which teammate was the lead singer of a rock band, with a song they wrote still floating around on YouTube?`, answer: `Ana` },
-      { kind: 'standard', points: 500, question: `Which teammate has watched all three Lord of the Rings films more than twenty times?`, answer: `Antonela` },
-      { kind: 'standard', points: 600, question: `This HBO drama became the network’s most-watched series ever before it ended in 2019.`, answer: `Game of Thrones`, credit: `Hattie’s specialty — TV shows` },
+      { kind: 'standard', points: 500, question: `When this teammate was ten, their grandfather gave them a deer. Who?`, answer: `Jonattan` },
+      { kind: 'standard', points: 600, question: `Which teammate was once a rabbit at the White House Easter Egg Roll?`, answer: `Lucy` },
     ],
   },
   {
     name: 'Odds & Ends',
     clues: [
-      { kind: 'standard', points: 100, question: `Launched by Bandai in 1996, which egg-shaped handheld pet had to be fed and cleaned or it would die?`, answer: `The Tamagotchi`, credit: `Juan’s specialty — iconic 90s/00s objects` },
-      { kind: 'standard', points: 200, question: `On Windows, which keyboard shortcut reopens the browser tab you just closed?`, answer: `Ctrl + Shift + T`, credit: `Antonela’s specialty — keyboard shortcuts` },
-      { kind: 'standard', points: 300, question: `Which teammate was once a rabbit at the White House Easter Egg Roll?`, answer: `Lucy` },
+      { kind: 'standard', points: 100, question: `This children’s author drew wartime political cartoons, wrote under a pen name, and was really named Theodor Geisel.`, answer: `Dr. Seuss`, credit: `Matt’s specialty — children’s books` },
+      { kind: 'standard', points: 200, question: `The wave of uprisings that swept the Middle East and North Africa in 2010–2011 is commonly known as what?`, answer: `The Arab Spring`, credit: `Hattie’s specialty — recent Middle East, Europe & US history` },
+      { kind: 'standard', points: 300, question: `On Windows, which keyboard shortcut reopens the browser tab you just closed?`, answer: `Ctrl + Shift + T`, credit: `Antonela’s specialty — keyboard shortcuts` },
       {
         kind: 'lie', points: 400, person: 'Jonattan', lieIndex: 2,
         statements: [
@@ -130,25 +148,7 @@ export const CATEGORIES: Category[] = [
         ],
       },
       { kind: 'standard', points: 500, question: `Crude oil is separated into petrol, kerosene and diesel by which refining process, which relies on their different boiling points?`, answer: `Fractional distillation`, credit: `Ask’s specialty — oil & petroleum products` },
-      {
-        kind: 'lie', points: 600, person: 'Alexis', lieIndex: 1,
-        statements: [
-          `Started a podcast in 2012.`,
-          `Is pretty good at playing the electric guitar.`,
-          `Collects frog-themed things, but doesn’t like real frogs.`,
-        ],
-      },
-    ],
-  },
-  {
-    name: 'Words & History',
-    clues: [
-      { kind: 'standard', points: 100, question: `This children’s author drew wartime political cartoons, wrote under a pen name, and was really named Theodor Geisel.`, answer: `Dr. Seuss`, credit: `Matt’s specialty — children’s books` },
-      { kind: 'standard', points: 200, question: `The wave of uprisings that swept the Middle East and North Africa in 2010–2011 is commonly known as what?`, answer: `The Arab Spring`, credit: `Hattie’s specialty — recent Middle East, Europe & US history` },
-      { kind: 'standard', points: 300, question: `Which team member used to be a pediatric doctor?`, answer: `Juan` },
-      { kind: 'standard', points: 400, question: `AI companies now pay a fortune for “.ai” web addresses. The domain actually belongs to which Caribbean island?`, answer: `Anguilla`, credit: `Antonela’s specialty — countries by internet domain` },
-      { kind: 'standard', points: 500, question: `English borrowed the word “tycoon,” meaning a powerful businessman, in the 1800s — from the language of which country?`, answer: `Japan (from “taikun”)`, credit: `Ask’s specialty — English loanwords` },
-      { kind: 'standard', points: 600, question: `The War of the Triple Alliance pitted Paraguay against Brazil, Argentina and which third country?`, answer: `Uruguay`, credit: `Jonattan’s specialty — Paraguayan history` },
+      { kind: 'standard', points: 600, question: `English borrowed the word “tycoon,” meaning a powerful businessman, in the 1800s — from the language of which country?`, answer: `Japan (from “taikun”)`, credit: `Ask’s specialty — English loanwords` },
     ],
   },
 ]
