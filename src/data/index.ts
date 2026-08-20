@@ -77,7 +77,14 @@ export const CATEGORIES: Category[] = [
         ],
       },
       { kind: 'standard', points: 200, question: `Which teammate lived in Madagascar for a year, then backpacked four months across India and four more through China and Japan?`, answer: `Juan` },
-      { kind: 'standard', points: 300, question: `Which teammate was born in the Philippines?`, answer: `Shakir` },
+      {
+        kind: 'lie', points: 300, person: 'Shakir', lieIndex: 0,
+        statements: [
+          `Once appeared in the background of a TV show.`,
+          `Was born at a time of day that reads the same as his birthday.`,
+          `Lived in Lagos, Nigeria for six months.`,
+        ],
+      },
       { kind: 'standard', points: 400, question: `AI companies now pay a fortune for “.ai” web addresses. The domain actually belongs to which Caribbean island?`, answer: `Anguilla`, credit: `Antonela’s specialty` },
       { kind: 'standard', points: 500, question: `The War of the Triple Alliance pitted Paraguay against Brazil, Argentina and which third country?`, answer: `Uruguay`, credit: `Jonattan’s specialty` },
       { kind: 'standard', points: 600, question: `Which state does Matt intend to never visit?`, answer: `South Dakota` },
