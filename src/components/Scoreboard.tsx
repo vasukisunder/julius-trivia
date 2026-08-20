@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import type { Award, PlayerStyle, Team, ViewMode } from '../types'
+import type { Award, PlayerLook, Team, ViewMode } from '../types'
 import { teamColor } from '../theme'
 import { useAwardFlash } from '../state/useAwardFlash'
 import { PlayerPill } from './PlayerPill'
@@ -37,7 +37,7 @@ function useCountUp(target: number): number {
 type Props = {
   teams: Team[]
   scores: Map<number, number>
-  styleOf: (name: string) => PlayerStyle
+  styleOf: (name: string) => PlayerLook
   mode: ViewMode
   /** The latest award, so the winning team's panel can celebrate. */
   lastAward: Award | null

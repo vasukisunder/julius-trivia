@@ -32,7 +32,12 @@ export const PLAYER_EMOJI = [
   '🚀', '⚡', '🔥', '🌈', '⭐', '🎯', '🎸', '👑',
 ]
 
-export type PlayerStyle = { color: string; icon: string }
+/**
+ * Re-exported rather than declared here. It was declared in both this file and
+ * types.ts — two identical definitions that nothing would stop from drifting apart.
+ */
+export type { PlayerLook, PlayerStyle } from '../types'
+import type { PlayerLook, PlayerStyle } from '../types'
 
 /** Stable small integer for a name not on the sign-up list. */
 function hash(name: string): number {
@@ -58,14 +63,23 @@ export function defaultStyle(name: string, roster: readonly string[]): PlayerSty
   }
 }
 
+/** How long a self-chosen name may be. Long enough for a nickname, short enough
+ *  that a team card and a buzz queue still lay out. */
+export const MAX_NAME = 18
+
 /**
- * The style to show for someone: their own pick if they made one, otherwise the
- * default. `playerStyles` therefore holds only deliberate choices.
+ * Everything to show for someone: their own picks where they made them, defaults
+ * everywhere else. `playerStyles` and `displayNames` therefore hold only deliberate
+ * choices, and someone who never opens the buzzer still looks like themselves.
  */
 export function styleFor(
   name: string,
   overrides: Record<string, PlayerStyle>,
   roster: readonly string[],
-): PlayerStyle {
-  return overrides[name] ?? defaultStyle(name, roster)
+  displayNames: Record<string, string> = {},
+): PlayerLook {
+  return {
+    ...(overrides[name] ?? defaultStyle(name, roster)),
+    label: displayNames[name]?.trim() || name,
+  }
 }

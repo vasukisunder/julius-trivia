@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import type { GameState, PlayerStyle, ViewMode } from '../types'
+import type { GameState, PlayerLook, ViewMode } from '../types'
 import { standings } from '../state/gameState'
 import { teamColor } from '../theme'
 import { Confetti } from './Confetti'
@@ -10,7 +10,7 @@ const CEREMONY_SECONDS = 3
 
 type Props = {
   state: GameState
-  styleOf: (name: string) => PlayerStyle
+  styleOf: (name: string) => PlayerLook
   mode: ViewMode
   /** Host only: the countdown reaching zero moves it on. */
   onReveal: () => void

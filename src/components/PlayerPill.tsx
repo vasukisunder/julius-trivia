@@ -1,8 +1,8 @@
-import type { PlayerStyle } from '../types'
+import type { PlayerLook } from '../types'
 
 type Props = {
   name: string
-  style?: PlayerStyle
+  style?: PlayerLook
   size?: 'sm' | 'md' | 'lg'
   /** Off where the emoji would crowd the name — a revealed answer, for instance. */
   icon?: boolean
@@ -34,7 +34,7 @@ export function PlayerPill({ name, style, size = 'md', icon = true }: Props) {
       {icon && (
         <PlayerIcon icon={style.icon} size={size === 'sm' ? 12 : size === 'lg' ? 30 : 14} />
       )}
-      {name}
+      {style.label}
     </span>
   )
 }

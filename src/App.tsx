@@ -96,8 +96,9 @@ export default function App() {
    * the buzzer — `playerStyles` holds only the choices people have actually made.
    */
   const styleOf = useCallback(
-    (name: string) => styleFor(name, state.playerStyles, state.roster),
-    [state.playerStyles, state.roster],
+    (name: string) =>
+      styleFor(name, state.playerStyles, state.roster, state.displayNames),
+    [state.playerStyles, state.roster, state.displayNames],
   )
 
   const used = useMemo(() => new Set(state.used), [state.used])
@@ -146,6 +147,7 @@ export default function App() {
         onRenameTeam={(teamId, teamName) =>
           dispatch({ type: 'renameTeam', teamId, name: teamName })
         }
+        onPickName={(name, label) => dispatch({ type: 'setPlayerName', name, label })}
       />
       </>
     )

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import type { Buzz, Clue, CluePhase, PlayerStyle, Team, ViewMode, Wrong } from '../types'
+import type { Buzz, Clue, CluePhase, PlayerLook, Team, ViewMode, Wrong } from '../types'
 import { PlayerIcon, PlayerPill } from './PlayerPill'
 import { PEOPLE } from '../data'
 import { WithNames } from './WithNames'
@@ -20,7 +20,7 @@ type Props = {
   phase: CluePhase
   timerEndsAt: number | null
   buzzes: Buzz[]
-  styleOf: (name: string) => PlayerStyle
+  styleOf: (name: string) => PlayerLook
   lockedOut: number[]
   /** The buzz with the floor — fastest from a team not already ruled wrong. */
   onTheSpot: Buzz | null
@@ -268,7 +268,7 @@ export function ClueStage({
                     <span style={{ color: styleOf(b.name).color }}>
                       <PlayerIcon icon={styleOf(b.name).icon} size={15} />
                     </span>
-                    <span className="buzzname">{b.name}</span>
+                    <span className="buzzname">{styleOf(b.name).label}</span>
                     <span className="buzzteam">{teamOf(b.teamId)?.name}</span>
                     <span className="buzzms">{(b.reactionMs / 1000).toFixed(2)}s</span>
                   </li>
@@ -290,7 +290,8 @@ export function ClueStage({
             <div className="verdict-team">{spotTeam.name}</div>
             <div className="verdict-who">
               <PlayerIcon icon={styleOf(onTheSpot.name).icon} size={17} />
-              {onTheSpot.name} buzzed in {(onTheSpot.reactionMs / 1000).toFixed(2)}s
+              {styleOf(onTheSpot.name).label} buzzed in{' '}
+              {(onTheSpot.reactionMs / 1000).toFixed(2)}s
             </div>
             {lockedOut.length > 0 && (
               <div className="verdict-out">

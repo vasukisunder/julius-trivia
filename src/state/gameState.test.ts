@@ -7,7 +7,7 @@ import { CATEGORIES, TEAMMATES, PEOPLE, HOST, FINAL_CLUE } from '../data'
 import { artOf, scaleOf } from '../data/stickers'
 import { FINAL_REF } from '../types'
 import { TEAM_NAMES, TEAM_COUNT, drawTeams } from '../data/teams'
-import { PLAYER_COLORS, PLAYER_EMOJI, defaultStyle, styleFor } from '../data/avatars'
+import { PLAYER_COLORS, PLAYER_EMOJI, MAX_NAME, defaultStyle, styleFor } from '../data/avatars'
 
 let pass = 0, fail = 0
 const check = (label: string, cond: boolean) => {
@@ -254,6 +254,48 @@ const spoilers = standard
   })
 check(`no sticker names the answer it sits next to${spoilers.length ? ` (${spoilers})` : ''}`,
   spoilers.length === 0)
+
+console.log('\nplayers naming themselves')
+/**
+ * A player editing their name changes a label, not an identity. The roster name keys
+ * their style, the teams hold it, and the clues were written with it — so "Spot the
+ * lie about Hannah" must still say Hannah however she labels herself.
+ */
+let sdn = reducer(initialState(), { type: 'shuffleTeams' })
+sdn = reducer(sdn, { type: 'setTeams', rosters: sdn.teams.map(t => t.members) })
+const look = (st: GameState, n: string) => styleFor(n, st.playerStyles, st.roster, st.displayNames)
+
+check('everyone starts labelled with their roster name',
+  TEAMMATES.every(n => look(sdn, n).label === n))
+
+sdn = reducer(sdn, { type: 'setPlayerName', name: 'Juan', label: 'Nacho' })
+check('a player can set their own name', look(sdn, 'Juan').label === 'Nacho')
+check('and it changes nobody else', look(sdn, 'Hannah').label === 'Hannah')
+check('the roster still holds the identity', sdn.roster.includes('Juan'))
+check('so do the teams', sdn.teams.some(t => t.members.includes('Juan')))
+check('and the clues still say the canonical name',
+  CATEGORIES.flatMap(c => c.clues).some(c => c.kind === 'standard' && c.answer === 'Juan'))
+
+// It is a label, so it must not become a second identity in playerStyles.
+sdn = reducer(sdn, { type: 'setPlayerStyle', name: 'Juan', color: PLAYER_COLORS[3], icon: PLAYER_EMOJI[3] })
+check('a style set after renaming still lands on the roster name',
+  sdn.playerStyles.Juan?.color === PLAYER_COLORS[3] && !('Nacho' in sdn.playerStyles))
+check('and the renamed player keeps that style', look(sdn, 'Juan').color === PLAYER_COLORS[3])
+
+sdn = reducer(sdn, { type: 'setPlayerName', name: 'Juan', label: '   ' })
+check('blanking it falls back to the roster name', look(sdn, 'Juan').label === 'Juan')
+check('and leaves nothing behind', !('Juan' in sdn.displayNames))
+
+sdn = reducer(sdn, { type: 'setPlayerName', name: 'Ana', label: 'Ana' })
+check('setting it to the name it already was stores nothing',
+  !('Ana' in sdn.displayNames))
+
+sdn = reducer(sdn, { type: 'setPlayerName', name: 'Greg', label: 'x'.repeat(60) })
+check(`a very long name is capped at ${MAX_NAME}`,
+  look(sdn, 'Greg').label.length === MAX_NAME)
+
+sdn = reducer(sdn, { type: 'setPlayerName', name: 'Ask', label: '  Ask the Elder  ' })
+check('surrounding space is trimmed', look(sdn, 'Ask').label === 'Ask the Elder')
 
 console.log('\npartial credit on the closing question')
 /**

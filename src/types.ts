@@ -71,6 +71,16 @@ export const clueKey = (ref: ClueRef) => `${ref.categoryIndex}-${ref.clueIndex}`
 /** A player's chosen colour and shape, keyed by name in GameState. */
 export type PlayerStyle = { color: string; icon: string }
 
+/**
+ * What components actually render: the colour and emoji plus the name to show.
+ *
+ * Separate from PlayerStyle because the roster name is the identity — it keys
+ * `playerStyles`, it is what the teams hold, and it is what the clues were written
+ * with. A player editing their name is changing a label, not becoming someone else,
+ * so "Spot the lie about Hannah" still says Hannah.
+ */
+export type PlayerLook = PlayerStyle & { label: string }
+
 export type Team = {
   id: number
   name: string
@@ -129,6 +139,11 @@ export type GameState = {
    * teams can score here at once, which no tile allows.
    */
   finalHits: Record<number, number>
+  /**
+   * Names players have set for themselves, canonical roster name -> what to show.
+   * Holds only deliberate edits, so an untouched player just shows their roster name.
+   */
+  displayNames: Record<string, string>
   /** Next team id to hand out. */
   teamSeq: number
   /** Whether the teams have been drawn yet. */

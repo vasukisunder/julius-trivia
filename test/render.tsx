@@ -128,7 +128,7 @@ const stage = (clue: Clue, phase: CluePhase, isFinal: boolean) =>
       phase={phase}
       timerEndsAt={null}
       buzzes={phase === 'reading' ? [] : [buzz]}
-      styleOf={() => ({ color: '#8B90E5', icon: '🐝' })}
+      styleOf={(n: string) => ({ color: '#8B90E5', icon: '🐝', label: n })}
       lockedOut={[]}
       onTheSpot={phase === 'reading' ? null : buzz}
       lastWrong={null}

@@ -92,6 +92,23 @@ inflate a score, and only a mark going *up* stamps `lastAward` — otherwise fix
 typo sets off the confetti again. Putting the question back on the board clears
 `finalHits` as well as the ledger.
 
+### Player identity
+
+The roster name is the identity: it keys `playerStyles`, the teams hold it, and the
+clues were written with it. A player editing their own name on `/buzz` sets a *label*
+in `displayNames` — so a clue still reads "Spot the lie about Hannah" however Hannah
+labels herself, and a style set after a rename still lands on the roster name rather
+than creating a second person.
+
+Components never read the raw name. They take one resolver, `styleOf(name)`, which
+returns a `PlayerLook` — colour, emoji and label together — so a name shown anywhere
+is the chosen one by construction. `PlayerStyle` (the stored choice) and `PlayerLook`
+(what gets rendered) are deliberately separate types.
+
+Colour, emoji and name are all set from the same panel, which opens by default the
+first time a phone lands on `/buzz` — a picker you have to discover is a picker
+nobody uses.
+
 ### Buzz ordering
 
 Ranking by message arrival ranks connections, not reaction times: round trips differ by

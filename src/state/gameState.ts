@@ -3,6 +3,7 @@ import { clueKey, FINAL_REF } from '../types'
 import { CATEGORIES, FINAL_CLUE } from '../data'
 import { TEAMMATES } from '../data'
 import { MAX_TEAMS, MIN_TEAMS, TEAM_COUNT, drawTeams, teamNameFor } from '../data/teams'
+import { MAX_NAME } from '../data/avatars'
 
 
 export type Action =
@@ -16,6 +17,7 @@ export type Action =
   | { type: 'redraw' }
   | { type: 'resetRoster' }
   | { type: 'setPlayerStyle'; name: string; color: string; icon: string }
+  | { type: 'setPlayerName'; name: string; label: string }
   | { type: 'addToRoster'; name: string }
   | { type: 'removeFromRoster'; name: string }
   | { type: 'setTeamCount'; count: number }
@@ -42,13 +44,14 @@ export type Action =
   | { type: 'clearClue'; key: string }
 
 /** Bump on any change to the saved shape or to the seeded defaults. */
-export const STATE_VERSION = 16
+export const STATE_VERSION = 17
 
 export function initialState(): GameState {
   return {
     version: STATE_VERSION,
     roster: TEAMMATES.slice(),
     playerStyles: {},
+    displayNames: {},
     teamCount: TEAM_COUNT,
     teams: [],
     awards: {},
@@ -206,6 +209,19 @@ export function reducer(state: GameState, action: Action): GameState {
             }
           : state.lastAward,
       }
+    }
+
+    /**
+     * A player renaming themselves. The roster name stays the identity — it keys
+     * every style, the teams hold it, and the clues were written with it — so this
+     * only changes the label. Clearing it goes back to the roster name.
+     */
+    case 'setPlayerName': {
+      const label = action.label.trim().slice(0, MAX_NAME)
+      const displayNames = { ...state.displayNames }
+      if (!label || label === action.name) delete displayNames[action.name]
+      else displayNames[action.name] = label
+      return { ...state, displayNames }
     }
 
     // Skips ahead to the answer — for a clue nobody wants to buzz on.

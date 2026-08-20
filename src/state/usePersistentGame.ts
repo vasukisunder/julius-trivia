@@ -42,6 +42,7 @@ export function load(): GameState {
       version: STATE_VERSION,
       roster: saved.roster,
       playerStyles: saved.playerStyles ?? {},
+      displayNames: saved.displayNames ?? {},
       teamCount: saved.teamCount ?? fresh.teamCount,
       teams: saved.teams,
       awards: saved.awards ?? {},

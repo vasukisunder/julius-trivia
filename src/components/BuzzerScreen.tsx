@@ -1,19 +1,21 @@
 import { useEffect, useRef, useState } from 'react'
-import type { GameState, PlayerStyle } from '../types'
+import type { GameState, PlayerLook } from '../types'
 import type { Connection } from '../net/useRoom'
 import { playerId, savedName, saveName, hasChosen, markChosen } from '../net/player'
-import { PLAYER_COLORS, PLAYER_EMOJI } from '../data/avatars'
+import { MAX_NAME, PLAYER_COLORS, PLAYER_EMOJI } from '../data/avatars'
 import { PlayerIcon, PlayerPill } from './PlayerPill'
 import { Wordmark } from './Wordmark'
 
 type Props = {
   state: GameState
-  styleOf: (name: string) => PlayerStyle
+  styleOf: (name: string) => PlayerLook
   connection: Connection
   onBuzz: (name: string, teamId: number, reactionMs: number) => void
   onPickStyle: (name: string, color: string, icon: string) => void
   /** Anyone on a team can rename it, and it changes everywhere at once. */
   onRenameTeam: (teamId: number, name: string) => void
+  /** A player's own name, as it should appear on every screen. */
+  onPickName: (name: string, label: string) => void
 }
 
 /**
@@ -38,7 +40,7 @@ function useSecondsLeft(endsAt: number | null): number | null {
 const ORDINALS = ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th']
 
 export function BuzzerScreen({
-  state, styleOf, connection, onBuzz, onPickStyle, onRenameTeam,
+  state, styleOf, connection, onBuzz, onPickStyle, onRenameTeam, onPickName,
 }: Props) {
   const [name, setName] = useState<string | null>(savedName)
   // Opens by default the first time, because a picker you have to discover is a
@@ -93,7 +95,7 @@ export function BuzzerScreen({
                   }}
                 >
                   {st && <PlayerIcon icon={st.icon} size={15} />}
-                  {member}
+                  {st.label}
                 </button>
               )
             })}
@@ -110,7 +112,7 @@ export function BuzzerScreen({
       <div className="phone-id">
         <div className="phone-idrow">
           {style && <PlayerIcon icon={style.icon} size={30} />}
-          <span className="phone-who">{name}</span>
+          <span className="phone-who">{style?.label ?? name}</span>
           {/* Sits with the thing it edits, rather than as a full-width button
               competing with the buzzer below. */}
           <button
@@ -166,6 +168,15 @@ export function BuzzerScreen({
 
       {picking && (
         <div className="picker">
+          <div className="picker-label">Your name</div>
+          <input
+            className="picker-name"
+            value={style?.label ?? name}
+            maxLength={MAX_NAME}
+            aria-label="Your name, as everyone will see it"
+            onChange={(e) => onPickName(name, e.target.value)}
+          />
+
           <div className="picker-label">Your colour</div>
           <div className="picker-row">
             {PLAYER_COLORS.map((c) => (
