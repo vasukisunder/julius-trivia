@@ -774,7 +774,7 @@ body[data-mode="host"]::before{
 button:disabled{cursor:default}
 /* Controls mirrored onto the shared screen stay at full strength — the room is
    watching them, not using them. Only genuinely secondary affordances dim. */
-.roster-remove:disabled{opacity:0}
+.roster-remove:disabled{opacity:.45}
 .draft-add:disabled{opacity:.5}
 .tbtn:disabled:hover,.sbtn:disabled:hover,.step:disabled:hover,
 .countbtn:disabled:hover,.draft-add:disabled:hover{
@@ -785,7 +785,6 @@ button:disabled{cursor:default}
 .bigbtn:disabled:hover{background:var(--ink);transform:none}
 .bigbtn.ghost:disabled:hover{background:var(--surface)}
 .roster-chip.add input:disabled{opacity:.45}
-.draft-member .draft-remove:disabled{opacity:0}
 
 
 /* The root path: a wordmark and nothing else. */
@@ -1069,3 +1068,19 @@ button:disabled{cursor:default}
 
 .tbtn.end{background:rgba(201,245,49,.16);color:#C9F531;font-weight:700}
 .tbtn.end:hover{background:rgba(201,245,49,.26);color:#C9F531}
+
+
+/* ==================== the shared screen mirrors, fully =================
+   Nothing on the presentation screen should read as unavailable — the room is
+   watching the host work, not trying to click anything. Removal crosses, inputs
+   and buttons all show at full strength there, while the host keeps the dimming
+   that tells them a control is not ready yet.
+   ==================================================================== */
+body[data-mode="present"] button:disabled,
+body[data-mode="present"] input:disabled,
+body[data-mode="present"] input:read-only{opacity:1}
+
+/* The host's removal crosses appear on row hover, which a screen with no cursor
+   can never show — so on the shared screen they are simply always visible. */
+body[data-mode="present"] .draft-remove,
+body[data-mode="present"] .roster-remove{opacity:.6}
