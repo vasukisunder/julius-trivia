@@ -1,4 +1,4 @@
-import type { Category } from '../types'
+import type { Category, Clue } from '../types'
 
 /**
  * One 6x6 Jeopardy board — 36 clues, sized so a one-hour meeting with 2-3 teams
@@ -138,6 +138,24 @@ export const CATEGORIES: Category[] = [
     ],
   },
 ]
+
+/**
+ * The closing question. Deliberately NOT on the board: the host opens it from the
+ * toolbar once the tiles are done, and it is worth more than any of them.
+ *
+ * A three-way match is the hardest shape available — there is no narrowing it down
+ * from one clue to the next.
+ */
+export const FINAL_CLUE: Clue = {
+  kind: 'standard',
+  points: 1000,
+  question: `Match each to the right teammate: delivered newspapers as a first job · is ambidextrous · has never had a cup of coffee.`,
+  answer: `Greg (newspapers) · Ask (ambidextrous) · Antonela (coffee)`,
+}
+
+export const FINAL_CATEGORY = 'Final question'
+/** Outside the six category hues, so the closing question reads as its own thing. */
+export const FINAL_ACCENT = '#F0A6B4'
 
 /** Everyone who filled in the sign-up form, for the coverage check in the tests. */
 export const TEAMMATES = [

@@ -28,8 +28,15 @@ export type Category = {
   clues: Clue[]
 }
 
-/** Identifies one clue on the board. */
+/**
+ * Identifies one clue. `categoryIndex: -1` is the closing question, which has no
+ * tile — using the same ref type means it flows through openClue, the award ledger
+ * and the used set exactly like any board clue.
+ */
 export type ClueRef = { categoryIndex: number; clueIndex: number }
+
+export const FINAL_REF: ClueRef = { categoryIndex: -1, clueIndex: 0 }
+export const isFinal = (ref: ClueRef) => ref.categoryIndex === -1
 
 /** Stable key for a clue, used by the award ledger and the used set. */
 export const clueKey = (ref: ClueRef) => `${ref.categoryIndex}-${ref.clueIndex}`

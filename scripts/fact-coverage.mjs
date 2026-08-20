@@ -11,20 +11,23 @@
  * than trusting a null.
  */
 import { readFileSync, writeFileSync } from 'node:fs'
-import { CATEGORIES } from '../node_modules/.cache/board.mjs'
+import { CATEGORIES, FINAL_CLUE, FINAL_CATEGORY } from '../node_modules/.cache/board.mjs'
 
 const ROOT = process.cwd()
 
 /* ---- board -------------------------------------------------------------- */
-const clues = CATEGORIES.flatMap((c) =>
-  c.clues.map((cl) => ({
-    where: `${c.name} ${cl.points}`,
-    text: cl.kind === 'lie'
-      ? `${cl.person} ${cl.statements.join(' ')}`
-      : `${cl.question} ${cl.answer}`,
-    personal: cl.kind === 'lie' || !cl.credit,
-  })),
-).filter((c) => c.personal)
+const asEntry = (cl, where) => ({
+  where,
+  text: cl.kind === 'lie' ? `${cl.person} ${cl.statements.join(' ')}` : `${cl.question} ${cl.answer}`,
+  personal: cl.kind === 'lie' || !cl.credit,
+})
+
+// The closing question is off the board but still uses facts, so it has to be
+// searched too or its facts read as unused.
+const clues = [
+  ...CATEGORIES.flatMap((c) => c.clues.map((cl) => asEntry(cl, `${c.name} ${cl.points}`))),
+  asEntry(FINAL_CLUE, FINAL_CATEGORY),
+].filter((c) => c.personal)
 
 const STOP = new Set(['about','after','again','because','before','being','could','every','first','their','there','these','those','which','while','would','still','never','once','three','other','years','times'])
 const key = (s) => [...new Set(s.toLowerCase().replace(/[^a-z ]/g, ' ').split(/\s+/)
@@ -50,11 +53,12 @@ function autoLocate(fact) {
  * travel clue purely on shared geography words.
  */
 const FIX = [
+  // One distinctive word, so it cannot clear the two-keyword threshold. It lives in
+  // the closing question.
+  [/ambidextrous/i, FINAL_CATEGORY],
   [/brewer/i, 'Origin Stories 300'],
   [/kung fu/i, 'Game On 300'],
   [/bike fixing shop/i, 'Origin Stories 600'],
-  [/^I'?m a twin/i, 'Odds & Ends 600'],
-  [/ambidextrous/i, 'Odds & Ends 600'],
   [/Lagos/i, null],
 ]
 /** Fragments and pleasantries that are not facts in their own right. */

@@ -4,7 +4,7 @@ import { ClueStage } from './components/ClueStage'
 import { Scoreboard } from './components/Scoreboard'
 import { RosterStage } from './components/RosterStage'
 import { TeamDraft } from './components/TeamDraft'
-import { CATEGORIES, TEAMMATES } from './data'
+import { CATEGORIES, TEAMMATES, FINAL_CLUE, FINAL_CATEGORY, FINAL_ACCENT } from './data'
 import { computeScores, currentBuzz } from './state/gameState'
 import { useGame } from './state/useGame'
 import { useBuildCheck } from './net/useBuildCheck'
@@ -13,7 +13,7 @@ import { SoundToggle, useSoundPref } from './components/SoundToggle'
 import { BuzzerScreen } from './components/BuzzerScreen'
 import { playerId } from './net/player'
 import { catColor } from './theme'
-import { clueKey, type ViewMode } from './types'
+import { clueKey, isFinal, FINAL_REF, type ViewMode } from './types'
 import { PRESENT_URL, buzzUrl, routeFromUrl } from './routes'
 import type { Connection } from './net/useRoom'
 import { Wordmark } from './components/Wordmark'
@@ -68,9 +68,18 @@ export default function App() {
   const used = useMemo(() => new Set(state.used), [state.used])
   const scores = useMemo(() => computeScores(state), [state])
 
+  // The closing question has no tile, so it resolves outside the board.
   const openKey = openRef ? clueKey(openRef) : null
-  const openCategory = openRef ? CATEGORIES[openRef.categoryIndex] : null
-  const openClue = openRef ? openCategory?.clues[openRef.clueIndex] : null
+  const openIsFinal = openRef ? isFinal(openRef) : false
+  const openClue = openRef
+    ? openIsFinal ? FINAL_CLUE : CATEGORIES[openRef.categoryIndex]?.clues[openRef.clueIndex]
+    : null
+  const openCategoryName = openRef
+    ? openIsFinal ? FINAL_CATEGORY : CATEGORIES[openRef.categoryIndex]?.name
+    : null
+  const openAccent = openRef
+    ? openIsFinal ? FINAL_ACCENT : catColor(openRef.categoryIndex)
+    : FINAL_ACCENT
 
   // Unmissable, and on every surface: a window running an old bundle looks like a
   // bug rather than a stale page.
@@ -178,6 +187,13 @@ export default function App() {
             </button>
           )}
           <button
+            className="tbtn final"
+            disabled={mode !== 'host'}
+            onClick={() => dispatch({ type: 'openClue', ref: FINAL_REF })}
+          >
+            Final question
+          </button>
+          <button
             className="tbtn"
             disabled={mode !== 'host'}
             onClick={() => dispatch({ type: 'backToDraft' })}
@@ -237,11 +253,11 @@ export default function App() {
         onAdjust={(teamId, delta) => dispatch({ type: 'adjustScore', teamId, delta })}
       />
 
-      {openClue && openKey && openCategory && openRef && (
+      {openClue && openKey && openCategoryName && openRef && (
         <ClueStage
           clue={openClue}
-          categoryName={openCategory.name}
-          accent={catColor(openRef.categoryIndex)}
+          categoryName={openCategoryName}
+          accent={openAccent}
           mode={mode}
           teams={state.teams}
           awardedIds={state.awards[openKey] ?? []}

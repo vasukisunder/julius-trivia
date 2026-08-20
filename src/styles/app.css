@@ -87,6 +87,10 @@ button{font-family:inherit;color:inherit}
 .tbtn:hover{background:var(--surface-2);color:var(--ink)}
 .tbtn:focus-visible{outline:2px solid var(--cat);outline-offset:2px}
 .tbtn.go{background:var(--ink);color:var(--canvas)}
+/* The closing question is worth more than anything on the board, so its control
+   does not look like the rest of the toolbar. */
+.tbtn.final{background:rgba(240,166,180,.18);color:#F0A6B4;font-weight:700}
+.tbtn.final:hover{background:rgba(240,166,180,.28);color:#F0A6B4}
 .tbtn.go:hover{background:#fff;color:var(--canvas)}
 
 .chip{font-size:var(--t-12);font-weight:700;padding:5px 10px;border-radius:99px}
@@ -194,6 +198,7 @@ body[data-mode="host"]::before{
 .stage-cat{
   font-family:var(--display);font-size:var(--t-15);font-weight:600;color:var(--cat);
 }
+.phase-reading .stage-cat,.phase-buzzing .stage-cat{letter-spacing:-.01em}
 .stage-pts{color:var(--ink-3);font-family:var(--sans);font-weight:500}
 .stage-close{
   background:var(--surface);border:none;border-radius:var(--r-sm);color:var(--ink-2);

@@ -1,6 +1,7 @@
 import { reducer, initialState, computeScores, currentBuzz, STATE_VERSION } from './gameState'
 import type { GameState } from '../types'
-import { CATEGORIES, TEAMMATES } from '../data'
+import { CATEGORIES, TEAMMATES, FINAL_CLUE } from '../data'
+import { FINAL_REF } from '../types'
 import { TEAM_NAMES, TEAM_COUNT, drawTeams } from '../data/teams'
 import { PLAYER_COLORS, PLAYER_EMOJI, freeStyle } from '../data/avatars'
 
@@ -89,6 +90,29 @@ const looseAskHits = standard.filter(c => /\bask\b/.test(c.question)).map(c => c
 check('no clue text contains lowercase "ask" that a loose match would catch' +
   (looseAskHits.length ? ` (${looseAskHits.length})` : ''),
   looseAskHits.length === 0)
+
+console.log('\nthe closing question')
+// It is deliberately off the board: reachable only from the host toolbar, and worth
+// more than any tile.
+const onBoard = CATEGORIES.flatMap(c => c.clues)
+check('the final clue is not one of the board clues',
+  !onBoard.some(c => c.kind === 'standard' && FINAL_CLUE.kind === 'standard' && c.question === FINAL_CLUE.question))
+check('it outscores every tile',
+  FINAL_CLUE.points > Math.max(...onBoard.map(c => c.points)))
+check('it has a question and an answer',
+  FINAL_CLUE.kind === 'standard' && !!FINAL_CLUE.question && !!FINAL_CLUE.answer)
+const finalAnswer = FINAL_CLUE.kind === 'standard' ? FINAL_CLUE.answer : ''
+check('its answer names three teammates',
+  TEAMMATES.filter(n => finalAnswer.includes(n)).length === 3)
+// It scores through the same ledger as everything else.
+let sf = reducer(initialState(), { type: 'shuffleTeams' })
+sf = reducer(sf, { type: 'setTeams', rosters: sf.teams.map(t => t.members) })
+sf = reducer(sf, { type: 'openClue', ref: FINAL_REF })
+check('opening it starts the same sequence', sf.cluePhase === 'reading')
+sf = reducer(sf, { type: 'awardTo', teamId: sf.teams[0].id, points: FINAL_CLUE.points })
+check('awarding it credits the full value',
+  computeScores(sf).get(sf.teams[0].id) === FINAL_CLUE.points)
+check('and it lands under its own key, not a tile’s', sf.lastAward?.key === '-1-0')
 
 console.log('\nteammate coverage')
 // A personal clue is one that names no specialty: the answer is a teammate.

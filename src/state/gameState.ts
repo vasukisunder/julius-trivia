@@ -1,6 +1,6 @@
 import type { Buzz, ClueRef, GameState, Team } from '../types'
 import { clueKey } from '../types'
-import { CATEGORIES } from '../data'
+import { CATEGORIES, FINAL_CLUE } from '../data'
 import { TEAMMATES } from '../data'
 import { MAX_TEAMS, MIN_TEAMS, TEAM_COUNT, drawTeams, teamNameFor } from '../data/teams'
 
@@ -350,6 +350,8 @@ const POINTS: Map<string, number> = (() => {
       map.set(`${c}-${r}`, clue.points)
     })
   })
+  // The closing question scores like any other clue; it just has no tile.
+  map.set('-1-0', FINAL_CLUE.points)
   return map
 })()
 
