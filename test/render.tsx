@@ -163,6 +163,14 @@ for (const phase of PHASES) {
 check(`every step offers the host an action${deadEnds.length ? ` — stuck at ${deadEnds}` : ''}`,
   deadEnds.length === 0)
 
+// The buzz still decides who answers first on the closing question, so a team can
+// be marked right or wrong there — without that the race decides nothing.
+const finalVerdict = stage(FINAL_CLUE, 'verdict', true)
+check('the closing question can still be won on the buzzer',
+  finalVerdict.includes('Correct') && finalVerdict.includes('Wrong'))
+check('and skipped past to hand out partials',
+  finalVerdict.includes('Reveal the answers'))
+
 // The closing question leads into the ceremony rather than back to the board.
 const finalRevealed = stage(FINAL_CLUE, 'revealed', true)
 check('the closing question reveals a winner from its last step',

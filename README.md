@@ -78,6 +78,11 @@ field rather than a fractional entry in `awards`: two ledgers that can both desc
 the same clue is two things to keep in step. `awardTo` refuses the closing question
 outright for the same reason.
 
+The buzzer still works there, and still decides who answers first: Correct on the
+closing question means all three, and Wrong locks that team out and promotes the next
+buzz, exactly as on a tile. "Reveal the answers" is the way past when nobody buzzed in
+with a full answer.
+
 The marker appears only once the answers are revealed: scoring before the room has
 seen what the answers were puts the arithmetic ahead of the moment the question exists
 for.

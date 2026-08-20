@@ -5,7 +5,7 @@ import { Scoreboard } from './components/Scoreboard'
 import { RosterStage } from './components/RosterStage'
 import { TeamDraft } from './components/TeamDraft'
 import { CATEGORIES, TEAMMATES, FINAL_CLUE, FINAL_CATEGORY, FINAL_ACCENT } from './data'
-import { computeScores, currentBuzz } from './state/gameState'
+import { computeScores, currentBuzz, FINAL_ITEMS } from './state/gameState'
 import { useGame } from './state/useGame'
 import { useBuildCheck } from './net/useBuildCheck'
 import { useGameSounds } from './audio/useGameSounds'
@@ -341,9 +341,17 @@ export default function App() {
           onHover={mode === 'host' ? sendHover : undefined}
           onOpenBuzzers={() => dispatch({ type: 'openBuzzers', seconds: COUNTDOWN })}
           onEndBuzzing={() => dispatch({ type: 'endBuzzing' })}
-          onCorrect={(teamId: number) =>
-            dispatch({ type: 'awardTo', teamId, points: openClue.points })
-          }
+          onCorrect={(teamId: number) => {
+            if (openIsFinal) {
+              // The closing question is scored out of three, so a team that buzzed
+              // in and got it has all three. Partials for everyone else are handed
+              // out on the reveal.
+              dispatch({ type: 'setFinalHits', teamId, hits: FINAL_ITEMS })
+              dispatch({ type: 'reveal' })
+            } else {
+              dispatch({ type: 'awardTo', teamId, points: openClue.points })
+            }
+          }}
           onWrong={(teamId: number) => dispatch({ type: 'markWrong', teamId })}
           finalHits={state.finalHits}
           onSetFinalHits={(teamId: number, hits: number) =>

@@ -1,6 +1,6 @@
 import {
   reducer, initialState, computeScores, currentBuzz, standings, STATE_VERSION,
-  finalPoints, FINAL_KEY,
+  finalPoints, FINAL_KEY, FINAL_ITEMS,
 } from './gameState'
 import type { GameState } from '../types'
 import { CATEGORIES, TEAMMATES, PEOPLE, HOST, FINAL_CLUE } from '../data'
@@ -308,6 +308,32 @@ check('the closing question is not double-counted', score(sfr, fp2.id) === 1000)
 
 sfr = reducer(sfr, { type: 'resetGame' })
 check('reset clears partial credit', Object.keys(sfr.finalHits).length === 0)
+
+/**
+ * The buzzer still decides who answers the closing question first, so winning it on
+ * the buzzer has to be worth all three — the host presses Correct, not 3 of 3.
+ */
+let sfb = reducer(initialState(), { type: 'shuffleTeams' })
+sfb = reducer(sfb, { type: 'setTeams', rosters: sfb.teams.map(t => t.members) })
+sfb = reducer(sfb, { type: 'openClue', ref: FINAL_REF })
+sfb = reducer(sfb, { type: 'openBuzzers', seconds: 25 })
+sfb = reducer(sfb, {
+  type: 'buzz',
+  buzz: { playerId: 'p1', name: sfb.teams[0].members[0], teamId: sfb.teams[0].id, reactionMs: 300 },
+})
+sfb = reducer(sfb, { type: 'endBuzzing' })
+check('a buzz on the closing question puts a team on the spot',
+  currentBuzz(sfb)?.teamId === sfb.teams[0].id)
+// What App dispatches for Correct on the closing question.
+sfb = reducer(sfb, { type: 'setFinalHits', teamId: sfb.teams[0].id, hits: FINAL_ITEMS })
+sfb = reducer(sfb, { type: 'reveal' })
+check('winning it on the buzzer is worth all three',
+  score(sfb, sfb.teams[0].id) === FINAL_CLUE.points)
+check('and it lands on the answers', sfb.cluePhase === 'revealed')
+// Wrong there must still promote the next team, or the queue means nothing.
+let sfw = reducer(sfb, { type: 'markWrong', teamId: sfb.teams[0].id })
+check('a wrong answer still locks that team out',
+  sfw.lockedOut.includes(sfb.teams[0].id))
 
 console.log('\nteammate coverage')
 /**

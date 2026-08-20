@@ -404,7 +404,7 @@ export function reducer(state: GameState, action: Action): GameState {
 
 /** The closing question's key, and how much one of its three matches is worth. */
 export const FINAL_KEY = clueKey(FINAL_REF)
-const FINAL_ITEMS = FINAL_CLUE.kind === 'match' ? FINAL_CLUE.items.length : 1
+export const FINAL_ITEMS = FINAL_CLUE.kind === 'match' ? FINAL_CLUE.items.length : 1
 
 /** Points for landing `hits` of the closing question's matches. */
 export const finalPoints = (hits: number) =>

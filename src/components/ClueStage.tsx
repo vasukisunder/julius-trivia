@@ -145,7 +145,7 @@ export function ClueStage({
   const stepLabel =
     phase === 'reading' ? 'Read the question' :
     phase === 'buzzing' ? 'Buzzers open' :
-    phase === 'verdict' ? (isFinal ? 'Mark each team' : `${spotTeam?.name ?? 'Someone'} to answer`) :
+    phase === 'verdict' ? `${spotTeam?.name ?? 'Someone'} to answer` :
     isFinal ? 'Answers' : 'Answer'
 
   const showAnswer = isHost || phase === 'revealed'
@@ -422,7 +422,7 @@ export function ClueStage({
           </button>
         )}
 
-        {phase === 'verdict' && onTheSpot && !isFinal && (
+        {phase === 'verdict' && onTheSpot && (
           <>
             <button
               className={`step-btn right${hoverClass('right')}`}
@@ -443,11 +443,13 @@ export function ClueStage({
           </>
         )}
 
-        {/* The closing question has no single team on the spot, so Correct and Wrong
-            do not apply — but it still needs a way forward from here. */}
+        {/* On the closing question the buzz still decides who answers first, so
+            Correct and Wrong stay — Correct there means all three. This is the way
+            past when nobody buzzed in with a full answer, and the route to handing
+            out partials. */}
         {phase === 'verdict' && isFinal && (
           <button
-            className={`step-btn go${hoverClass('reveal')}`}
+            className={`step-skip${hoverClass('reveal')}`}
             disabled={!isHost}
             {...hoverProps('reveal')}
             onClick={onSkipToAnswer}
