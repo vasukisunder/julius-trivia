@@ -227,8 +227,15 @@ body[data-mode="host"]::before{
   line-height:1.25;letter-spacing:-.02em;max-width:30ch;text-wrap:balance;margin:0;
 }
 .credit{
+  display:inline-flex;align-items:center;gap:10px;
   font-size:var(--t-17);font-weight:500;color:var(--ink-2);margin:0;
-  background:rgba(255,255,255,.05);border-radius:99px;padding:8px 18px;
+  background:rgba(255,255,255,.05);border-radius:99px;padding:6px 20px 6px 7px;
+}
+/* Says outright that this is a hint, rather than leaving a name to float there
+   looking like an attribution. */
+.credit-tag{
+  background:var(--cat);color:var(--on-color);border-radius:99px;
+  padding:4px 12px;font-size:var(--t-13);font-weight:700;flex:none;
 }
 
 /* A teammate's name, wherever it appears in clue text. */

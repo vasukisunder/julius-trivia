@@ -160,7 +160,12 @@ export function ClueStage({
         {clue.kind === 'standard' ? (
           <>
             <p className="clue"><WithNames text={clue.question} /></p>
-            {clue.credit && <p className="credit"><WithNames text={clue.credit} /></p>}
+            {clue.credit && (
+              <p className="credit">
+                <span className="credit-tag">Hint</span>
+                <WithNames text={clue.credit} />
+              </p>
+            )}
           </>
         ) : clue.kind === 'match' ? (
           <>
@@ -202,7 +207,10 @@ export function ClueStage({
               ))}
             </ol>
             {phase === 'revealed' && clue.credit && (
-              <p className="credit"><WithNames text={clue.credit} /></p>
+              <p className="credit">
+                <span className="credit-tag">Hint</span>
+                <WithNames text={clue.credit} />
+              </p>
             )}
           </>
         )}
