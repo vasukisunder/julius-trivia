@@ -83,7 +83,7 @@ export const CATEGORIES: Category[] = [
         ],
       },
       { kind: 'standard', points: 300, question: `Which teammate lived in Madagascar for a year, then backpacked four months across India and four more through China and Japan?`, answer: `Juan` },
-      { kind: 'standard', points: 400, question: `Which teammate says they intend never to go to South Dakota?`, answer: `Matt` },
+      { kind: 'standard', points: 400, question: `Which state does Matt intend to never visit?`, answer: `South Dakota` },
       {
         kind: 'lie', points: 500, person: 'Daniel',
         prompt: `Daniel has an unusual list of former addresses. Which one is he inventing?`,
@@ -145,7 +145,7 @@ export const CATEGORIES: Category[] = [
     clues: [
       { kind: 'standard', points: 100, question: `This children’s author drew wartime political cartoons, wrote under a pen name, and was really named Theodor Geisel.`, answer: `Dr. Seuss`, credit: `Matt’s specialty — children’s books` },
       { kind: 'standard', points: 200, question: `The wave of uprisings that swept the Middle East and North Africa in 2010–2011 is commonly known as what?`, answer: `The Arab Spring`, credit: `Hattie’s specialty — recent Middle East, Europe & US history` },
-      { kind: 'standard', points: 300, question: `Name three foods that start with the letter Q.`, answer: `e.g. quiche, quinoa, quince, quail, quesadilla`, credit: `Daniel’s specialty — foods starting with Q` },
+      { kind: 'standard', points: 300, question: `Which team member used to be a pediatric doctor?`, answer: `Juan` },
       { kind: 'standard', points: 400, question: `AI companies now pay a fortune for “.ai” web addresses. The domain actually belongs to which Caribbean island?`, answer: `Anguilla`, credit: `Antonela’s specialty — countries by internet domain` },
       { kind: 'standard', points: 500, question: `English borrowed the word “tycoon,” meaning a powerful businessman, in the 1800s — from the language of which country?`, answer: `Japan (from “taikun”)`, credit: `Ask’s specialty — English loanwords` },
       { kind: 'standard', points: 600, question: `The War of the Triple Alliance pitted Paraguay against Brazil, Argentina and which third country?`, answer: `Uruguay`, credit: `Jonattan’s specialty — Paraguayan history` },

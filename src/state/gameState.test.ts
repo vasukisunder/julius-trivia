@@ -132,12 +132,17 @@ check('awarding it credits the full value',
 check('and it lands under its own key, not a tile’s', sf.lastAward?.key === '-1-0')
 
 console.log('\nteammate coverage')
-// A personal clue is one that names no specialty: the answer is a teammate.
+/**
+ * A personal clue is one with no specialist subject attached. It counts whether the
+ * teammate is the answer ("Which teammate used to brew their own beer?" -> Hannah)
+ * or the subject of the question ("Which state does Matt intend to never visit?"),
+ * since either way the clue is about them.
+ */
 const personalText = allClues
   .map(c =>
     c.kind === 'lie' ? c.person
     : c.kind === 'match' ? c.items.map(i => i.person).join(' ')
-    : c.credit ? '' : c.answer,
+    : c.credit ? '' : `${c.question} ${c.answer}`,
   )
   .join(' | ')
 const creditText = allClues.map(c => c.credit ?? '').join(' | ')
@@ -151,11 +156,14 @@ check('but the host can still be named in a clue', PEOPLE.includes(HOST))
 check('every teammate has a personal clue' + (noPersonal.length ? ` (missing: ${noPersonal})` : ''),
   noPersonal.length === 0)
 /**
- * Ivan's only specialist-subject clue (car mechanics) was replaced by Jonattan's
- * card. Pinned as an exact set rather than exempted, so this still fails the moment
+ * Players whose only specialist-subject clue was replaced by a personal one:
+ * Ivan's car mechanics became Jonattan's card, Daniel's foods-starting-with-Q
+ * became the pediatric doctor question. Both are still represented personally.
+ *
+ * Pinned as an exact set rather than exempted, so this still fails the moment
  * anyone else loses their niche question.
  */
-const NO_NICHE_BY_DESIGN = ['Ivan']
+const NO_NICHE_BY_DESIGN = ['Ivan', 'Daniel']
 check(`only ${NO_NICHE_BY_DESIGN.join(', ')} lacks a niche clue (found: ${noNiche.join(', ') || 'none'})`,
   JSON.stringify(noNiche) === JSON.stringify(NO_NICHE_BY_DESIGN))
 
