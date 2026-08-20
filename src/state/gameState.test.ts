@@ -198,42 +198,29 @@ check('and it lands under its own key, not a tile’s', sf.lastAward?.key === '-
 console.log('\nstickers')
 /**
  * Decoration, but decoration that ships on a projector, so it gets the same
- * treatment as the questions. TypeScript already rejects an art key that does not
- * exist and test/stickers.mjs checks the files are on disk; what is left is whether
- * each clue was actually dressed, and dressed with some variety.
+ * treatment as the questions. TypeScript already rejects art that does not exist
+ * and test/stickers.mjs checks the files are on disk; what is left is whether each
+ * clue was dressed, and dressed with some variety.
  */
 const decorated = [...allClues, FINAL_CLUE]
-const bare = decorated.filter(c => c.stickers.length === 0).length
-check(`every clue carries stickers${bare ? ` (${bare} bare)` : ''}`, bare === 0)
-// More than four turns the margins into a collage and starts crowding the question.
-check('one to four each, never more',
-  decorated.every(c => c.stickers.length >= 1 && c.stickers.length <= 4))
+const counts = decorated.map(c => c.stickers.length)
+check(`every clue carries three or four stickers (${Math.min(...counts)}-${Math.max(...counts)})`,
+  Math.min(...counts) >= 3 && Math.max(...counts) <= 4)
 
-const dupWithin = decorated.filter(c => {
-  const art = c.stickers.flatMap(s => (typeof s === 'string' ? [s] : []))
-  return new Set(art).size !== art.length
-}).length
-check(`no clue repeats one piece of art${dupWithin ? ` (${dupWithin})` : ''}`, dupWithin === 0)
+const dupWithin = decorated.filter(c => new Set(c.stickers).size !== c.stickers.length)
+check(`no clue repeats one piece of art${dupWithin.length ? ` (${dupWithin.length})` : ''}`,
+  dupWithin.length === 0)
 
-// A printed piece with no words is a blank rectangle on the wall.
-const printed = decorated.flatMap(c => c.stickers).filter(s => typeof s === 'object')
-check(`every printed piece carries its text (${printed.length} of them)`,
-  printed.every(s =>
-    ('postcard' in s && !!s.postcard && !!s.note) ||
-    ('photo' in s && !!s.photo && !!s.of)))
+// Postcards are landscape and get a wider box in the scatter; they are also the only
+// art that names a place, so a clue set to nowhere in particular should not have one.
+const cards = decorated.flatMap(c => c.stickers.filter(s => s.startsWith('postcard-')))
+check(`postcards are in play (${cards.length}) and none repeats`,
+  cards.length >= 5 && new Set(cards).size === cards.length)
 
-/**
- * Both surviving forms stay in play. Five others were cut for being a flat shape
- * with a word on it; these two are the ones that carry a picture, and a board that
- * quietly lost one of them would be back to a single material.
- */
-const forms = new Set(printed.map(s => Object.keys(s)[0]))
-check(`postcards and Polaroids both in use (${[...forms].sort()})`, forms.size === 2)
-
-// Four postcards reading "Wish you were here" is a template, not a souvenir.
-const notes = printed.flatMap(s => ('postcard' in s ? [s.note] : []))
-check(`postcard notes are all different (${notes.length})`,
-  new Set(notes).size === notes.length)
+// No clue should be more than half postcards — they are 200px wide.
+check('no clue is mostly postcards',
+  decorated.every(c => c.stickers.filter(s => s.startsWith('postcard-')).length <= 2 ||
+    c.stickers.every(s => s.startsWith('postcard-'))))
 
 /**
  * The room sees the stickers while the question is being read, so a sticker that
@@ -244,11 +231,7 @@ const spoilers = standard
   .filter(c => !PEOPLE.includes(c.answer.trim()))
   .flatMap(c => {
     const words = c.answer.toLowerCase().match(/[a-z]{4,}/g) ?? []
-    // Art keys and the words printed on the paper alike — a postcard naming the
-    // answer gives it away just as surely as a picture of it.
-    const said = c.stickers.flatMap(s =>
-      typeof s === 'string' ? [s] : Object.values(s).map(v => String(v).toLowerCase()))
-    return said
+    return c.stickers
       .filter(art => words.some(w => art.includes(w) || w.includes(art)))
       .map(art => `${art} on "${c.answer}"`)
   })

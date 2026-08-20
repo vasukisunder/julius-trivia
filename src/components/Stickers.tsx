@@ -1,4 +1,4 @@
-import { isPhoto, isPostcard, isWide, stickerSrc, type Sticker } from '../data/stickers'
+import { isWide, stickerSrc, type Sticker } from '../data/stickers'
 
 /**
  * The sticker layer for a clue.
@@ -49,16 +49,6 @@ const BANDS = {
   wide: [{ t: 18, drift: 6 }, { t: 52, drift: 6 }],
 }
 
-/** Postcard scenery. Indexed by position so four cards on one clue never match. */
-const SCENES = [
-  { sky: ['#F4A259', '#E2574C'], land: '#3B2A44', sun: '#FFE08A' },
-  { sky: ['#7FD8E8', '#C9F0E0'], land: '#2E7D5B', sun: '#FFF3B0' },
-  { sky: ['#6D6BB0', '#E58CA8'], land: '#2A2545', sun: '#FFD9A0' },
-  { sky: ['#BFE3F2', '#EAF2F7'], land: '#4A6B8A', sun: '#FFFFFF' },
-  { sky: ['#F6D48A', '#E8944A'], land: '#8B5A38', sun: '#FFF6D8' },
-  { sky: ['#26356B', '#5B7FC7'], land: '#16203D', sun: '#EFF3FF' },
-]
-
 type Props = {
   stickers: readonly Sticker[]
   /** Anything stable and unique per clue — the clue key. */
@@ -95,42 +85,12 @@ export function Stickers({ stickers, seed }: Props) {
 
         return (
           <div className={`sticker${wide ? ' wide' : ''}`} key={i} style={style}>
-            <div className="sticker-art">{art(sticker, i)}</div>
+            <div className="sticker-art">
+              <img className="sticker-img" src={stickerSrc(sticker)} alt="" draggable={false} />
+            </div>
           </div>
         )
       })}
     </div>
   )
-}
-
-function art(sticker: Sticker, i: number) {
-  if (isPostcard(sticker)) {
-    const scene = SCENES[(hash(sticker.postcard) + i) % SCENES.length]
-    return (
-      <div className="pcard">
-        <div
-          className="pcard-scene"
-          style={{ background: `linear-gradient(${scene.sky[0]}, ${scene.sky[1]})` }}
-        >
-          <span className="pcard-sun" style={{ background: scene.sun }} />
-          <span className="pcard-land" style={{ background: scene.land }} />
-          <span className="pcard-place">{sticker.postcard}</span>
-        </div>
-        <div className="pcard-note">{sticker.note}</div>
-      </div>
-    )
-  }
-
-  if (isPhoto(sticker)) {
-    return (
-      <div className="polaroid">
-        <div className="polaroid-frame">
-          <img src={stickerSrc(sticker.of)} alt="" draggable={false} />
-        </div>
-        <div className="polaroid-cap">{sticker.photo}</div>
-      </div>
-    )
-  }
-
-  return <img className="sticker-img" src={stickerSrc(sticker)} alt="" draggable={false} />
 }

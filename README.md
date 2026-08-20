@@ -92,44 +92,59 @@ valid `lieIndex` values.
 
 ## Stickers
 
-Every clue carries one to four stickers, scattered around the stage. Two materials:
+Every clue carries three or four stickers, scattered down the left and right edges of
+the stage. The art is generated, keyed and vendored into `public/stickers` as WebP —
+102 pieces, 1.15MB for the whole set, preloaded during setup.
 
-- **Objects** are art from [Fluent Emoji](https://github.com/microsoft/fluentui-emoji)
-  (MIT), vendored into `public/stickers` as WebP — 82 files, 428KB for the whole set.
-  Vendored rather than hot-linked so nothing depends on a CDN mid-game. The union in
-  `src/data/stickers.ts` is generated from the directory, so a typo in the board data is
-  a build error.
-- **Printed pieces** — postcards, a pennant, a ticket stub — are built from HTML and
-  type in `src/components/Stickers.tsx`. They carry words, which art cannot, and flat
-  paper should not look like a glossy object.
+`sticker-prompts.csv` holds the prompt behind each key. Each piece is drawn in the
+printing technique that suits the thing it is — litho card, matchbox label, risograph,
+enamel tin sign, embroidered patch, woodblock, Ben-Day comic — with its own palette
+taken from what the object actually looks like. That variety is the point: a fridge
+door is never one sticker pack, and an earlier pass that fixed one palette across all
+of them came back looking like exactly that. The thin white die-cut edge is what holds
+the set together.
 
-Placement is derived from a hash of the clue key, not authored: the host's screen and the
-shared screen scatter identically, nothing moves on re-render, and no two clues come out
-arranged alike. Slots are corner-weighted because stage text is centred both ways.
+Filenames are the keys used in `src/data/index.ts`, and the union in
+`src/data/stickers.ts` is generated from the directory, so a typo in the board data is
+a build error rather than a missing image on the projector.
 
-The whole set is preloaded during setup. `test/stickers.mjs` checks the registry, the
-files on disk and the board data all agree, and holds the set to a size budget.
-
-### Generating art
-
-`sticker-prompts.csv` holds one image-generation prompt per sticker key, and
-`tools/key.py` turns the results into assets:
+### Keying
 
 ```bash
 python3 tools/key.py --dir raw/ --out public/stickers/
 ```
 
-Prompts ask for a flat magenta `#FF00FF` background rather than transparency. Asked
-for transparency, models sometimes paint the *symbol* for it — an opaque grey-and-white
-checkerboard. That cannot be undone here: the art has pure white die-cut borders, so
-a border pixel landing on a white checker square is bit-identical to the background,
-and half of every border does. A lattice-based repair measured IoU 0.43-0.71 and ate
-up to 42% of the sticker. White and black are out for the same reason — the art uses
-both. Magenta appears in none of the palettes, which are all faded vintage colours,
-so the split is exact: IoU 0.982-0.994 measured against known alpha.
+Prompts ask for a flat magenta background rather than transparency. Asked for
+transparency, image models sometimes paint the *symbol* for it — an opaque
+grey-and-white checkerboard — and that is unrecoverable here: the art has pure white
+die-cut borders, so a border pixel landing on a white checker square is bit-identical
+to the background, and half of every border does. A lattice-based repair measured IoU
+0.43-0.71 and ate up to 42% of the sticker. White and black are out for the same
+reason; the art uses both.
 
-The keyer unmixes edge pixels rather than thresholding them, so an anti-aliased pixel
-has the key's contribution subtracted back out instead of leaving a pink fringe.
+The keyer samples the key per image (the generated pink drifts across R 194-235,
+G 27-106), selects by connectivity rather than colour alone so that near-key art like
+an oxblood car interior cannot be punched through, keeps only the largest component,
+and unmixes edge pixels instead of thresholding them so nothing keeps a pink fringe.
+Measured against known alpha: IoU 0.982-0.994.
+
+It also repairs one generation fault — art that comes back with the key colour walled
+*inside* it, where the model filled a disc with the background instead of a colour.
+That match is at a fixed tolerance, not one scaled to the background's noise: scaling
+it put a cream blotch through the middle of a red heart.
+
+### Placement
+
+Derived from a hash of the clue key, not authored, so the host's screen and the shared
+screen scatter identically and nothing moves on re-render. Each sticker takes its own
+side and its own band down the edges — four is the maximum, which is two per side, so
+nothing can overlap. Bands sit below the header and above the footer: free scatter kept
+putting art in the corners, where the stage already has the category name, the Close
+button and the primary action.
+
+`test/render.tsx` renders every clue's layer and asserts the numbers it writes are
+inside the box. That exists because a signed `>>` on a hash that fills all 32 bits went
+negative, made a band index -1, and blanked the stage on twelve of the 37 clues.
 
 ## Sound
 

@@ -6,15 +6,19 @@
  * the room something to look at while the question is read, and they make each clue
  * feel like a made object rather than a text slide.
  *
- * Two materials, deliberately:
+ * The art is generated, keyed and vendored into public/stickers as WebP — see
+ * sticker-prompts.csv for the prompt behind each key and tools/key.py for the
+ * keying. Vendored rather than hot-linked so nothing depends on a CDN mid-game.
  *
- *   - Objects are glossy 3D art from Microsoft's Fluent Emoji set (MIT), vendored
- *     into public/stickers as WebP. Vendored rather than hot-linked so nothing
- *     depends on a CDN mid-game, and WebP because it took the set from 2.6MB to
- *     under 600KB.
- *   - Printed ephemera — postcards, a felt pennant, a ticket stub — are built from
- *     HTML and type instead. Flat paper should look like flat paper next to the
- *     glossy objects, and they carry words, which art cannot.
+ * Each piece is drawn in the printing technique that suits the thing it is — litho
+ * card, matchbox label, risograph, enamel tin sign, embroidered patch, woodblock,
+ * Ben-Day comic — with its own palette. That variety is the point: a fridge door is
+ * never one sticker pack. The thin white die-cut edge is what holds it together.
+ *
+ * Postcards are art like everything else, keyed by a `postcard-` prefix. They used
+ * to be built from HTML and type, along with a pennant, a rosette, a luggage tag, a
+ * ticket stub and a postage stamp, and they all came to the same thing: a flat shape
+ * with a word on it, which read as a prop.
  *
  * ONE RULE: a sticker must never answer the question. It can set the scene the
  * question lives in, but a Brazilian flag on "which nation has played every World
@@ -25,17 +29,20 @@
 
 /** Art available in public/stickers. The union below makes a typo a build error. */
 export const STICKER_KEYS = [
-  'automobile', 'ball-soccer', 'bandage', 'baseball', 'basketball', 'bed', 'beer',
-  'bicycle', 'brownie', 'camping', 'canoe', 'cat', 'clapper', 'classical-building', 'clock',
-  'coat', 'cocktail', 'coffee', 'compass', 'couch', 'crown', 'crutch', 'cut-of-meat',
-  'deer', 'dress-shoe', 'egg', 'film', 'fire', 'football', 'fountain-pen', 'frog', 'gem',
-  'ghost', 'gi', 'glasses', 'globe', 'golf', 'guitar', 'heart-pink', 'house-garden',
-  'keyboard', 'laptop', 'luggage', 'medal', 'mic', 'money-bag', 'mountain-snow',
-  'movie-camera', 'musical-notes', 'newspaper', 'oil-drum', 'open-book', 'palm', 'palms-up',
-  'pine', 'popcorn', 'pushpin', 'rabbit', 'ring', 'rose', 'running-shoe', 'ship', 'skate',
-  'skis', 'snowflake', 'snowman', 'star', 'stethoscope', 'sun-umbrella', 'swords', 'tennis',
-  'test-tube', 'top-hat', 'trophy', 'tshirt', 'tv', 'videogame', 'volcano', 'wand',
-  'water-wave', 'wine', 'world-map',
+  'automobile', 'ball-soccer', 'bamboo', 'bandage', 'barn', 'baseball', 'basketball', 'bed',
+  'beer', 'bicycle', 'brownie', 'camping', 'canoe', 'cat', 'clapper', 'classical-building',
+  'clock', 'coat', 'cocktail', 'coffee', 'compass', 'couch', 'crown', 'crutch',
+  'cut-of-meat', 'deer', 'dress-shoe', 'egg', 'film', 'fire', 'football', 'fountain-pen',
+  'frog', 'gem', 'ghost', 'gi', 'glasses', 'globe', 'goblet', 'golf', 'guitar',
+  'heart-pink', 'helmet', 'house-garden', 'inkwell', 'keyboard', 'lantern', 'laptop',
+  'luggage', 'medal', 'mic', 'money-bag', 'mountain-snow', 'mouse', 'movie-camera',
+  'musical-notes', 'newspaper', 'oil-drum', 'open-book', 'palm', 'palms-up', 'pine',
+  'popcorn', 'postcard-arctic-circle', 'postcard-china', 'postcard-green-bay',
+  'postcard-india', 'postcard-japan', 'postcard-lagos', 'postcard-madagascar', 'pushpin',
+  'rabbit', 'remote', 'ring', 'rose', 'running-shoe', 'ship', 'skate', 'skis', 'snowflake',
+  'snowman', 'soccer-boot', 'spotlight', 'stadium', 'star', 'stethoscope', 'sun-umbrella',
+  'swords', 'teddy-bear', 'tennis', 'test-tube', 'top-hat', 'trophy', 'tshirt', 'tv',
+  'videogame', 'volcano', 'wand', 'water-wave', 'whistle', 'wine', 'world-map',
 ] as const
 
 export type StickerKey = (typeof STICKER_KEYS)[number]
@@ -44,33 +51,9 @@ export type StickerKey = (typeof STICKER_KEYS)[number]
 export const stickerSrc = (key: StickerKey) => `/stickers/${key}.webp`
 
 /**
- * A postcard. `place` is printed large, `note` is the scrawl underneath — vary it,
- * because four identical "Wish you were here" cards read as a template.
+ * One sticker: a key into the art above. Postcards are landscape and two to three
+ * times the width of an object, so the scatter gives them a wider box.
  */
-export type Postcard = { postcard: string; note: string }
+export type Sticker = StickerKey
 
-/**
- * A Polaroid with a piece of the object art inside it and a caption in the deep
- * bottom border. Framed and captioned, an object reads as a photograph of a thing
- * rather than an icon of one.
- */
-export type Photo = { photo: string; of: StickerKey }
-
-/**
- * One sticker. A bare key is the common case and stays readable in the board data;
- * the two object forms are the printed pieces.
- *
- * There were five more — a pennant, a rosette, a luggage tag, a ticket stub, a
- * postage stamp — and they all came to the same thing: a flat shape with a word on
- * it. They looked like props rather than objects. What survives is the pair that
- * carries a picture, which is the reason to print something in the first place.
- */
-export type Sticker = StickerKey | Postcard | Photo
-
-export const isPostcard = (s: Sticker): s is Postcard =>
-  typeof s === 'object' && 'postcard' in s
-export const isPhoto = (s: Sticker): s is Photo =>
-  typeof s === 'object' && 'photo' in s
-
-/** Printed pieces are two to three times the width of an object. */
-export const isWide = (s: Sticker) => typeof s === 'object'
+export const isWide = (s: Sticker) => s.startsWith('postcard-')

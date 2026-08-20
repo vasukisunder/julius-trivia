@@ -1129,13 +1129,9 @@ body[data-mode="present"] .roster-remove{opacity:.6}
    read, and a bit of made-object character on what would otherwise be a text
    slide.
 
-   Two materials. Glossy 3D objects get a shadow and nothing else — they already
-   carry their own light. Printed pieces (postcards, Polaroids) are built from
-   type and gradients here, because paper should look like paper next to them and
-   because they carry words.
-
-   Sizing inside the printed pieces is in cqw, so a postcard's type scales with the
-   card rather than with the viewport and the layout inside it never breaks.
+   Every sticker is generated art with a die-cut white edge, keyed to transparency
+   (see tools/key.py). All this has to do is place it, tilt it and lift it off the
+   stage with a shadow — the art carries its own light and its own border.
    ==================================================================== */
 .stickers{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
 /* Text sits above the sticker layer, always. */
@@ -1166,48 +1162,6 @@ body[data-mode="present"] .roster-remove{opacity:.6}
 .sticker-img{
   display:block;width:100%;height:auto;
   filter:drop-shadow(0 10px 16px rgba(0,0,0,.45));
-}
-
-/* A postcard front: sky, sun, a hill, the place printed across it. */
-.pcard{
-  background:#F6F2E6;border-radius:4px;padding:3.6cqw 3.6cqw 0;
-  box-shadow:0 12px 24px rgba(0,0,0,.5);font-family:var(--display);
-}
-.pcard-scene{
-  position:relative;aspect-ratio:16/10;border-radius:2px;overflow:hidden;
-  display:flex;align-items:flex-end;
-}
-.pcard-sun{position:absolute;top:13%;right:13%;width:17%;aspect-ratio:1;border-radius:50%}
-.pcard-land{
-  position:absolute;left:-12%;right:-12%;bottom:0;height:40%;
-  border-radius:50% 50% 0 0 / 72% 72% 0 0;
-}
-.pcard-place{
-  position:relative;width:100%;text-align:center;color:#fff;font-weight:700;
-  font-size:10.5cqw;line-height:1.05;letter-spacing:-.02em;padding:0 4% 5%;
-  text-shadow:0 2px 7px rgba(0,0,0,.45);
-}
-.pcard-note{
-  color:#7A7364;font-size:5.2cqw;font-weight:600;font-style:italic;
-  padding:2.6cqw 1cqw 3.4cqw;text-align:center;line-height:1.1;
-}
-
-/* A Polaroid, with a piece of the object art inside it. Framed and captioned, the
-   art reads as a photograph of a thing rather than an icon of one — which is most
-   of the reason this form exists. */
-.polaroid{
-  background:#FBFAF6;border-radius:3px;padding:5cqw 5cqw 0;
-  box-shadow:0 12px 24px rgba(0,0,0,.5);font-family:var(--display);
-}
-.polaroid-frame{
-  aspect-ratio:1;background:linear-gradient(150deg,#DCE3EC,#B9C4D4);
-  display:flex;align-items:center;justify-content:center;border-radius:1px;
-}
-.polaroid-frame img{width:62%;height:auto;filter:drop-shadow(0 4cqw 4cqw rgba(0,0,0,.22))}
-/* Polaroids have a deep bottom border; that is where the caption goes. */
-.polaroid-cap{
-  color:#5C5647;font-size:6cqw;font-weight:600;font-style:italic;
-  padding:4cqw 1cqw 7cqw;text-align:center;line-height:1.1;
 }
 
 /* A narrow host window has no gutters to spare — drop to two, then to none,

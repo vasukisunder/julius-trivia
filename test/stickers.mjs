@@ -52,12 +52,21 @@ check(`every sticker on the board has art${missing.length ? ` (${missing})` : ''
   missing.length === 0)
 
 /**
- * The whole set is preloaded on the host and shared screens, so its total size is
- * a real number rather than a detail. WebP with alpha keeps it here; PNG was 2.6MB.
+ * The whole set is preloaded on the host and shared screens during setup, so its
+ * total size is a real number rather than a detail.
+ *
+ * The budget was 1MB when the art was flat 3D emoji that compressed to 4KB apiece.
+ * The generated set is detailed illustration — litho card, woodblock, halftone — and
+ * lands around 10KB at the resolution it is actually displayed: 208px for objects,
+ * which render at up to 100px, and 416px for postcards, which render at up to 204px.
+ * Squeezing under 1MB meant 208px postcards, which is under 2x for their display
+ * size and visibly soft on a projector. 1.5MB preloads in about a second on office
+ * wifi, once, on two screens, while people are still joining.
  */
 const bytes = files.reduce(
   (n, f) => n + statSync(new URL(`public/stickers/${f}.webp`, root)).size, 0)
-check(`the set preloads under 1MB (${Math.round(bytes / 1024)}KB)`, bytes < 1024 * 1024)
+check(`the set preloads under 1.5MB (${Math.round(bytes / 1024)}KB)`,
+  bytes < 1536 * 1024)
 
 console.log(`\n${pass} passed, ${fail} failed`)
 if (fail) throw new Error(`${fail} sticker check(s) failed`)

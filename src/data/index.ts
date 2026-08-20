@@ -30,7 +30,7 @@ export const CATEGORIES: Category[] = [
           `Worked for a wine delivery company.`,
           `Worked at a bike repair shop.`,
         ],
-        stickers: ['cat', 'wine', { photo: 'Bike shop', of: 'bicycle' }],
+        stickers: ['cat', 'wine', 'bicycle'],
       },
       {
         kind: 'lie', points: 200, person: 'Greg', lieIndex: 2,
@@ -39,10 +39,7 @@ export const CATEGORIES: Category[] = [
           `Has travelled north of the Arctic Circle.`,
           `Once worked as a ski instructor.`,
         ],
-        stickers: [
-          'cut-of-meat', 'skis', 'snowman',
-          { postcard: 'Arctic Circle', note: 'North of here' },
-        ],
+        stickers: ['cut-of-meat', 'skis', 'snowman', 'postcard-arctic-circle'],
       },
       {
         kind: 'standard', points: 300,
@@ -50,21 +47,21 @@ export const CATEGORIES: Category[] = [
         answer: `Ana`,
         stickers: ['guitar', 'musical-notes', 'star'],
       },
-      { kind: 'standard', points: 400, question: `Which teammate worked on “Popstars,” the TV show that came before American Idol?`, answer: `Daniel`, stickers: ['tv', 'clapper'] },
+      { kind: 'standard', points: 400, question: `Which teammate worked on “Popstars,” the TV show that came before American Idol?`, answer: `Daniel`, stickers: ['tv', 'clapper', 'spotlight'] },
       {
         kind: 'standard', points: 500,
         question: `Which teammate’s first “real” job was in the men’s sportswear department at Nordstrom?`,
         answer: `Lucy`,
         stickers: ['tshirt', 'dress-shoe', 'coat'],
       },
-      { kind: 'standard', points: 600, question: `Which team member used to be a pediatric doctor?`, answer: `Juan`, stickers: ['bandage', { photo: 'On call', of: 'stethoscope' }] },
+      { kind: 'standard', points: 600, question: `Which team member used to be a pediatric doctor?`, answer: `Juan`, stickers: ['stethoscope', 'bandage', 'teddy-bear'] },
     ],
   },
   {
     name: 'Game On',
     clues: [
-      { kind: 'standard', points: 100, question: `Only one nation has appeared at every FIFA World Cup since 1930. Which country?`, answer: `Brazil`, credit: `Shakir’s specialty`, stickers: ['ball-soccer', 'trophy'] },
-      { kind: 'standard', points: 200, question: `The NFL’s championship trophy carries the name of which legendary Green Bay Packers coach?`, answer: `Vince Lombardi`, credit: `Joe’s specialty`, stickers: ['football', { postcard: 'Green Bay', note: 'Frozen tundra' }] },
+      { kind: 'standard', points: 100, question: `Only one nation has appeared at every FIFA World Cup since 1930. Which country?`, answer: `Brazil`, credit: `Shakir’s specialty`, stickers: ['ball-soccer', 'trophy', 'whistle'] },
+      { kind: 'standard', points: 200, question: `The NFL’s championship trophy carries the name of which legendary Green Bay Packers coach?`, answer: `Vince Lombardi`, credit: `Joe’s specialty`, stickers: ['football', 'helmet', 'postcard-green-bay'] },
       {
         kind: 'lie', points: 300, person: 'Ask', lieIndex: 0,
         statements: [
@@ -74,9 +71,9 @@ export const CATEGORIES: Category[] = [
         ],
         stickers: ['beer', 'canoe', 'running-shoe'],
       },
-      { kind: 'standard', points: 400, question: `Which teammate did fifteen years of kung fu?`, answer: `Ivan`, stickers: ['gi', 'medal'] },
-      { kind: 'standard', points: 500, question: `Which teammate used to be a competitive figure skater?`, answer: `Hattie`, stickers: ['skate', 'snowflake', 'medal'] },
-      { kind: 'standard', points: 600, question: `Where did the US men’s team finish at the very first World Cup?`, answer: `Third — still their best ever`, credit: `Greg’s specialty`, stickers: ['trophy', { photo: 'First final', of: 'ball-soccer' }] },
+      { kind: 'standard', points: 400, question: `Which teammate did fifteen years of kung fu?`, answer: `Ivan`, stickers: ['gi', 'bamboo', 'medal'] },
+      { kind: 'standard', points: 500, question: `Which teammate used to be a competitive figure skater?`, answer: `Hattie`, stickers: ['skate', 'snowflake', 'star'] },
+      { kind: 'standard', points: 600, question: `Where did the US men’s team finish at the very first World Cup?`, answer: `Third — still their best ever`, credit: `Greg’s specialty`, stickers: ['soccer-boot', 'stadium', 'ball-soccer'] },
     ],
   },
   {
@@ -99,10 +96,8 @@ export const CATEGORIES: Category[] = [
         answer: `Juan`,
         // The notes read as an itinerary rather than four copies of one caption.
         stickers: [
-          { postcard: 'Madagascar', note: 'Wish you were here' },
-          { postcard: 'India', note: 'Four months, no plan' },
-          { postcard: 'China', note: 'Still going' },
-          { postcard: 'Japan', note: 'Last stop' },
+          'postcard-madagascar', 'postcard-india',
+          'postcard-china', 'postcard-japan',
         ],
       },
       {
@@ -112,10 +107,7 @@ export const CATEGORIES: Category[] = [
           `Was born at a time of day that reads the same as his birthday.`,
           `Lived in Lagos, Nigeria for six months.`,
         ],
-        stickers: [
-          'movie-camera', 'clock',
-          { postcard: 'Lagos', note: 'Six months here' },
-        ],
+        stickers: ['movie-camera', 'clock', 'postcard-lagos'],
       },
       { kind: 'standard', points: 400, question: `AI companies now pay a fortune for “.ai” web addresses. The domain actually belongs to which Caribbean island?`, answer: `Anguilla`, credit: `Antonela’s specialty`, stickers: ['laptop', 'palm', 'globe'] },
       { kind: 'standard', points: 500, question: `The War of the Triple Alliance pitted Paraguay against Brazil, Argentina and which third country?`, answer: `Uruguay`, credit: `Jonattan’s specialty`, stickers: ['swords', 'compass', 'world-map'] },
@@ -125,18 +117,18 @@ export const CATEGORIES: Category[] = [
   {
     name: 'Pop Culture',
     clues: [
-      { kind: 'standard', points: 100, question: `Premiering in 1989, this animated sitcom is the longest-running scripted prime-time show in US TV history.`, answer: `The Simpsons`, credit: `Ana & Juan’s specialty`, stickers: ['couch', 'tv'] },
-      { kind: 'standard', points: 200, question: `This HBO drama became the network’s most-watched series ever before it ended in 2019.`, answer: `Game of Thrones`, credit: `Hattie’s specialty`, stickers: ['crown', 'popcorn'] },
+      { kind: 'standard', points: 100, question: `Premiering in 1989, this animated sitcom is the longest-running scripted prime-time show in US TV history.`, answer: `The Simpsons`, credit: `Ana & Juan’s specialty`, stickers: ['couch', 'tv', 'remote'] },
+      { kind: 'standard', points: 200, question: `This HBO drama became the network’s most-watched series ever before it ended in 2019.`, answer: `Game of Thrones`, credit: `Hattie’s specialty`, stickers: ['crown', 'popcorn', 'goblet'] },
       { kind: 'standard', points: 300, question: `Launched by Bandai in 1996, which egg-shaped handheld pet had to be fed and cleaned or it would die?`, answer: `The Tamagotchi`, credit: `Juan’s specialty`, stickers: ['egg', 'videogame', 'heart-pink'] },
       { kind: 'standard', points: 400, question: `In the US the first Harry Potter book is “Harry Potter and the Sorcerer’s Stone.” What is it called in the rest of the world?`, answer: `“Harry Potter and the Philosopher’s Stone”`, credit: `Lucy’s specialty`, stickers: ['wand', 'glasses', 'gem', 'open-book'] },
-      { kind: 'standard', points: 500, question: `Which teammate has watched all three Lord of the Rings films more than twenty times?`, answer: `Antonela`, stickers: ['ring', 'volcano'] },
-      { kind: 'standard', points: 600, question: `In 1991 this became the first animated film ever nominated for the Best Picture Oscar.`, answer: `Beauty and the Beast`, credit: `Hannah’s specialty`, stickers: ['film', 'trophy'] },
+      { kind: 'standard', points: 500, question: `Which teammate has watched all three Lord of the Rings films more than twenty times?`, answer: `Antonela`, stickers: ['ring', 'volcano', 'lantern'] },
+      { kind: 'standard', points: 600, question: `In 1991 this became the first animated film ever nominated for the Best Picture Oscar.`, answer: `Beauty and the Beast`, credit: `Hannah’s specialty`, stickers: ['film', 'trophy', 'spotlight'] },
     ],
   },
   {
     name: 'Hard to Believe',
     clues: [
-      { kind: 'standard', points: 100, question: `Which teammate was once a rabbit at the White House Easter Egg Roll?`, answer: `Lucy`, stickers: ['rabbit', 'classical-building', { photo: 'Egg roll', of: 'egg' }] },
+      { kind: 'standard', points: 100, question: `Which teammate was once a rabbit at the White House Easter Egg Roll?`, answer: `Lucy`, stickers: ['rabbit', 'classical-building', 'egg'] },
       {
         kind: 'lie', points: 200, person: 'Hattie', lieIndex: 1,
         statements: [
@@ -173,14 +165,14 @@ export const CATEGORIES: Category[] = [
         ],
         stickers: ['sun-umbrella', 'basketball', 'baseball'],
       },
-      { kind: 'standard', points: 600, question: `When this teammate was ten, their grandfather gave them a deer. Who?`, answer: `Jonattan`, stickers: ['pine', { photo: 'Age ten', of: 'deer' }] },
+      { kind: 'standard', points: 600, question: `When this teammate was ten, their grandfather gave them a deer. Who?`, answer: `Jonattan`, stickers: ['deer', 'pine', 'barn'] },
     ],
   },
   {
     name: 'Odds & Ends',
     clues: [
-      { kind: 'standard', points: 100, question: `This children’s author drew wartime political cartoons, wrote under a pen name, and was really named Theodor Geisel.`, answer: `Dr. Seuss`, credit: `Matt’s specialty`, stickers: ['fountain-pen', 'open-book'] },
-      { kind: 'standard', points: 200, question: `On Windows, which keyboard shortcut reopens the browser tab you just closed?`, answer: `Ctrl + Shift + T`, credit: `Antonela’s specialty`, stickers: ['keyboard', 'laptop'] },
+      { kind: 'standard', points: 100, question: `This children’s author drew wartime political cartoons, wrote under a pen name, and was really named Theodor Geisel.`, answer: `Dr. Seuss`, credit: `Matt’s specialty`, stickers: ['fountain-pen', 'open-book', 'inkwell'] },
+      { kind: 'standard', points: 200, question: `On Windows, which keyboard shortcut reopens the browser tab you just closed?`, answer: `Ctrl + Shift + T`, credit: `Antonela’s specialty`, stickers: ['keyboard', 'laptop', 'mouse'] },
       {
         kind: 'lie', points: 300, person: 'Matt', lieIndex: 1,
         statements: [
