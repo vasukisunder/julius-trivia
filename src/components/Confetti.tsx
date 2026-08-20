@@ -2,7 +2,6 @@ import { useMemo } from 'react'
 import { CATEGORY_COLORS, TEAM_COLORS } from '../theme'
 
 const COLORS = [...TEAM_COLORS, ...CATEGORY_COLORS]
-const COUNT = 90
 
 /**
  * Full-screen confetti, generated rather than loaded — no library, no assets, and
@@ -15,25 +14,25 @@ const COUNT = 90
  * `seed` changes per award so the pieces are re-randomised and the animation
  * replays even when the same team scores twice.
  */
-export function Confetti({ seed }: { seed: number }) {
+export function Confetti({ seed, big = false }: { seed: number; big?: boolean }) {
   const pieces = useMemo(
     () =>
-      Array.from({ length: COUNT }, (_, i) => ({
+      Array.from({ length: big ? 260 : 90 }, (_, i) => ({
         left: Math.random() * 100,
         drift: (Math.random() - 0.5) * 30,
-        delay: Math.random() * 0.5,
-        duration: 2.2 + Math.random() * 1.6,
+        delay: Math.random() * (big ? 2.4 : 0.5),
+        duration: (big ? 3.4 : 2.2) + Math.random() * 1.6,
         spin: 360 + Math.random() * 720 * (Math.random() < 0.5 ? -1 : 1),
-        size: 6 + Math.random() * 8,
+        size: (big ? 8 : 6) + Math.random() * (big ? 11 : 8),
         long: Math.random() < 0.4,
         color: COLORS[i % COLORS.length],
       })),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [seed],
+    [seed, big],
   )
 
   return (
-    <div className="confetti" aria-hidden="true">
+    <div className={`confetti${big ? ' big' : ''}`} aria-hidden="true">
       {pieces.map((p, i) => (
         <i
           key={i}

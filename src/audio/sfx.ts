@@ -15,6 +15,8 @@ export type Cue =
   | 'wrong'      // wrong answer
   | 'shuffle'    // teams being drawn
   | 'start'      // game begins
+  | 'countIn'    // one beat of the closing countdown
+  | 'fanfare'    // the winner is announced
 
 let ctx: AudioContext | null = null
 let master: GainNode | null = null
@@ -165,6 +167,26 @@ export function play(cue: Cue) {
       for (let i = 0; i < 5; i++) {
         tone({ freq: 900 + i * 120, dur: 0.05, type: 'square', gain: 0.13, at: i * 0.055 })
       }
+      break
+
+    case 'countIn':
+      // Low and hollow, so the numbers feel like a drum rather than a doorbell.
+      tone({ freq: 196, dur: 0.16, type: 'triangle', gain: 0.4 })
+      tone({ freq: 98, dur: 0.3, type: 'sine', gain: 0.3 })
+      break
+
+    case 'fanfare':
+      // A proper flourish: two rising runs, then a held major chord.
+      ;[392, 523, 659, 784].forEach((f, i) =>
+        tone({ freq: f, dur: 0.14, type: 'triangle', gain: 0.4, at: i * 0.075 }),
+      )
+      ;[523, 659, 784, 1047].forEach((f, i) =>
+        tone({ freq: f, dur: 0.14, type: 'triangle', gain: 0.42, at: 0.34 + i * 0.075 }),
+      )
+      ;[523, 659, 784, 1047, 1319].forEach((f) =>
+        tone({ freq: f, dur: 1.5, type: 'triangle', gain: 0.3, at: 0.66 }),
+      )
+      tone({ freq: 131, dur: 1.7, type: 'sine', gain: 0.34, at: 0.66 })
       break
 
     case 'start':

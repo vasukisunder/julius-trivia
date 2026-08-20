@@ -58,6 +58,8 @@ export function load(): GameState {
       lockedOut: saved.lockedOut ?? [],
       lastAward: saved.lastAward ?? null,
       lastWrong: saved.lastWrong ?? null,
+      ceremony: saved.ceremony ?? 'off',
+      ceremonyEndsAt: saved.ceremonyEndsAt ?? null,
     }
   } catch {
     return fresh

@@ -11,6 +11,7 @@ import { useBuildCheck } from './net/useBuildCheck'
 import { useGameSounds } from './audio/useGameSounds'
 import { SoundToggle, useSoundPref } from './components/SoundToggle'
 import { Confetti } from './components/Confetti'
+import { Ceremony } from './components/Ceremony'
 import { useAwardFlash } from './state/useAwardFlash'
 import { BuzzerScreen } from './components/BuzzerScreen'
 import { playerId } from './net/player'
@@ -22,6 +23,8 @@ import { Wordmark } from './components/Wordmark'
 
 /** Seconds on the clock when the host starts the timer. */
 const COUNTDOWN = 25
+/** Seconds of build-up before the winner is announced. */
+const CEREMONY_COUNTDOWN = 5
 
 /** The root: a wordmark and nothing else. No links, no hints. */
 function Landing() {
@@ -208,6 +211,15 @@ export default function App() {
             Final question
           </button>
           <button
+            className="tbtn end"
+            disabled={mode !== 'host'}
+            onClick={() =>
+              dispatch({ type: 'startCeremony', seconds: CEREMONY_COUNTDOWN })
+            }
+          >
+            Announce the winner
+          </button>
+          <button
             className="tbtn"
             disabled={mode !== 'host'}
             onClick={() => dispatch({ type: 'backToDraft' })}
@@ -267,7 +279,16 @@ export default function App() {
         onAdjust={(teamId, delta) => dispatch({ type: 'adjustScore', teamId, delta })}
       />
 
-      {openClue && openKey && openCategoryName && openRef && (
+      {state.ceremony !== 'off' && (
+        <Ceremony
+          state={state}
+          mode={mode}
+          onReveal={() => dispatch({ type: 'revealWinner' })}
+          onEnd={() => dispatch({ type: 'endCeremony' })}
+        />
+      )}
+
+      {state.ceremony === 'off' && openClue && openKey && openCategoryName && openRef && (
         <ClueStage
           clue={openClue}
           categoryName={openCategoryName}

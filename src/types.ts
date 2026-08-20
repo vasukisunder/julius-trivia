@@ -149,7 +149,19 @@ export type GameState = {
   lastAward: Award | null
   /** The most recent wrong answer, so every screen shows the same buzz-out. */
   lastWrong: Wrong | null
+
+  /* ---- Closing ceremony ---------------------------------------------------- */
+
+  /**
+   * The end of the night, run from shared state so the countdown and the reveal
+   * land on the host's screen and the shared screen at the same moment.
+   */
+  ceremony: Ceremony
+  /** Epoch ms the countdown finishes. */
+  ceremonyEndsAt: number | null
 }
+
+export type Ceremony = 'off' | 'countdown' | 'winner'
 
 export type Wrong = {
   teamId: number

@@ -1,4 +1,4 @@
-import { reducer, initialState, computeScores, currentBuzz, STATE_VERSION } from './gameState'
+import { reducer, initialState, computeScores, currentBuzz, standings, STATE_VERSION } from './gameState'
 import type { GameState } from '../types'
 import { CATEGORIES, TEAMMATES, PEOPLE, HOST, FINAL_CLUE } from '../data'
 import { FINAL_REF } from '../types'
@@ -118,6 +118,43 @@ srn = reducer(srn, { type: 'renameTeam', teamId: t.id, name: 'Les Quizerables' }
 check('and can still be renamed mid-game', srn.teams[1].name === 'Les Quizerables')
 srn = reducer(srn, { type: 'renameTeam', teamId: t.id, name: '' })
 check('clearing it is allowed, so a placeholder can show', srn.teams[1].name === '')
+
+console.log('\nthe closing ceremony')
+let sc3 = reducer(initialState(), { type: 'shuffleTeams' })
+sc3 = reducer(sc3, { type: 'setTeams', rosters: sc3.teams.map(t => t.members) })
+const [tw, tm, tl] = sc3.teams
+check('no ceremony to begin with', sc3.ceremony === 'off')
+
+// Give the three teams different totals.
+sc3 = reducer(sc3, { type: 'adjustScore', teamId: tw.id, delta: 1200 })
+sc3 = reducer(sc3, { type: 'adjustScore', teamId: tm.id, delta: 700 })
+sc3 = reducer(sc3, { type: 'adjustScore', teamId: tl.id, delta: 300 })
+
+const table = standings(sc3)
+check('standings run highest first', table.map(r => r.score).join() === '1200,700,300')
+check('ranks are 1, 2, 3', table.map(r => r.rank).join() === '1,2,3')
+check('the leader is rank 1', table[0].team.id === tw.id)
+
+// A tie at the top must produce two winners, not an arbitrary order.
+let stie = reducer(sc3, { type: 'adjustScore', teamId: tm.id, delta: 500 })
+const tied = standings(stie)
+check('a tie at the top shares rank 1', tied.filter(r => r.rank === 1).length === 2)
+check('and the next team is rank 3, not 2', tied[2].rank === 3)
+
+// A clue open when the ceremony starts must not stay open behind it.
+let sopen = reducer(sc3, { type: 'openClue', ref: { categoryIndex: 0, clueIndex: 0 } })
+sopen = reducer(sopen, { type: 'startCeremony', seconds: 5 })
+check('the countdown starts', sopen.ceremony === 'countdown')
+check('with a shared deadline', (sopen.ceremonyEndsAt ?? 0) > Date.now())
+check('and closes any open clue behind it', sopen.open === null)
+sopen = reducer(sopen, { type: 'revealWinner' })
+check('revealing moves to the winner', sopen.ceremony === 'winner')
+check('and clears the countdown clock', sopen.ceremonyEndsAt === null)
+sopen = reducer(sopen, { type: 'endCeremony' })
+check('and it can be dismissed', sopen.ceremony === 'off')
+
+check('a new game clears the ceremony',
+  reducer(sopen, { type: 'newGame' }).ceremony === 'off')
 
 console.log('\nthe closing question')
 // It is deliberately off the board: reachable only from the host toolbar, and worth

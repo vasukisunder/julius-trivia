@@ -33,12 +33,15 @@ export type Action =
   | { type: 'buzz'; buzz: Buzz }
   | { type: 'markWrong'; teamId: number }
   | { type: 'awardTo'; teamId: number; points: number }
+  | { type: 'startCeremony'; seconds: number }
+  | { type: 'revealWinner' }
+  | { type: 'endCeremony' }
   | { type: 'backToDraft' }
   | { type: 'hydrate'; state: GameState }
   | { type: 'clearClue'; key: string }
 
 /** Bump on any change to the saved shape or to the seeded defaults. */
-export const STATE_VERSION = 13
+export const STATE_VERSION = 14
 
 export function initialState(): GameState {
   return {
@@ -61,6 +64,8 @@ export function initialState(): GameState {
     lockedOut: [],
     lastAward: null,
     lastWrong: null,
+    ceremony: 'off',
+    ceremonyEndsAt: null,
   }
 }
 
@@ -322,6 +327,22 @@ export function reducer(state: GameState, action: Action): GameState {
     case 'backToDraft':
       return { ...state, phase: 'draft' }
 
+    // The countdown, then the reveal. Split in two so the host's clock drives the
+    // transition and both screens change together.
+    case 'startCeremony':
+      return {
+        ...state,
+        ceremony: 'countdown',
+        ceremonyEndsAt: Date.now() + action.seconds * 1000,
+        open: null,
+      }
+
+    case 'revealWinner':
+      return { ...state, ceremony: 'winner', ceremonyEndsAt: null }
+
+    case 'endCeremony':
+      return { ...state, ceremony: 'off', ceremonyEndsAt: null }
+
     // Back to a blank slate, roster and all. Needed between a rehearsal and the
     // real night, since the Durable Object keeps state between sessions.
     case 'newGame':
@@ -335,6 +356,7 @@ export function reducer(state: GameState, action: Action): GameState {
         open: null, cluePhase: 'reading', timerEndsAt: null,
         buzzOpenedAt: null, buzzes: [], lockedOut: [],
         lastAward: null, lastWrong: null,
+        ceremony: 'off', ceremonyEndsAt: null,
       }
 
     default:
@@ -374,4 +396,19 @@ export function computeScores(state: GameState): Map<number, number> {
  */
 export function currentBuzz(state: GameState): Buzz | null {
   return state.buzzes.find((b) => !state.lockedOut.includes(b.teamId)) ?? null
+}
+
+/**
+ * Final standings, highest first. Ties share a rank, so two teams level at the top
+ * are both winners rather than one being silently ordered above the other.
+ */
+export function standings(state: GameState): { team: Team; score: number; rank: number }[] {
+  const scores = computeScores(state)
+  const rows = state.teams
+    .map((team) => ({ team, score: scores.get(team.id) ?? 0, rank: 1 }))
+    .sort((a, b) => b.score - a.score)
+  rows.forEach((row, i) => {
+    row.rank = i > 0 && row.score === rows[i - 1].score ? rows[i - 1].rank : i + 1
+  })
+  return rows
 }

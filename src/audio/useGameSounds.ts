@@ -19,6 +19,7 @@ export function useGameSounds(state: GameState, enabled: boolean) {
     cluePhase: state.cluePhase,
     buzzCount: 0,
     awardSeq: state.lastAward?.seq ?? 0,
+    ceremony: state.ceremony,
     wrongSeq: state.lastWrong?.seq ?? 0,
     drawSeq: state.drawSeq,
     phase: state.phase,
@@ -38,6 +39,7 @@ export function useGameSounds(state: GameState, enabled: boolean) {
       if ((state.lastWrong?.seq ?? 0) > p.wrongSeq) play('wrong')
       if (state.drawSeq > p.drawSeq) play('shuffle')
       if (p.phase === 'draft' && state.phase === 'board') play('start')
+      if (p.ceremony !== 'winner' && state.ceremony === 'winner') play('fanfare')
     }
 
     prev.current = {
@@ -45,14 +47,32 @@ export function useGameSounds(state: GameState, enabled: boolean) {
       cluePhase: state.cluePhase,
       buzzCount: state.buzzes.length,
       awardSeq: state.lastAward?.seq ?? 0,
+    ceremony: state.ceremony,
       wrongSeq: state.lastWrong?.seq ?? 0,
       drawSeq: state.drawSeq,
       phase: state.phase,
     }
   }, [
     state.open, state.cluePhase, state.buzzes.length, state.lastAward?.seq,
-    state.lastWrong?.seq, state.drawSeq, state.phase, enabled,
+    state.lastWrong?.seq, state.drawSeq, state.phase, state.ceremony, enabled,
   ])
+
+  /** One beat per number of the closing countdown. */
+  const lastBeat = useRef<number | null>(null)
+  useEffect(() => {
+    if (!enabled || state.ceremony !== 'countdown' || state.ceremonyEndsAt === null) {
+      lastBeat.current = null
+      return
+    }
+    const id = window.setInterval(() => {
+      const left = Math.ceil((state.ceremonyEndsAt! - Date.now()) / 1000)
+      if (left > 0 && left !== lastBeat.current) {
+        lastBeat.current = left
+        play('countIn')
+      }
+    }, 100)
+    return () => clearInterval(id)
+  }, [enabled, state.ceremony, state.ceremonyEndsAt])
 
   /**
    * The thinking loop, for the whole buzzer window. Steady tempo on purpose: it is
