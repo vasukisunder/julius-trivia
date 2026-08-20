@@ -97,8 +97,9 @@ export const CATEGORIES: Category[] = [
   {
     name: 'Hard to Believe',
     clues: [
+      { kind: 'standard', points: 100, question: `Which teammate was once a rabbit at the White House Easter Egg Roll?`, answer: `Lucy` },
       {
-        kind: 'lie', points: 100, person: 'Hattie', lieIndex: 1,
+        kind: 'lie', points: 200, person: 'Hattie', lieIndex: 1,
         statements: [
           `Fell down a waterfall.`,
           `Won a lifetime supply of brownies.`,
@@ -106,7 +107,7 @@ export const CATEGORIES: Category[] = [
         ],
       },
       {
-        kind: 'lie', points: 200, person: 'Alexis', lieIndex: 1,
+        kind: 'lie', points: 300, person: 'Alexis', lieIndex: 1,
         statements: [
           `Started a podcast in 2012.`,
           `Is pretty good at playing the electric guitar.`,
@@ -114,7 +115,7 @@ export const CATEGORIES: Category[] = [
         ],
       },
       {
-        kind: 'lie', points: 300, person: 'Hannah', lieIndex: 0,
+        kind: 'lie', points: 400, person: 'Hannah', lieIndex: 0,
         statements: [
           `Won her first bike race.`,
           `Believes in ghosts.`,
@@ -122,22 +123,28 @@ export const CATEGORIES: Category[] = [
         ],
       },
       {
-        kind: 'lie', points: 400, person: 'Joe', lieIndex: 1,
+        kind: 'lie', points: 500, person: 'Joe', lieIndex: 1,
         statements: [
           `Likes to sunbathe in the nude.`,
           `Challenged President Obama to a basketball game.`,
           `Could throw an 80 mph fastball at sixty.`,
         ],
       },
-      { kind: 'standard', points: 500, question: `When this teammate was ten, their grandfather gave them a deer. Who?`, answer: `Jonattan` },
-      { kind: 'standard', points: 600, question: `Which teammate was once a rabbit at the White House Easter Egg Roll?`, answer: `Lucy` },
+      { kind: 'standard', points: 600, question: `When this teammate was ten, their grandfather gave them a deer. Who?`, answer: `Jonattan` },
     ],
   },
   {
     name: 'Odds & Ends',
     clues: [
       { kind: 'standard', points: 100, question: `This children’s author drew wartime political cartoons, wrote under a pen name, and was really named Theodor Geisel.`, answer: `Dr. Seuss`, credit: `Matt’s specialty` },
-      { kind: 'standard', points: 200, question: `The wave of uprisings that swept the Middle East and North Africa in 2010–2011 is commonly known as what?`, answer: `The Arab Spring`, credit: `Hattie’s specialty` },
+      {
+        kind: 'lie', points: 200, person: 'Matt', lieIndex: 1,
+        statements: [
+          `Had Sean Connery play through him on a golf course.`,
+          `Hit with John McEnroe for thirty minutes.`,
+          `Is a twin.`,
+        ],
+      },
       { kind: 'standard', points: 300, question: `On Windows, which keyboard shortcut reopens the browser tab you just closed?`, answer: `Ctrl + Shift + T`, credit: `Antonela’s specialty` },
       {
         kind: 'lie', points: 400, person: 'Jonattan', lieIndex: 2,
