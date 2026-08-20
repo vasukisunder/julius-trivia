@@ -28,9 +28,20 @@ check('every lie clue has exactly 3 statements', lieClues.every(c => c.statement
 check('every lieIndex is a valid statement index',
   lieClues.every(c => c.lieIndex >= 0 && c.lieIndex < c.statements.length))
 // Juan never said which of his statements was false, so he cannot have a card.
-// Hattie's was supplied separately after the fact.
 check('nobody has a card whose lie is unknown',
   !lieClues.some(c => c.person === 'Juan'))
+
+/**
+ * Position matters more than it looks. Every card was written with the lie last,
+ * which after two cards teaches the room to just pick the third one and stop
+ * reading.
+ */
+const positions = lieClues.map(c => c.lieIndex)
+const spread = [0, 1, 2].map(i => positions.filter(p => p === i).length)
+check(`the lie uses all three positions (${spread.join('/')})`,
+  spread.every(n => n > 0))
+check('and no position holds more than half the cards',
+  Math.max(...spread) <= Math.ceil(lieClues.length / 2))
 
 console.log('\nauthoring mistakes that would show up mid-game')
 // A spot-the-lie card names a person; if that name is not a real teammate, the

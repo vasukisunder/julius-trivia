@@ -24,20 +24,20 @@ export const CATEGORIES: Category[] = [
     name: 'Origin Stories',
     clues: [
       {
-        kind: 'lie', points: 100, person: 'Hattie', lieIndex: 2,
+        kind: 'lie', points: 100, person: 'Hattie', lieIndex: 1,
         statements: [
           `Fell down a waterfall.`,
-          `Was recruited for a reality dating show.`,
           `Won a lifetime supply of brownies.`,
+          `Was recruited for a reality dating show.`,
         ],
       },
       { kind: 'standard', points: 200, question: `Which teammate’s first “real” job was in the men’s sportswear department at Nordstrom?`, answer: `Lucy` },
       {
-        kind: 'lie', points: 300, person: 'Hannah', lieIndex: 2,
+        kind: 'lie', points: 300, person: 'Hannah', lieIndex: 0,
         statements: [
+          `Won her first bike race.`,
           `Believes in ghosts.`,
           `Was on the ski team in high school.`,
-          `Won her first bike race.`,
         ],
       },
       { kind: 'standard', points: 400, question: `When this teammate was ten, their grandfather gave them a deer. Who?`, answer: `Jonattan` },
@@ -61,11 +61,11 @@ export const CATEGORIES: Category[] = [
       { kind: 'standard', points: 400, question: `The NFL’s championship trophy carries the name of which legendary Green Bay Packers coach?`, answer: `Vince Lombardi`, credit: `Joe’s specialty — American football` },
       { kind: 'standard', points: 500, question: `Where did the US men’s team finish at the very first World Cup?`, answer: `Third — still their best ever`, credit: `Greg’s specialty — US soccer` },
       {
-        kind: 'lie', points: 600, person: 'Ask', lieIndex: 2,
+        kind: 'lie', points: 600, person: 'Ask', lieIndex: 0,
         statements: [
+          `Joined a rowing team on a drunken bet.`,
           `Biked 120 km on a drunken bet.`,
           `Ran a marathon on a drunken bet.`,
-          `Joined a rowing team on a drunken bet.`,
         ],
       },
     ],
@@ -75,11 +75,11 @@ export const CATEGORIES: Category[] = [
     clues: [
       { kind: 'standard', points: 100, question: `Which teammate was born in the Philippines?`, answer: `Shakir` },
       {
-        kind: 'lie', points: 200, person: 'Joe', lieIndex: 2,
+        kind: 'lie', points: 200, person: 'Joe', lieIndex: 1,
         statements: [
           `Likes to sunbathe in the nude.`,
-          `Could throw an 80 mph fastball at sixty.`,
           `Challenged President Obama to a basketball game.`,
+          `Could throw an 80 mph fastball at sixty.`,
         ],
       },
       { kind: 'standard', points: 300, question: `Which teammate lived in Madagascar for a year, then backpacked four months across India and four more through China and Japan?`, answer: `Juan` },
@@ -87,11 +87,11 @@ export const CATEGORIES: Category[] = [
       {
         kind: 'lie', points: 500, person: 'Daniel',
         prompt: `Daniel has an unusual list of former addresses. Which one is he inventing?`,
-        lieIndex: 2,
+        lieIndex: 0,
         statements: [
+          `A capsule hotel.`,
           `A bed and breakfast.`,
           `A commune.`,
-          `A capsule hotel.`,
         ],
       },
       {
@@ -124,11 +124,11 @@ export const CATEGORIES: Category[] = [
       { kind: 'standard', points: 400, question: `A turbocharger forces extra air into an engine. What spins it?`, answer: `The engine’s own exhaust gases`, credit: `Ivan’s specialty — car mechanics` },
       { kind: 'standard', points: 500, question: `Crude oil is separated into petrol, kerosene and diesel by which refining process, which relies on their different boiling points?`, answer: `Fractional distillation`, credit: `Ask’s specialty — oil & petroleum products` },
       {
-        kind: 'lie', points: 600, person: 'Alexis', lieIndex: 2,
+        kind: 'lie', points: 600, person: 'Alexis', lieIndex: 1,
         statements: [
           `Started a podcast in 2012.`,
-          `Collects frog-themed things, but doesn’t like real frogs.`,
           `Is pretty good at playing the electric guitar.`,
+          `Collects frog-themed things, but doesn’t like real frogs.`,
         ],
       },
     ],
