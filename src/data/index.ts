@@ -158,9 +158,9 @@ export const FINAL_CLUE: Clue = {
   points: 1000,
   prompt: `Three facts. Three people. No overlap.`,
   items: [
-    { fact: `Their very first job was a paper round.`, person: `Greg` },
-    { fact: `Is ambidextrous — equally good with either hand.`, person: `Ask` },
-    { fact: `Has never had a cup of coffee. Not one, ever.`, person: `Antonela` },
+    { fact: `Delivered newspapers as a first job.`, person: `Greg` },
+    { fact: `Is ambidextrous.`, person: `Ask` },
+    { fact: `Has never had a cup of coffee.`, person: `Antonela` },
   ],
 }
 
