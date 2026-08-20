@@ -15,10 +15,13 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { Stickers } from '../src/components/Stickers'
 import { ClueStage } from '../src/components/ClueStage'
 import { TeamDraft } from '../src/components/TeamDraft'
+import { BuzzerScreen } from '../src/components/BuzzerScreen'
 import { RosterStage } from '../src/components/RosterStage'
 import { CATEGORIES, FINAL_CLUE } from '../src/data'
 import { clueKey, type Clue, type CluePhase, type Buzz } from '../src/types'
 import { initialState, reducer } from '../src/state/gameState'
+import { styleFor, PLAYER_COLORS } from '../src/data/avatars'
+import { teamColor } from '../src/theme'
 
 let pass = 0, fail = 0
 const check = (label: string, cond: boolean) => {
@@ -241,6 +244,68 @@ for (const screen of ['draft', 'roster'] as const) {
 // And the join code, which is how anyone reaches a buzzer at all.
 check('both setup screens carry the join code on both views',
   setupScreens.every((s) => s.draft.includes('svg') && s.roster.includes('svg')))
+
+console.log('\nthe phone keeps personal and team colour apart')
+/**
+ * A player's colour is theirs; the team's colour is the one the room sees on the
+ * board. Picking a personal colour must not repaint the team, which is what it did
+ * when both came out of the same `--team` custom property.
+ */
+;(globalThis as { localStorage?: unknown }).localStorage = (() => {
+  const store = new Map<string, string>()
+  return {
+    getItem: (k: string) => store.get(k) ?? null,
+    setItem: (k: string, v: string) => void store.set(k, v),
+    removeItem: (k: string) => void store.delete(k),
+  }
+})()
+
+const player = teams[0].members[0]
+const picked = PLAYER_COLORS[7]
+let phoneState = reducer(seeded, {
+  type: 'setPlayerStyle', name: player, color: picked, icon: '🔥',
+})
+localStorage.setItem('julius-trivia:player-name', player)
+localStorage.setItem('julius-trivia:player-chose', '1')
+
+const phone = renderToStaticMarkup(
+  <BuzzerScreen
+    state={phoneState}
+    styleOf={(n: string) =>
+      styleFor(n, phoneState.playerStyles, phoneState.roster, phoneState.displayNames)}
+    connection="online"
+    onBuzz={() => {}}
+    onPickStyle={() => {}}
+    onRenameTeam={() => {}}
+    onPickName={() => {}}
+  />,
+)
+
+check(`the phone carries the player's own colour as --me (${picked})`,
+  phone.includes(`--me:${picked}`) || phone.includes(`--me: ${picked}`))
+check(`and the team's own colour as --team (${teamColor(0)})`,
+  phone.includes(`--team:${teamColor(0)}`) || phone.includes(`--team: ${teamColor(0)}`))
+check('so a personal pick is not the team accent', picked !== teamColor(0))
+check('the Edit button is there once they have chosen', phone.includes('>Edit<'))
+
+// First run: the panel opens by itself, and Edit steps aside for its Done button.
+localStorage.removeItem('julius-trivia:player-chose')
+const firstRun = renderToStaticMarkup(
+  <BuzzerScreen
+    state={phoneState}
+    styleOf={(n: string) =>
+      styleFor(n, phoneState.playerStyles, phoneState.roster, phoneState.displayNames)}
+    connection="online"
+    onBuzz={() => {}}
+    onPickStyle={() => {}}
+    onRenameTeam={() => {}}
+    onPickName={() => {}}
+  />,
+)
+check('the panel opens by itself the first time', firstRun.includes('class="picker"'))
+check('it offers a name, a colour and an emoji',
+  firstRun.includes('picker-name') && firstRun.includes('swatch') && firstRun.includes('shape'))
+check('and Edit steps aside while it is open', !firstRun.includes('>Edit<'))
 
 console.log(`\n${pass} passed, ${fail} failed`)
 if (fail) throw new Error(`${fail} render check(s) failed`)

@@ -5,6 +5,7 @@ import { playerId, savedName, saveName, hasChosen, markChosen } from '../net/pla
 import { MAX_NAME, PLAYER_COLORS, PLAYER_EMOJI } from '../data/avatars'
 import { PlayerIcon, PlayerPill } from './PlayerPill'
 import { Wordmark } from './Wordmark'
+import { teamColor } from '../theme'
 
 type Props = {
   state: GameState
@@ -108,24 +109,39 @@ export function BuzzerScreen({
     )
   }
 
-  const accent = style?.color ?? '#8B90E5'
+  /**
+   * Two accents, because they mean different things. A player's own colour is theirs
+   * — it goes on their name, styled the way a name is styled inside a clue. The team
+   * colour is the team's, and it is the one the room sees on the board, so picking a
+   * personal colour must not repaint it. Before the draw there is no team, so their
+   * own colour stands in.
+   */
+  const mine = style?.color ?? '#8B90E5'
+  const teamIndex = me ? state.teams.findIndex((t) => t.id === me.id) : -1
+  const teamAccent = teamIndex >= 0 ? teamColor(teamIndex) : mine
 
   return (
-    <div className="phone" style={{ ['--team' as string]: accent }}>
+    <div
+      className="phone"
+      style={{ ['--team' as string]: teamAccent, ['--me' as string]: mine }}
+    >
       <div className="phone-id">
         <div className="phone-idrow">
           {style && <PlayerIcon icon={style.icon} size={30} />}
           <span className="phone-who">{style?.label ?? name}</span>
           {/* Sits with the thing it edits, rather than as a full-width button
-              competing with the buzzer below. */}
-          <button
-            className="phone-edit"
-            aria-label="Change your colour and emoji"
-            aria-expanded={picking}
-            onClick={() => setPicking((p) => !p)}
-          >
-            Edit
-          </button>
+              competing with the buzzer below. Gone while the panel is open: the
+              panel has its own Done, and two ways to close one thing is one too
+              many on a phone. */}
+          {!picking && (
+            <button
+              className="phone-edit"
+              aria-label="Change your name, colour and emoji"
+              onClick={() => setPicking(true)}
+            >
+              Edit
+            </button>
+          )}
         </div>
 
         {me ? (

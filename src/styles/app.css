@@ -687,7 +687,13 @@ body[data-mode="host"]::before{
   padding:24px 20px 32px;gap:18px;
 }
 .phone-head{text-align:center}
-.phone-who{font-family:var(--display);font-size:var(--t-32);font-weight:700;letter-spacing:-.02em}
+/* Their own name wears their own colour, in the same chip a name gets inside a clue
+   — so the person on the phone matches the person on the shared screen. */
+.phone-who{
+  font-family:var(--display);font-size:var(--t-32);font-weight:700;letter-spacing:-.02em;
+  color:var(--me);background:color-mix(in oklab, var(--me) 22%, transparent);
+  border-radius:9px;padding:1px 12px 3px;
+}
 .phone-team{font-family:var(--display);font-size:var(--t-20);font-weight:600;color:var(--team)}
 
 /* Renaming is a button rather than a field that merely looks editable — a dashed

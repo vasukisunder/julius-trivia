@@ -17,9 +17,10 @@ const check = (label, cond) => {
 
 // Set inline from React, so they are legitimately absent from the stylesheet.
 // 'dx' and 'spin' are per-confetti-particle; 'cols' is the board width; 'p' is a
-// player's colour; the rest are one sticker's place, tilt, size and stagger.
+// player's colour on a pill and 'me' is the phone owner's own; the rest are one
+// sticker's place, tilt, size and stagger.
 const SET_INLINE = new Set([
-  'cols', 'p', 'dx', 'spin', 'x', 'y', 'rot', 'scale', 'd',
+  'cols', 'p', 'dx', 'spin', 'x', 'y', 'rot', 'scale', 'd', 'me',
 ])
 
 const defined = new Set([...css.matchAll(/--([a-z0-9-]+)\s*:/g)].map((m) => m[1]))
@@ -34,6 +35,19 @@ check(`every custom property is defined${missing.length ? ` (missing: ${missing}
 const unused = [...defined].filter((d) => d.startsWith('t-') && !used.has(d))
 check(`no orphaned type tokens${unused.length ? ` (unused: ${unused})` : ''}`,
   unused.length === 0)
+
+/**
+ * A player's colour and their team's colour are different things and must stay in
+ * different properties. They were both coming out of `--team`, so choosing a
+ * personal colour repainted the team name on the phone.
+ */
+const rule = (sel) => (css.split(sel + '{')[1] ?? '').split('}')[0]
+check('the player\'s own name is coloured from --me',
+  rule('.phone-who').includes('var(--me)'))
+check('and the team name from --team',
+  rule('.phone-team').includes('var(--team)'))
+check('the two are not the same property',
+  !rule('.phone-who').includes('var(--team)'))
 
 // Braces balancing, so a bad edit cannot silently kill every rule after it.
 const opens = (css.match(/\{/g) ?? []).length
