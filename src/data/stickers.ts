@@ -56,10 +56,27 @@ export type Pennant = { pennant: string }
 export type Stub = { stub: string; sub: string }
 
 /**
+ * A Polaroid with a piece of the object art inside it and a caption in the deep
+ * bottom border. The most useful of the printed forms: framed and captioned, an
+ * object reads as a photograph of a thing rather than as an icon of one.
+ */
+export type Photo = { photo: string; of: StickerKey }
+
+/** A kraft luggage tag, punched and labelled. */
+export type Tag = { tag: string; sub?: string }
+
+/** A pleated award rosette with a word on the disc. */
+export type Rosette = { rosette: string }
+
+/** A perforated postage stamp. Short marks only — it is a stamp, not a caption. */
+export type Stamp = { stamp: string }
+
+/**
  * One sticker. A bare key is the common case and stays readable in the board data;
  * the object forms are the printed pieces.
  */
-export type Sticker = StickerKey | Postcard | Pennant | Stub
+export type Sticker =
+  | StickerKey | Postcard | Pennant | Stub | Photo | Tag | Rosette | Stamp
 
 export const isPostcard = (s: Sticker): s is Postcard =>
   typeof s === 'object' && 'postcard' in s
@@ -67,5 +84,17 @@ export const isPennant = (s: Sticker): s is Pennant =>
   typeof s === 'object' && 'pennant' in s
 export const isStub = (s: Sticker): s is Stub =>
   typeof s === 'object' && 'stub' in s
-/** Printed pieces are wide, so the scatter keeps them further from the text. */
-export const isWide = (s: Sticker) => typeof s === 'object'
+export const isPhoto = (s: Sticker): s is Photo =>
+  typeof s === 'object' && 'photo' in s
+export const isTag = (s: Sticker): s is Tag =>
+  typeof s === 'object' && 'tag' in s
+export const isRosette = (s: Sticker): s is Rosette =>
+  typeof s === 'object' && 'rosette' in s
+export const isStamp = (s: Sticker): s is Stamp =>
+  typeof s === 'object' && 'stamp' in s
+
+/**
+ * Printed pieces are two to three times the width of an object, so the scatter
+ * gives them a wider box. A stamp is the exception — it is small like an object.
+ */
+export const isWide = (s: Sticker) => typeof s === 'object' && !isStamp(s)

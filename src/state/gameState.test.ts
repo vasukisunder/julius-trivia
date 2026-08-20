@@ -210,7 +210,7 @@ check('one to four each, never more',
   decorated.every(c => c.stickers.length >= 1 && c.stickers.length <= 4))
 
 const dupWithin = decorated.filter(c => {
-  const art = c.stickers.filter((s): s is string => typeof s === 'string')
+  const art = c.stickers.flatMap(s => (typeof s === 'string' ? [s] : []))
   return new Set(art).size !== art.length
 }).length
 check(`no clue repeats one piece of art${dupWithin ? ` (${dupWithin})` : ''}`, dupWithin === 0)
@@ -221,7 +221,24 @@ check(`every printed piece carries its text (${printed.length} of them)`,
   printed.every(s =>
     ('postcard' in s && !!s.postcard && !!s.note) ||
     ('pennant' in s && !!s.pennant) ||
-    ('stub' in s && !!s.stub && !!s.sub)))
+    ('stub' in s && !!s.stub && !!s.sub) ||
+    ('photo' in s && !!s.photo && !!s.of) ||
+    ('tag' in s && !!s.tag) ||
+    ('rosette' in s && !!s.rosette) ||
+    ('stamp' in s && !!s.stamp)))
+
+/**
+ * The point of the printed forms is that they are not all one thing. If the board
+ * drifts back to postcards everywhere, this is the line that notices.
+ */
+const forms = new Set(printed.map(s => Object.keys(s)[0]))
+check(`the printed pieces use ${forms.size} different forms (${[...forms].sort()})`,
+  forms.size >= 5)
+// Roughly half the clues should carry something that is not object art, or the
+// board reads as one material again.
+const withPrinted = decorated.filter(c => c.stickers.some(s => typeof s === 'object')).length
+check(`${withPrinted} of ${decorated.length} clues carry a printed piece`,
+  withPrinted >= decorated.length / 2)
 
 // Four postcards reading "Wish you were here" is a template, not a souvenir.
 const notes = printed.flatMap(s => ('postcard' in s ? [s.note] : []))
@@ -237,8 +254,11 @@ const spoilers = standard
   .filter(c => !PEOPLE.includes(c.answer.trim()))
   .flatMap(c => {
     const words = c.answer.toLowerCase().match(/[a-z]{4,}/g) ?? []
-    return c.stickers
-      .filter((s): s is string => typeof s === 'string')
+    // Art keys and the words printed on the paper alike — a postcard naming the
+    // answer gives it away just as surely as a picture of it.
+    const said = c.stickers.flatMap(s =>
+      typeof s === 'string' ? [s] : Object.values(s).map(v => String(v).toLowerCase()))
+    return said
       .filter(art => words.some(w => art.includes(w) || w.includes(art)))
       .map(art => `${art} on "${c.answer}"`)
   })

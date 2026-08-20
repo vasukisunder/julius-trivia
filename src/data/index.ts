@@ -30,7 +30,7 @@ export const CATEGORIES: Category[] = [
           `Worked for a wine delivery company.`,
           `Worked at a bike repair shop.`,
         ],
-        stickers: ['cat', 'wine', 'bicycle'],
+        stickers: ['cat', 'wine', { photo: 'Bike shop', of: 'bicycle' }],
       },
       {
         kind: 'lie', points: 200, person: 'Greg', lieIndex: 2,
@@ -39,12 +39,31 @@ export const CATEGORIES: Category[] = [
           `Has travelled north of the Arctic Circle.`,
           `Once worked as a ski instructor.`,
         ],
-        stickers: ['cut-of-meat', 'skis', 'snowman'],
+        stickers: [
+          'cut-of-meat', 'skis', 'snowman',
+          { postcard: 'Arctic Circle', note: 'North of here' },
+        ],
       },
-      { kind: 'standard', points: 300, question: `Which teammate was the lead singer of a rock band, with a song they wrote still floating around on YouTube?`, answer: `Ana`, stickers: ['guitar', 'musical-notes', 'star'] },
-      { kind: 'standard', points: 400, question: `Which teammate worked on “Popstars,” the TV show that came before American Idol?`, answer: `Daniel`, stickers: ['tv', 'star'] },
-      { kind: 'standard', points: 500, question: `Which teammate’s first “real” job was in the men’s sportswear department at Nordstrom?`, answer: `Lucy`, stickers: ['tshirt', 'dress-shoe', 'coat'] },
-      { kind: 'standard', points: 600, question: `Which team member used to be a pediatric doctor?`, answer: `Juan`, stickers: ['stethoscope', 'bandage'] },
+      {
+        kind: 'standard', points: 300,
+        question: `Which teammate was the lead singer of a rock band, with a song they wrote still floating around on YouTube?`,
+        answer: `Ana`,
+        stickers: [
+          'guitar', 'musical-notes', 'star',
+          { stub: 'Live tonight', sub: 'One night only' },
+        ],
+      },
+      { kind: 'standard', points: 400, question: `Which teammate worked on “Popstars,” the TV show that came before American Idol?`, answer: `Daniel`, stickers: ['tv', { rosette: 'On air' }] },
+      {
+        kind: 'standard', points: 500,
+        question: `Which teammate’s first “real” job was in the men’s sportswear department at Nordstrom?`,
+        answer: `Lucy`,
+        stickers: [
+          'tshirt', 'dress-shoe', 'coat',
+          { tag: 'Menswear', sub: 'Second floor' },
+        ],
+      },
+      { kind: 'standard', points: 600, question: `Which team member used to be a pediatric doctor?`, answer: `Juan`, stickers: ['bandage', { photo: 'On call', of: 'stethoscope' }] },
     ],
   },
   {
@@ -59,7 +78,7 @@ export const CATEGORIES: Category[] = [
           `Biked 120 km on a drunken bet.`,
           `Ran a marathon on a drunken bet.`,
         ],
-        stickers: ['beer', 'canoe', 'running-shoe'],
+        stickers: ['beer', 'canoe', { rosette: 'On a bet' }],
       },
       { kind: 'standard', points: 400, question: `Which teammate did fifteen years of kung fu?`, answer: `Ivan`, stickers: ['gi', 'medal'] },
       { kind: 'standard', points: 500, question: `Which teammate used to be a competitive figure skater?`, answer: `Hattie`, stickers: ['skate', 'snowflake', 'medal'] },
@@ -78,7 +97,7 @@ export const CATEGORIES: Category[] = [
           `A bed and breakfast.`,
           `A commune.`,
         ],
-        stickers: ['bed', 'house-garden', 'camping'],
+        stickers: ['bed', 'house-garden', 'camping', { tag: 'Former address' }],
       },
       {
         kind: 'standard', points: 200,
@@ -99,28 +118,31 @@ export const CATEGORIES: Category[] = [
           `Was born at a time of day that reads the same as his birthday.`,
           `Lived in Lagos, Nigeria for six months.`,
         ],
-        stickers: ['movie-camera', 'clock', { postcard: 'Lagos', note: 'Six months here' }],
+        stickers: [
+          'movie-camera', 'clock',
+          { postcard: 'Lagos', note: 'Six months here' },
+        ],
       },
-      { kind: 'standard', points: 400, question: `AI companies now pay a fortune for “.ai” web addresses. The domain actually belongs to which Caribbean island?`, answer: `Anguilla`, credit: `Antonela’s specialty`, stickers: ['laptop', 'palm', 'globe'] },
+      { kind: 'standard', points: 400, question: `AI companies now pay a fortune for “.ai” web addresses. The domain actually belongs to which Caribbean island?`, answer: `Anguilla`, credit: `Antonela’s specialty`, stickers: ['laptop', 'palm', 'globe', { stamp: '.ai' }] },
       { kind: 'standard', points: 500, question: `The War of the Triple Alliance pitted Paraguay against Brazil, Argentina and which third country?`, answer: `Uruguay`, credit: `Jonattan’s specialty`, stickers: ['swords', 'compass', 'world-map'] },
-      { kind: 'standard', points: 600, question: `Which state does Matt intend to never visit?`, answer: `South Dakota`, stickers: ['automobile', 'luggage', 'pushpin'] },
+      { kind: 'standard', points: 600, question: `Which state does Matt intend to never visit?`, answer: `South Dakota`, stickers: ['automobile', 'luggage', 'pushpin', { tag: 'Never' }] },
     ],
   },
   {
     name: 'Pop Culture',
     clues: [
-      { kind: 'standard', points: 100, question: `Premiering in 1989, this animated sitcom is the longest-running scripted prime-time show in US TV history.`, answer: `The Simpsons`, credit: `Ana & Juan’s specialty`, stickers: ['couch', 'tv'] },
-      { kind: 'standard', points: 200, question: `This HBO drama became the network’s most-watched series ever before it ended in 2019.`, answer: `Game of Thrones`, credit: `Hattie’s specialty`, stickers: ['crown', 'popcorn'] },
-      { kind: 'standard', points: 300, question: `Launched by Bandai in 1996, which egg-shaped handheld pet had to be fed and cleaned or it would die?`, answer: `The Tamagotchi`, credit: `Juan’s specialty`, stickers: ['egg', 'videogame', 'heart-pink'] },
+      { kind: 'standard', points: 100, question: `Premiering in 1989, this animated sitcom is the longest-running scripted prime-time show in US TV history.`, answer: `The Simpsons`, credit: `Ana & Juan’s specialty`, stickers: ['couch', 'tv', { stub: 'Prime time', sub: 'Since 1989' }] },
+      { kind: 'standard', points: 200, question: `This HBO drama became the network’s most-watched series ever before it ended in 2019.`, answer: `Game of Thrones`, credit: `Hattie’s specialty`, stickers: ['crown', 'popcorn', { rosette: 'Most watched' }] },
+      { kind: 'standard', points: 300, question: `Launched by Bandai in 1996, which egg-shaped handheld pet had to be fed and cleaned or it would die?`, answer: `The Tamagotchi`, credit: `Juan’s specialty`, stickers: ['egg', 'videogame', 'heart-pink', { tag: 'Feed me' }] },
       { kind: 'standard', points: 400, question: `In the US the first Harry Potter book is “Harry Potter and the Sorcerer’s Stone.” What is it called in the rest of the world?`, answer: `“Harry Potter and the Philosopher’s Stone”`, credit: `Lucy’s specialty`, stickers: ['wand', 'glasses', 'gem', 'open-book'] },
-      { kind: 'standard', points: 500, question: `Which teammate has watched all three Lord of the Rings films more than twenty times?`, answer: `Antonela`, stickers: ['ring', 'volcano'] },
-      { kind: 'standard', points: 600, question: `In 1991 this became the first animated film ever nominated for the Best Picture Oscar.`, answer: `Beauty and the Beast`, credit: `Hannah’s specialty`, stickers: ['film', 'trophy'] },
+      { kind: 'standard', points: 500, question: `Which teammate has watched all three Lord of the Rings films more than twenty times?`, answer: `Antonela`, stickers: ['ring', 'volcano', { stub: 'Extended edition', sub: 'All three' }] },
+      { kind: 'standard', points: 600, question: `In 1991 this became the first animated film ever nominated for the Best Picture Oscar.`, answer: `Beauty and the Beast`, credit: `Hannah’s specialty`, stickers: ['film', 'trophy', { stamp: '1991' }] },
     ],
   },
   {
     name: 'Hard to Believe',
     clues: [
-      { kind: 'standard', points: 100, question: `Which teammate was once a rabbit at the White House Easter Egg Roll?`, answer: `Lucy`, stickers: ['rabbit', 'egg', 'classical-building'] },
+      { kind: 'standard', points: 100, question: `Which teammate was once a rabbit at the White House Easter Egg Roll?`, answer: `Lucy`, stickers: ['rabbit', 'classical-building', { photo: 'Egg roll', of: 'egg' }] },
       {
         kind: 'lie', points: 200, person: 'Hattie', lieIndex: 1,
         statements: [
@@ -157,13 +179,13 @@ export const CATEGORIES: Category[] = [
         ],
         stickers: ['sun-umbrella', 'basketball', 'baseball'],
       },
-      { kind: 'standard', points: 600, question: `When this teammate was ten, their grandfather gave them a deer. Who?`, answer: `Jonattan`, stickers: ['deer', 'pine'] },
+      { kind: 'standard', points: 600, question: `When this teammate was ten, their grandfather gave them a deer. Who?`, answer: `Jonattan`, stickers: ['pine', { photo: 'Age ten', of: 'deer' }] },
     ],
   },
   {
     name: 'Odds & Ends',
     clues: [
-      { kind: 'standard', points: 100, question: `This children’s author drew wartime political cartoons, wrote under a pen name, and was really named Theodor Geisel.`, answer: `Dr. Seuss`, credit: `Matt’s specialty`, stickers: ['fountain-pen', 'open-book'] },
+      { kind: 'standard', points: 100, question: `This children’s author drew wartime political cartoons, wrote under a pen name, and was really named Theodor Geisel.`, answer: `Dr. Seuss`, credit: `Matt’s specialty`, stickers: ['fountain-pen', 'open-book', { tag: 'Pen name' }] },
       { kind: 'standard', points: 200, question: `On Windows, which keyboard shortcut reopens the browser tab you just closed?`, answer: `Ctrl + Shift + T`, credit: `Antonela’s specialty`, stickers: ['keyboard', 'laptop'] },
       {
         kind: 'lie', points: 300, person: 'Matt', lieIndex: 1,
@@ -172,7 +194,10 @@ export const CATEGORIES: Category[] = [
           `Hit with John McEnroe for thirty minutes.`,
           `Is a twin.`,
         ],
-        stickers: ['golf', 'tennis', 'cocktail'],
+        stickers: [
+          'golf', 'tennis', 'cocktail',
+          { stub: 'Centre court', sub: 'Thirty minutes' },
+        ],
       },
       {
         kind: 'lie', points: 400, person: 'Jonattan', lieIndex: 2,
@@ -183,7 +208,7 @@ export const CATEGORIES: Category[] = [
         ],
         stickers: ['clapper', 'crutch', 'running-shoe'],
       },
-      { kind: 'standard', points: 500, question: `English borrowed the word “tycoon,” meaning a powerful businessman, in the 1800s — from the language of which country?`, answer: `Japan (from “taikun”)`, credit: `Ask’s specialty`, stickers: ['top-hat', 'money-bag', 'ship'] },
+      { kind: 'standard', points: 500, question: `English borrowed the word “tycoon,” meaning a powerful businessman, in the 1800s — from the language of which country?`, answer: `Japan (from “taikun”)`, credit: `Ask’s specialty`, stickers: ['top-hat', 'money-bag', 'ship', { stamp: '1800s' }] },
       { kind: 'standard', points: 600, question: `Crude oil is separated into petrol, kerosene and diesel by which refining process, which relies on their different boiling points?`, answer: `Fractional distillation`, credit: `Ask’s specialty`, stickers: ['test-tube', 'oil-drum', 'fire'] },
     ],
   },
