@@ -195,6 +195,56 @@ check('awarding it credits the full value',
   computeScores(sf).get(sf.teams[0].id) === FINAL_CLUE.points)
 check('and it lands under its own key, not a tile’s', sf.lastAward?.key === '-1-0')
 
+console.log('\nstickers')
+/**
+ * Decoration, but decoration that ships on a projector, so it gets the same
+ * treatment as the questions. TypeScript already rejects an art key that does not
+ * exist and test/stickers.mjs checks the files are on disk; what is left is whether
+ * each clue was actually dressed, and dressed with some variety.
+ */
+const decorated = [...allClues, FINAL_CLUE]
+const bare = decorated.filter(c => c.stickers.length === 0).length
+check(`every clue carries stickers${bare ? ` (${bare} bare)` : ''}`, bare === 0)
+// More than four turns the margins into a collage and starts crowding the question.
+check('one to four each, never more',
+  decorated.every(c => c.stickers.length >= 1 && c.stickers.length <= 4))
+
+const dupWithin = decorated.filter(c => {
+  const art = c.stickers.filter((s): s is string => typeof s === 'string')
+  return new Set(art).size !== art.length
+}).length
+check(`no clue repeats one piece of art${dupWithin ? ` (${dupWithin})` : ''}`, dupWithin === 0)
+
+// A printed piece with no words is a blank rectangle on the wall.
+const printed = decorated.flatMap(c => c.stickers).filter(s => typeof s === 'object')
+check(`every printed piece carries its text (${printed.length} of them)`,
+  printed.every(s =>
+    ('postcard' in s && !!s.postcard && !!s.note) ||
+    ('pennant' in s && !!s.pennant) ||
+    ('stub' in s && !!s.stub && !!s.sub)))
+
+// Four postcards reading "Wish you were here" is a template, not a souvenir.
+const notes = printed.flatMap(s => ('postcard' in s ? [s.note] : []))
+check(`postcard notes are all different (${notes.length})`,
+  new Set(notes).size === notes.length)
+
+/**
+ * The room sees the stickers while the question is being read, so a sticker that
+ * depicts the answer hands over the point. Names are safe — no object gives away a
+ * person — so this checks the general-knowledge answers against the art keys.
+ */
+const spoilers = standard
+  .filter(c => !PEOPLE.includes(c.answer.trim()))
+  .flatMap(c => {
+    const words = c.answer.toLowerCase().match(/[a-z]{4,}/g) ?? []
+    return c.stickers
+      .filter((s): s is string => typeof s === 'string')
+      .filter(art => words.some(w => art.includes(w) || w.includes(art)))
+      .map(art => `${art} on "${c.answer}"`)
+  })
+check(`no sticker names the answer it sits next to${spoilers.length ? ` (${spoilers})` : ''}`,
+  spoilers.length === 0)
+
 console.log('\nteammate coverage')
 /**
  * A personal clue is one with no specialist subject attached. It counts whether the

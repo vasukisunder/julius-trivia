@@ -17,6 +17,7 @@ import { BuzzerScreen } from './components/BuzzerScreen'
 import { playerId } from './net/player'
 import { catColor, CATEGORY_GRADIENT } from './theme'
 import { styleFor } from './data/avatars'
+import { STICKER_KEYS, stickerSrc } from './data/stickers'
 import { clueKey, isFinal, FINAL_REF, type ViewMode } from './types'
 import { PRESENT_URL, buzzUrl, routeFromUrl } from './routes'
 import type { Connection } from './net/useRoom'
@@ -68,6 +69,19 @@ export default function App() {
   // Drives the host-mode viewport frame, so a mis-shared window is obvious.
   useEffect(() => {
     document.body.dataset.mode = route
+  }, [route])
+
+  /**
+   * Pull the sticker art in during setup, while people are still joining. The whole
+   * set is under 600KB and the alternative is each clue's stickers popping in a beat
+   * after the question appears, on conference-room wifi, in front of everyone.
+   */
+  useEffect(() => {
+    if (route === 'buzz') return
+    for (const key of STICKER_KEYS) {
+      const img = new Image()
+      img.src = stickerSrc(key)
+    }
   }, [route])
 
   useGameSounds(state, route === 'present' && soundOn)

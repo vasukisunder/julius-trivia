@@ -90,6 +90,26 @@ not hold equal numbers of clues; short columns are padded in the grid.
 questions, no clue containing its own answer, no clue disclosing another's answer, and
 valid `lieIndex` values.
 
+## Stickers
+
+Every clue carries one to four stickers, scattered around the stage. Two materials:
+
+- **Objects** are art from [Fluent Emoji](https://github.com/microsoft/fluentui-emoji)
+  (MIT), vendored into `public/stickers` as WebP — 82 files, 428KB for the whole set.
+  Vendored rather than hot-linked so nothing depends on a CDN mid-game. The union in
+  `src/data/stickers.ts` is generated from the directory, so a typo in the board data is
+  a build error.
+- **Printed pieces** — postcards, a pennant, a ticket stub — are built from HTML and
+  type in `src/components/Stickers.tsx`. They carry words, which art cannot, and flat
+  paper should not look like a glossy object.
+
+Placement is derived from a hash of the clue key, not authored: the host's screen and the
+shared screen scatter identically, nothing moves on re-render, and no two clues come out
+arranged alike. Slots are corner-weighted because stage text is centred both ways.
+
+The whole set is preloaded during setup. `test/stickers.mjs` checks the registry, the
+files on disk and the board data all agree, and holds the set to a size budget.
+
 ## Sound
 
 Only `/present` produces audio. Cues are synthesised with the Web Audio API rather than

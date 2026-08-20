@@ -1,3 +1,11 @@
+import type { Sticker } from './data/stickers'
+
+/**
+ * Art scattered around the stage for this clue. Required rather than optional, so
+ * a clue added later cannot quietly arrive bare.
+ */
+type Decorated = { stickers: readonly Sticker[] }
+
 /** A normal trivia question with one answer. */
 export type StandardClue = {
   kind: 'standard'
@@ -37,7 +45,10 @@ export type MatchClue = {
   credit?: string
 }
 
-export type Clue = StandardClue | LieClue | MatchClue
+export type Clue =
+  | (StandardClue & Decorated)
+  | (LieClue & Decorated)
+  | (MatchClue & Decorated)
 
 export type Category = {
   name: string

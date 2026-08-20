@@ -3,6 +3,7 @@ import type { Buzz, Clue, CluePhase, PlayerStyle, Team, ViewMode, Wrong } from '
 import { PlayerIcon, PlayerPill } from './PlayerPill'
 import { PEOPLE } from '../data'
 import { WithNames } from './WithNames'
+import { Stickers } from './Stickers'
 import { useAwardFlash } from '../state/useAwardFlash'
 import { teamColor, CATEGORY_GRADIENT } from '../theme'
 
@@ -150,6 +151,10 @@ export function ClueStage({
       style={{ ['--cat' as string]: accent }}
       ref={stageRef}
     >
+      {/* Behind everything and keyed to the clue, so the host's screen and the
+          shared screen scatter them identically. */}
+      <Stickers stickers={clue.stickers} seed={clueKeyStr} />
+
       <div className="stage-top">
         <div className="stage-cat">
           {heading} <span className="stage-pts">· {clue.points} points</span>

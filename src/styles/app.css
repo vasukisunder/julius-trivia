@@ -1122,3 +1122,105 @@ body[data-mode="present"] input:read-only{opacity:1}
    can never show — so on the shared screen they are simply always visible. */
 body[data-mode="present"] .draft-remove,
 body[data-mode="present"] .roster-remove{opacity:.6}
+
+
+/* ===================== stickers =========================================
+   Decoration with a job: something for the room to look at while the question is
+   read, and a bit of made-object character on what would otherwise be a text
+   slide.
+
+   Two materials. Glossy 3D objects get a shadow and nothing else — they already
+   carry their own light. Printed pieces (postcards, pennant, stub) are built from
+   type and gradients here, because paper should look like paper next to them and
+   because they carry words.
+
+   Sizing inside the printed pieces is in cqw, so a postcard's type scales with the
+   card rather than with the viewport and the layout inside it never breaks.
+   ==================================================================== */
+.stickers{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+/* Text sits above the sticker layer, always. */
+.stage-top,.stage-body,.stage-foot{position:relative;z-index:1}
+
+.sticker{
+  position:absolute;left:var(--x);top:var(--y);
+  width:clamp(54px,6.2vw,100px);
+  animation:stickIn .5s var(--ease) var(--d) both;
+}
+.sticker.wide{width:clamp(126px,14vw,204px);container-type:inline-size}
+/* Lands with a slight overshoot, like it was pressed on. */
+@keyframes stickIn{
+  from{opacity:0;transform:translate(-50%,-50%) scale(calc(var(--scale) * .4))}
+  62%{opacity:1;transform:translate(-50%,-50%) scale(calc(var(--scale) * 1.09))}
+  to{opacity:1;transform:translate(-50%,-50%) scale(var(--scale))}
+}
+/* The tilt lives on the inner element so the entry scale and the idle sway are not
+   both fighting for one transform. */
+.sticker-art{
+  display:block;opacity:.93;transform:rotate(var(--rot));
+  animation:stickSway 9s ease-in-out var(--d) infinite;
+}
+@keyframes stickSway{
+  0%,100%{transform:rotate(var(--rot))}
+  50%{transform:rotate(calc(var(--rot) + 2.5deg))}
+}
+.sticker-img{
+  display:block;width:100%;height:auto;
+  filter:drop-shadow(0 10px 16px rgba(0,0,0,.45));
+}
+
+/* A postcard front: sky, sun, a hill, the place printed across it. */
+.pcard{
+  background:#F6F2E6;border-radius:4px;padding:3.6cqw 3.6cqw 0;
+  box-shadow:0 12px 24px rgba(0,0,0,.5);font-family:var(--display);
+}
+.pcard-scene{
+  position:relative;aspect-ratio:16/10;border-radius:2px;overflow:hidden;
+  display:flex;align-items:flex-end;
+}
+.pcard-sun{position:absolute;top:13%;right:13%;width:17%;aspect-ratio:1;border-radius:50%}
+.pcard-land{
+  position:absolute;left:-12%;right:-12%;bottom:0;height:40%;
+  border-radius:50% 50% 0 0 / 72% 72% 0 0;
+}
+.pcard-place{
+  position:relative;width:100%;text-align:center;color:#fff;font-weight:700;
+  font-size:10.5cqw;line-height:1.05;letter-spacing:-.02em;padding:0 4% 5%;
+  text-shadow:0 2px 7px rgba(0,0,0,.45);
+}
+.pcard-note{
+  color:#7A7364;font-size:5.2cqw;font-weight:600;font-style:italic;
+  padding:2.6cqw 1cqw 3.4cqw;text-align:center;line-height:1.1;
+}
+
+/* Felt pennant. */
+.pennant{
+  aspect-ratio:5/3;background:linear-gradient(150deg,#2B7A52,#195436);
+  clip-path:polygon(0 0,100% 50%,0 100%);display:flex;align-items:center;
+  filter:drop-shadow(0 10px 18px rgba(0,0,0,.5));
+}
+.pennant-text{
+  color:#EFC65B;font-family:var(--display);font-weight:700;font-size:9.5cqw;
+  line-height:1;letter-spacing:-.01em;padding-left:7cqw;max-width:56%;
+}
+
+/* Torn ticket stub. */
+.stub{
+  background:#F6F2E6;border-radius:3px;display:flex;flex-direction:column;
+  align-items:center;text-align:center;padding:6cqw 5cqw 5cqw;
+  box-shadow:0 12px 24px rgba(0,0,0,.5);font-family:var(--display);position:relative;
+}
+.stub::after{
+  content:'';position:absolute;left:4%;right:4%;bottom:26%;
+  border-top:2px dashed rgba(30,37,64,.22);
+}
+.stub-head{color:#1E2540;font-weight:700;font-size:11cqw;line-height:1;letter-spacing:-.02em}
+.stub-sub{color:#7A7364;font-weight:600;font-size:5.4cqw;padding-top:6cqw}
+
+/* A narrow host window has no gutters to spare — drop to two, then to none,
+   rather than letting a sticker land on the question. */
+@media (max-width:1150px){.sticker:nth-child(n+3){display:none}}
+@media (max-width:880px){.stickers{display:none}}
+@media (prefers-reduced-motion:reduce){
+  .sticker{animation-duration:.01ms}
+  .sticker-art{animation:none}
+}
