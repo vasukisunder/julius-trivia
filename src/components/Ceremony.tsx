@@ -5,6 +5,9 @@ import { teamColor } from '../theme'
 import { Confetti } from './Confetti'
 import { PlayerPill } from './PlayerPill'
 
+/** Kept in step with the value App dispatches. */
+const CEREMONY_SECONDS = 3
+
 type Props = {
   state: GameState
   mode: ViewMode
@@ -44,6 +47,21 @@ export function Ceremony({ state, mode, onReveal, onEnd }: Props) {
   // Only the host's clock advances it; a mirror doing so would fire twice.
   const left = useCountdown(state.ceremonyEndsAt, isHost ? onReveal : () => {})
 
+  // Cycles the team names during the countdown.
+  const [rolling, setRolling] = useState(state.teams[0]?.name ?? '')
+  useEffect(() => {
+    if (state.ceremony !== 'countdown' || !state.teams.length) return
+    let i = 0
+    const id = window.setInterval(() => {
+      i += 1
+      setRolling(state.teams[i % state.teams.length].name || `Team ${(i % state.teams.length) + 1}`)
+    }, 90)
+    return () => clearInterval(id)
+  }, [state.ceremony, state.teams])
+
+  const total = CEREMONY_SECONDS
+  const progress = left === null ? 1 : Math.min(1, Math.max(0, 1 - left / total))
+
   const rows = standings(state)
   const winners = rows.filter((r) => r.rank === 1)
   const rest = rows.filter((r) => r.rank !== 1)
@@ -52,10 +70,12 @@ export function Ceremony({ state, mode, onReveal, onEnd }: Props) {
   if (state.ceremony === 'countdown') {
     return (
       <div className="ceremony countdown">
-        <p className="ceremony-kicker">Final scores in…</p>
-        {/* Keyed on the number so each one animates in on its own. */}
-        <div className="ceremony-count" key={left ?? 'go'}>
-          {left && left > 0 ? left : 'Go'}
+        <p className="ceremony-kicker">Counting up the scores…</p>
+        {/* A roulette of team names rather than digits ticking down: it echoes the
+            team draw, and it builds towards an answer instead of just elapsing. */}
+        <div className="ceremony-roulette">{rolling}</div>
+        <div className="ceremony-bar">
+          <i style={{ transform: `scaleX(${progress})` }} />
         </div>
       </div>
     )

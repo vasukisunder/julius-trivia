@@ -23,8 +23,9 @@ import { Wordmark } from './components/Wordmark'
 
 /** Seconds on the clock when the host starts the timer. */
 const COUNTDOWN = 25
-/** Seconds of build-up before the winner is announced. */
-const CEREMONY_COUNTDOWN = 5
+/** Seconds of build-up before the winner is announced. Short on purpose — it is a
+ *  drumroll, not an interval. Mirrored in Ceremony.tsx for the progress bar. */
+const CEREMONY_COUNTDOWN = 3
 
 /** The root: a wordmark and nothing else. No links, no hints. */
 function Landing() {
@@ -204,11 +205,12 @@ export default function App() {
             </button>
           )}
           <button
-            className="tbtn final"
+            className="finalbtn"
             disabled={mode !== 'host'}
             onClick={() => dispatch({ type: 'openClue', ref: FINAL_REF })}
           >
             Final question
+            <span className="finalbtn-pts">{FINAL_CLUE.points}</span>
           </button>
           <button
             className="tbtn end"
@@ -315,7 +317,10 @@ export default function App() {
           onSkipToAnswer={() => dispatch({ type: 'reveal' })}
           onDone={() => {
             dispatch({ type: 'consumeClue', key: openKey })
-            dispatch({ type: 'closeClue' })
+            // The closing question is the end of the game, so finishing it runs
+            // straight into the ceremony rather than dropping back to the board.
+            if (openIsFinal) dispatch({ type: 'startCeremony', seconds: CEREMONY_COUNTDOWN })
+            else dispatch({ type: 'closeClue' })
           }}
           onDismiss={() => dispatch({ type: 'closeClue' })}
           onReturnToBoard={() => {

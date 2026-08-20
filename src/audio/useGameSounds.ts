@@ -64,13 +64,10 @@ export function useGameSounds(state: GameState, enabled: boolean) {
       lastBeat.current = null
       return
     }
+    // A roll rather than one beat a second — three seconds is too short to count.
     const id = window.setInterval(() => {
-      const left = Math.ceil((state.ceremonyEndsAt! - Date.now()) / 1000)
-      if (left > 0 && left !== lastBeat.current) {
-        lastBeat.current = left
-        play('countIn')
-      }
-    }, 100)
+      if (Date.now() < state.ceremonyEndsAt!) play('countIn')
+    }, 105)
     return () => clearInterval(id)
   }, [enabled, state.ceremony, state.ceremonyEndsAt])
 

@@ -89,8 +89,27 @@ button{font-family:inherit;color:inherit}
 .tbtn.go{background:var(--ink);color:var(--canvas)}
 /* The closing question is worth more than anything on the board, so its control
    does not look like the rest of the toolbar. */
-.tbtn.final{background:rgba(240,166,180,.18);color:#F0A6B4;font-weight:700}
-.tbtn.final:hover{background:rgba(240,166,180,.28);color:#F0A6B4}
+/* The closing question is worth more than the whole bottom row of the board, and
+   it was sitting in the toolbar looking like one tab among several. Filled, larger,
+   carrying its own point value, and breathing so the eye finds it. */
+.finalbtn{
+  display:inline-flex;align-items:center;gap:10px;
+  background:#F0A6B4;color:var(--on-color);border:none;border-radius:99px;
+  font-family:var(--display);font-size:var(--t-15);font-weight:700;
+  padding:9px 10px 9px 18px;cursor:pointer;
+  animation:finalglow 2.6s ease-in-out infinite;
+  transition:transform .14s var(--ease),filter .15s;
+}
+.finalbtn:hover:not(:disabled){transform:translateY(-1px);filter:brightness(1.06)}
+.finalbtn:disabled{cursor:default}
+.finalbtn-pts{
+  background:rgba(16,21,38,.22);border-radius:99px;padding:4px 12px;
+  font-size:var(--t-15);font-weight:700;letter-spacing:-.01em;
+}
+@keyframes finalglow{
+  0%,100%{box-shadow:0 0 0 0 rgba(240,166,180,0)}
+  50%{box-shadow:0 0 0 7px rgba(240,166,180,.16)}
+}
 .tbtn.go:hover{background:#fff;color:var(--canvas)}
 
 .chip{font-size:var(--t-12);font-weight:700;padding:5px 10px;border-radius:99px}
@@ -996,18 +1015,24 @@ button:disabled{cursor:default}
 }
 
 /* ---- the countdown ---- */
-.ceremony.countdown{gap:8px}
-.ceremony-count{
+.ceremony.countdown{gap:18px}
+/* Names blur past rather than digits counting down: it builds towards an answer. */
+.ceremony-roulette{
   font-family:var(--display);font-weight:700;
-  font-size:clamp(140px,34vw,420px);line-height:.9;letter-spacing:-.06em;
-  color:var(--ink);
-  animation:countpop .85s cubic-bezier(.16,1.2,.3,1) both;
+  font-size:clamp(40px,9vw,120px);line-height:1;letter-spacing:-.04em;
+  color:var(--ink);animation:rouletteshake .09s steps(2) infinite;
 }
-@keyframes countpop{
-  0%{opacity:0;transform:scale(2.1)}
-  22%{opacity:1;transform:scale(1)}
-  75%{opacity:1;transform:scale(1)}
-  100%{opacity:.15;transform:scale(.88)}
+@keyframes rouletteshake{
+  0%{transform:translateY(-2px)}
+  100%{transform:translateY(2px)}
+}
+.ceremony-bar{
+  width:min(420px,70vw);height:6px;background:var(--surface);
+  border-radius:99px;overflow:hidden;
+}
+.ceremony-bar i{
+  display:block;height:100%;width:100%;background:var(--ink);
+  transform-origin:left;transition:transform .2s linear;
 }
 
 /* ---- the winners ---- */

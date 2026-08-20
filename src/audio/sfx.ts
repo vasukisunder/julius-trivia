@@ -170,9 +170,10 @@ export function play(cue: Cue) {
       break
 
     case 'countIn':
-      // Low and hollow, so the numbers feel like a drum rather than a doorbell.
-      tone({ freq: 196, dur: 0.16, type: 'triangle', gain: 0.4 })
-      tone({ freq: 98, dur: 0.3, type: 'sine', gain: 0.3 })
+      // One hit of a drumroll: short, low, and quiet enough to repeat ten times a
+      // second without becoming a drone.
+      tone({ freq: 174, dur: 0.06, type: 'triangle', gain: 0.16 })
+      tone({ freq: 87, dur: 0.09, type: 'sine', gain: 0.13 })
       break
 
     case 'fanfare':

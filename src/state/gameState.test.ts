@@ -156,6 +156,18 @@ check('and it can be dismissed', sopen.ceremony === 'off')
 check('a new game clears the ceremony',
   reducer(sopen, { type: 'newGame' }).ceremony === 'off')
 
+// Finishing the closing question ends the game, so the ceremony follows on its own
+// rather than dropping the host back to a board with nothing left to play.
+let sfin = reducer(sc3, { type: 'openClue', ref: FINAL_REF })
+check('the closing question opens', sfin.open?.categoryIndex === -1)
+sfin = reducer(sfin, { type: 'awardTo', teamId: tw.id, points: 1000 })
+sfin = reducer(sfin, { type: 'consumeClue', key: '-1-0' })
+sfin = reducer(sfin, { type: 'startCeremony', seconds: 3 })
+check('and rolls straight into the ceremony', sfin.ceremony === 'countdown')
+check('with the clue closed behind it', sfin.open === null)
+check('the winner reflects the closing points',
+  standings(sfin)[0].team.id === tw.id)
+
 console.log('\nthe closing question')
 // It is deliberately off the board: reachable only from the host toolbar, and worth
 // more than any tile.
