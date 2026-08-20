@@ -141,11 +141,12 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument('--dir', required=True)
     ap.add_argument('--out', required=True)
-    # Resolution matched to display size rather than uniform: objects render at up
-    # to 100px on the stage and postcards at up to 204px, so a flat 256 was both
-    # wasteful for one and thin for the other.
-    ap.add_argument('--size', type=int, default=208, help='longest edge, objects')
-    ap.add_argument('--card-size', type=int, default=416, help='longest edge, postcards')
+    # Resolution matched to display size rather than uniform, with headroom for the
+    # tilt: a rotated bitmap is resampled again, and this art is fine-lined enough
+    # that the second resample shows. Objects render at up to 124px and postcards at
+    # up to 250px, so these are roughly 3x and 2.5x.
+    ap.add_argument('--size', type=int, default=384, help='longest edge, objects')
+    ap.add_argument('--card-size', type=int, default=640, help='longest edge, postcards')
     args = ap.parse_args()
 
     os.makedirs(args.out, exist_ok=True)
@@ -163,7 +164,7 @@ def main() -> None:
         edge = args.card_size if name.startswith('postcard-') else args.size
         img.thumbnail((edge, edge), Image.LANCZOS)
         img.save(os.path.join(args.out, os.path.splitext(name)[0] + '.webp'),
-                 'WEBP', quality=86, alpha_quality=100, method=6)
+                 'WEBP', quality=94, alpha_quality=100, method=6)
         ok += 1
     print(f'{ok} keyed, {bad} skipped -> {args.out}')
 

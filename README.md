@@ -94,7 +94,13 @@ valid `lieIndex` values.
 
 Every clue carries three or four stickers, scattered down the left and right edges of
 the stage. The art is generated, keyed and vendored into `public/stickers` as WebP —
-102 pieces, 1.15MB for the whole set, preloaded during setup.
+102 pieces, 4.2MB for the whole set, preloaded during setup.
+
+Sized generously on both ends. At a 100px box and 208px assets this art read as mush,
+and a higher-quality encode at that size changed nothing measurable — the pixel count
+was the constraint, not the compression. Objects now render up to 124px from 384px
+files and postcards up to 250px from 640px files, roughly 3x, which leaves headroom for
+the tilt: rotating a bitmap resamples it a second time and fine linework shows it.
 
 `sticker-prompts.csv` holds the prompt behind each key. Each piece is drawn in the
 printing technique that suits the thing it is — litho card, matchbox label, risograph,

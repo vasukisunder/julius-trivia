@@ -55,18 +55,19 @@ check(`every sticker on the board has art${missing.length ? ` (${missing})` : ''
  * The whole set is preloaded on the host and shared screens during setup, so its
  * total size is a real number rather than a detail.
  *
- * The budget was 1MB when the art was flat 3D emoji that compressed to 4KB apiece.
- * The generated set is detailed illustration — litho card, woodblock, halftone — and
- * lands around 10KB at the resolution it is actually displayed: 208px for objects,
- * which render at up to 100px, and 416px for postcards, which render at up to 204px.
- * Squeezing under 1MB meant 208px postcards, which is under 2x for their display
- * size and visibly soft on a projector. 1.5MB preloads in about a second on office
- * wifi, once, on two screens, while people are still joining.
+ * The budget started at 1MB when the art was flat 3D emoji at 4KB apiece. The
+ * generated set is detailed illustration and needs both resolution and quality: at
+ * 208px and q86 it read as mush on the stage, and a better encode at that size
+ * changed nothing, because the pixel count was the constraint. It is now ~3x the
+ * display size with headroom for the tilt, which resamples the bitmap again.
+ *
+ * 4.5MB preloads in a few seconds on office wifi — once, on two screens, while
+ * fourteen people are still finding the join link.
  */
 const bytes = files.reduce(
   (n, f) => n + statSync(new URL(`public/stickers/${f}.webp`, root)).size, 0)
-check(`the set preloads under 1.5MB (${Math.round(bytes / 1024)}KB)`,
-  bytes < 1536 * 1024)
+check(`the set preloads under 4.5MB (${(bytes / 1024 / 1024).toFixed(2)}MB)`,
+  bytes < 4.5 * 1024 * 1024)
 
 console.log(`\n${pass} passed, ${fail} failed`)
 if (fail) throw new Error(`${fail} sticker check(s) failed`)

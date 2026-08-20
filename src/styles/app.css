@@ -1132,6 +1132,12 @@ body[data-mode="present"] .roster-remove{opacity:.6}
    Every sticker is generated art with a die-cut white edge, keyed to transparency
    (see tools/key.py). All this has to do is place it, tilt it and lift it off the
    stage with a shadow — the art carries its own light and its own border.
+
+   Sized generously on purpose. At 100px this art read as mush: it is detailed
+   illustration — spokes, clock numerals, halftone — and a higher-quality encode made
+   no difference at that size, because the pixels were the constraint rather than the
+   compression. The files are ~3x the display size so the tilt, which resamples the
+   bitmap a second time, has something to work with.
    ==================================================================== */
 .stickers{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
 /* Text sits above the sticker layer, always. */
@@ -1139,10 +1145,10 @@ body[data-mode="present"] .roster-remove{opacity:.6}
 
 /* Left/right/top/bottom come from the slot, inline. */
 .sticker{
-  position:absolute;width:clamp(54px,6.2vw,100px);
+  position:absolute;width:clamp(64px,7.4vw,124px);
   animation:stickIn .5s var(--ease) var(--d) both;
 }
-.sticker.wide{width:clamp(126px,14vw,204px);container-type:inline-size}
+.sticker.wide{width:clamp(150px,16vw,250px)}
 /* Lands with a slight overshoot, like it was pressed on. */
 @keyframes stickIn{
   from{opacity:0;transform:scale(calc(var(--scale) * .4))}
