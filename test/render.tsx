@@ -70,8 +70,11 @@ const scales = nums('--scale')
 const badScale = scales.filter((v) => v < 0.85 || v > 2.3)
 check(`every scale is between 0.85 and 2.3${badScale.length ? ` — ${badScale}` : ''}`,
   scales.length > 0 && badScale.length === 0)
-const emphasised = scales.filter((v) => v > 1.15)
-check(`exactly one sticker is emphasised (${emphasised.length})`, emphasised.length === 1)
+// Emphasis is relative: a clue that scales up every sticker has emphasised none.
+const allBig = clues.filter(({ clue }) =>
+  clue.stickers.length > 1 && clue.stickers.every((s) => typeof s === 'object' && s.scale > 1.15))
+check(`no clue emphasises all of its stickers (${scales.filter((v) => v > 1.15).length} emphasised)`,
+  allBig.length === 0)
 
 // Both sides get used, or the "scatter" is a single column.
 check('stickers land on both edges',

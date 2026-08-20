@@ -156,7 +156,7 @@ export const CATEGORIES: Category[] = [
         ],
         stickers: ['sun-umbrella', 'basketball', 'baseball'],
       },
-      { kind: 'standard', points: 500, question: `What time does Benja go to bed on a typical workday?`, answer: `4 or 5am`, stickers: ['owl', 'crescent-moon', 'bedside-lamp', 'slippers'] },
+      { kind: 'standard', points: 500, question: `What time does Benja go to bed on a typical workday?`, answer: `4 or 5am`, stickers: ['owl', { art: 'crescent-moon', scale: 1.45 }, { art: 'slippers', scale: 1.6 }] },
       { kind: 'standard', points: 600, question: `When this teammate was ten, their grandfather gave them a deer. Who?`, answer: `Jonattan`, stickers: ['deer', 'pine', 'barn'] },
     ],
   },
