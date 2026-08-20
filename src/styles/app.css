@@ -654,18 +654,21 @@ body[data-mode="host"]::before{
 }
 .phone-head{text-align:center}
 .phone-who{font-family:var(--display);font-size:var(--t-32);font-weight:700;letter-spacing:-.02em}
-.phone-team{font-size:var(--t-15);font-weight:600;color:var(--team)}
+.phone-team{font-family:var(--display);font-size:var(--t-20);font-weight:600;color:var(--team)}
 
-/* Any player can rename their team from their phone. The dashed underline says it
-   is editable without needing a label to explain it. */
-.phone-team-name{
-  background:none;border:none;text-align:center;width:100%;
-  font-family:var(--display);font-size:var(--t-20);font-weight:600;color:var(--team);
-  border-bottom:1px dashed color-mix(in oklab, var(--team) 55%, transparent);
-  padding:2px 4px 3px;
+/* Renaming is a button rather than a field that merely looks editable — a dashed
+   underline is easy to miss on a phone. */
+.renamer{
+  width:100%;max-width:440px;background:var(--surface);border-radius:var(--r);
+  padding:12px;display:flex;flex-direction:column;gap:8px;flex:none;
 }
-.phone-team-name:focus{outline:none;border-bottom-style:solid}
-.phone-team-name::placeholder{color:var(--ink-3)}
+.renamer-input{
+  background:var(--surface-2);border:none;border-radius:var(--r-sm);
+  padding:13px 16px;text-align:center;color:var(--ink);
+  font-family:var(--display);font-size:var(--t-20);font-weight:600;
+}
+.renamer-input:focus{outline:2px solid var(--team)}
+.renamer-input::placeholder{color:var(--ink-3)}
 
 /* The rest of the team, so a player can see who they are playing with. */
 .phone-mates{

@@ -43,6 +43,7 @@ export function BuzzerScreen({
   // Opens by default the first time, because a picker you have to discover is a
   // picker nobody uses.
   const [picking, setPicking] = useState(() => !hasChosen())
+  const [renaming, setRenaming] = useState(false)
   const armedAt = useRef<number | null>(null)
 
   // The roster exists from the start; teams only after the host shuffles. People
@@ -122,14 +123,7 @@ export function BuzzerScreen({
 
         {me ? (
           <>
-            {/* Editable by anyone on the team; the change lands on every screen. */}
-            <input
-              className="phone-team-name"
-              value={me.name}
-              aria-label="Your team's name"
-              placeholder="Name your team"
-              onChange={(e) => onRenameTeam(me.id, e.target.value)}
-            />
+            <span className="phone-team">{me.name}</span>
             {me.members.length > 1 && (
               <div className="phone-mates">
                 {me.members
@@ -144,6 +138,29 @@ export function BuzzerScreen({
           <span className="phone-team">Team to be drawn</span>
         )}
       </div>
+
+      {/* An explicit control rather than an editable-looking field: anyone on the
+          team can rename it, and the change lands on every screen at once. */}
+      {me && (renaming ? (
+        <div className="renamer">
+          <input
+            className="renamer-input"
+            autoFocus
+            value={me.name}
+            aria-label="Your team's name"
+            placeholder="Name your team"
+            onChange={(e) => onRenameTeam(me.id, e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === 'Escape') setRenaming(false)
+            }}
+          />
+          <button className="picker-done" onClick={() => setRenaming(false)}>Done</button>
+        </div>
+      ) : (
+        <button className="picker-open" onClick={() => setRenaming(true)}>
+          Change team name
+        </button>
+      ))}
 
       {picking ? (
         <div className="picker">
