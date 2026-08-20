@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import type { GameState, ViewMode } from '../types'
+import type { GameState, PlayerStyle, ViewMode } from '../types'
 import { standings } from '../state/gameState'
 import { teamColor } from '../theme'
 import { Confetti } from './Confetti'
@@ -10,6 +10,7 @@ const CEREMONY_SECONDS = 3
 
 type Props = {
   state: GameState
+  styleOf: (name: string) => PlayerStyle
   mode: ViewMode
   /** Host only: the countdown reaching zero moves it on. */
   onReveal: () => void
@@ -42,7 +43,7 @@ function useCountdown(endsAt: number | null, onZero: () => void): number | null 
  * Both halves run off shared state, so the number on the host's screen and the
  * number the room is watching are the same number.
  */
-export function Ceremony({ state, mode, onReveal, onEnd }: Props) {
+export function Ceremony({ state, styleOf, mode, onReveal, onEnd }: Props) {
   const isHost = mode === 'host'
   // Only the host's clock advances it; a mirror doing so would fire twice.
   const left = useCountdown(state.ceremonyEndsAt, isHost ? onReveal : () => {})
@@ -100,7 +101,7 @@ export function Ceremony({ state, mode, onReveal, onEnd }: Props) {
             {/* The individuals, not just the team name — they are who won it. */}
             <div className="winner-members">
               {w.team.members.map((m) => (
-                <PlayerPill key={m} name={m} style={state.playerStyles[m]} />
+                <PlayerPill key={m} name={m} style={styleOf(m)} />
               ))}
             </div>
           </div>

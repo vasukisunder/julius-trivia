@@ -6,7 +6,7 @@ import { PEOPLE } from '../data'
 type Props = {
   categories: Category[]
   /** Player colours, so a name in the host's answer key wears its owner's colour. */
-  playerStyles: Record<string, PlayerStyle>
+  styleOf: (name: string) => PlayerStyle
   used: Set<string>
   mode: ViewMode
   /** Omitted in presentation mode: the shared screen mirrors, it does not drive. */
@@ -28,7 +28,7 @@ function answerFor(clue: Category['clues'][number]): string {
 }
 
 export function Board({
-  categories, playerStyles, used, mode, onOpen, hoveredKey, onHover,
+  categories, styleOf, used, mode, onOpen, hoveredKey, onHover,
 }: Props) {
   // Categories may hold different numbers of clues; pad the short ones so the
   // rows across the board stay level.
@@ -83,7 +83,7 @@ export function Board({
                   // everywhere else the person appears.
                   style={
                     clue.kind === 'standard' && PEOPLE.includes(clue.answer.trim())
-                      ? { color: playerStyles[clue.answer.trim()]?.color }
+                      ? { color: styleOf(clue.answer.trim()).color }
                       : undefined
                   }
                 >

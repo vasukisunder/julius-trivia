@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import { Board } from './components/Board'
 import { ClueStage } from './components/ClueStage'
 import { Scoreboard } from './components/Scoreboard'
@@ -16,6 +16,7 @@ import { useAwardFlash } from './state/useAwardFlash'
 import { BuzzerScreen } from './components/BuzzerScreen'
 import { playerId } from './net/player'
 import { catColor, CATEGORY_GRADIENT } from './theme'
+import { styleFor } from './data/avatars'
 import { clueKey, isFinal, FINAL_REF, type ViewMode } from './types'
 import { PRESENT_URL, buzzUrl, routeFromUrl } from './routes'
 import type { Connection } from './net/useRoom'
@@ -76,6 +77,15 @@ export default function App() {
   const award = useAwardFlash(state.lastAward, 3200)
   const showConfetti = award !== null && route !== 'buzz'
 
+  /**
+   * Everyone has a colour and emoji from the start, whether or not they have opened
+   * the buzzer — `playerStyles` holds only the choices people have actually made.
+   */
+  const styleOf = useCallback(
+    (name: string) => styleFor(name, state.playerStyles, state.roster),
+    [state.playerStyles, state.roster],
+  )
+
   const used = useMemo(() => new Set(state.used), [state.used])
   const scores = useMemo(() => computeScores(state), [state])
 
@@ -111,6 +121,7 @@ export default function App() {
       {staleBar}
       <BuzzerScreen
         state={state}
+        styleOf={styleOf}
         connection={connection}
         onBuzz={(name, teamId, reactionMs) =>
           dispatch({ type: 'buzz', buzz: { playerId: playerId(), name, teamId, reactionMs } })
@@ -255,7 +266,7 @@ export default function App() {
 
       <Board
         categories={CATEGORIES}
-        playerStyles={state.playerStyles}
+        styleOf={styleOf}
         used={used}
         mode={mode}
         // Only the host drives the board; the shared screen is a mirror.
@@ -280,7 +291,7 @@ export default function App() {
       <Scoreboard
         teams={state.teams}
         scores={scores}
-        playerStyles={state.playerStyles}
+        styleOf={styleOf}
         mode={mode}
         lastAward={state.lastAward}
         onRename={(teamId, name) => dispatch({ type: 'renameTeam', teamId, name })}
@@ -290,6 +301,7 @@ export default function App() {
       {state.ceremony !== 'off' && (
         <Ceremony
           state={state}
+          styleOf={styleOf}
           mode={mode}
           onReveal={() => dispatch({ type: 'revealWinner' })}
           onEnd={() => dispatch({ type: 'endCeremony' })}
@@ -307,7 +319,7 @@ export default function App() {
           phase={state.cluePhase}
           timerEndsAt={state.timerEndsAt}
           buzzes={state.buzzes}
-          playerStyles={state.playerStyles}
+          styleOf={styleOf}
           lockedOut={state.lockedOut}
           onTheSpot={currentBuzz(state)}
           lastWrong={state.lastWrong}

@@ -37,7 +37,7 @@ function useCountUp(target: number): number {
 type Props = {
   teams: Team[]
   scores: Map<number, number>
-  playerStyles: Record<string, PlayerStyle>
+  styleOf: (name: string) => PlayerStyle
   mode: ViewMode
   /** The latest award, so the winning team's panel can celebrate. */
   lastAward: Award | null
@@ -48,7 +48,7 @@ type Props = {
 const STEPS = [100, 200, 300, 400, 500, 600]
 
 export function Scoreboard({
-  teams, scores, playerStyles, mode, lastAward, onRename, onAdjust,
+  teams, scores, styleOf, mode, lastAward, onRename, onAdjust,
 }: Props) {
   // Same guards as the stage: no flash on mount, and it clears itself.
   const flash = useAwardFlash(lastAward, 1400)
@@ -86,7 +86,7 @@ export function Scoreboard({
               <TeamScore score={score} celebrating={celebrating} points={flash?.points ?? 0} />
               <div className="roster">
                 {team.members.map((m) => (
-                  <PlayerPill key={m} name={m} style={playerStyles[m]} size="sm" />
+                  <PlayerPill key={m} name={m} style={styleOf(m)} size="sm" />
                 ))}
               </div>
 

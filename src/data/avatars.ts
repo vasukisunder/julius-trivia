@@ -34,20 +34,38 @@ export const PLAYER_EMOJI = [
 
 export type PlayerStyle = { color: string; icon: string }
 
+/** Stable small integer for a name not on the sign-up list. */
+function hash(name: string): number {
+  let h = 0
+  for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) | 0
+  return Math.abs(h)
+}
+
 /**
- * A default for someone who has not chosen. Prefers a colour and emoji nobody
- * has taken so the room stays readable, but nothing stops a player picking a
- * duplicate afterwards.
+ * Everyone's colour and emoji, whether or not they have opened the buzzer.
+ *
+ * Derived from their position on the sign-up list, which never moves — so a
+ * player's colour is the same before they have touched anything, and adding a
+ * walk-in does not reshuffle everyone else's. The list is shorter than the palette,
+ * so the whole team comes out distinct. Walk-ins are hashed.
  */
-export function freeStyle(taken: readonly PlayerStyle[]): PlayerStyle {
-  const usedColors = new Set(taken.map((s) => s.color))
-  const usedEmoji = new Set(taken.map((s) => s.icon))
+export function defaultStyle(name: string, roster: readonly string[]): PlayerStyle {
+  const i = roster.indexOf(name)
+  const n = i >= 0 ? i : hash(name)
   return {
-    color:
-      PLAYER_COLORS.find((c) => !usedColors.has(c)) ??
-      PLAYER_COLORS[taken.length % PLAYER_COLORS.length],
-    icon:
-      PLAYER_EMOJI.find((e) => !usedEmoji.has(e)) ??
-      PLAYER_EMOJI[taken.length % PLAYER_EMOJI.length],
+    color: PLAYER_COLORS[n % PLAYER_COLORS.length],
+    icon: PLAYER_EMOJI[n % PLAYER_EMOJI.length],
   }
+}
+
+/**
+ * The style to show for someone: their own pick if they made one, otherwise the
+ * default. `playerStyles` therefore holds only deliberate choices.
+ */
+export function styleFor(
+  name: string,
+  overrides: Record<string, PlayerStyle>,
+  roster: readonly string[],
+): PlayerStyle {
+  return overrides[name] ?? defaultStyle(name, roster)
 }

@@ -3,7 +3,7 @@ import type { GameState } from '../types'
 import { CATEGORIES, TEAMMATES, PEOPLE, HOST, FINAL_CLUE } from '../data'
 import { FINAL_REF } from '../types'
 import { TEAM_NAMES, TEAM_COUNT, drawTeams } from '../data/teams'
-import { PLAYER_COLORS, PLAYER_EMOJI, freeStyle } from '../data/avatars'
+import { PLAYER_COLORS, PLAYER_EMOJI, defaultStyle, styleFor } from '../data/avatars'
 
 let pass = 0, fail = 0
 const check = (label: string, cond: boolean) => {
@@ -635,14 +635,31 @@ sp = reducer(sp, { type: 'setPlayerStyle', name: 'Matt', color: PLAYER_COLORS[5]
 check('a player can change their own style', sp.playerStyles.Matt.color === PLAYER_COLORS[5])
 check('changing does not duplicate the record', Object.keys(sp.playerStyles).length === 2)
 
-console.log('\nauto-assigned defaults still spread out')
-// Nobody has to open the picker, so the default must be sensible on its own.
-const assigned: { color: string; icon: string }[] = []
-for (let i = 0; i < TEAMMATES.length; i++) assigned.push(freeStyle(assigned))
-check('every teammate gets a distinct colour by default',
-  new Set(assigned.map(a => a.color)).size === TEAMMATES.length)
-check('every teammate gets a distinct emoji by default',
-  new Set(assigned.map(a => a.icon)).size === TEAMMATES.length)
+console.log('\ndefault colours apply without anyone choosing')
+// A player should have a colour before they have touched anything, so the default is
+// derived rather than assigned — nothing is written to state until someone picks.
+const defaults = TEAMMATES.map(n => defaultStyle(n, TEAMMATES))
+check('every player gets a distinct colour by default',
+  new Set(defaults.map(a => a.color)).size === TEAMMATES.length)
+check('every player gets a distinct emoji by default',
+  new Set(defaults.map(a => a.icon)).size === TEAMMATES.length)
+check('the same name always resolves to the same style',
+  JSON.stringify(defaultStyle('Lucy', TEAMMATES)) === JSON.stringify(defaultStyle('Lucy', TEAMMATES)))
+// A walk-in must not shift everyone else's colours along.
+const withGuest = [...TEAMMATES, 'A Walk-in']
+check('adding someone does not reshuffle the existing players',
+  TEAMMATES.every(n =>
+    JSON.stringify(defaultStyle(n, withGuest)) === JSON.stringify(defaultStyle(n, TEAMMATES))))
+check('someone off the roster still gets a style',
+  !!defaultStyle('A Walk-in', TEAMMATES).color)
+
+console.log('\nan explicit pick overrides the default')
+check('with no pick, the default applies',
+  styleFor('Lucy', {}, TEAMMATES).color === defaultStyle('Lucy', TEAMMATES).color)
+const picked = { Lucy: { color: PLAYER_COLORS[9], icon: PLAYER_EMOJI[9] } }
+check('a pick wins over the default', styleFor('Lucy', picked, TEAMMATES).color === PLAYER_COLORS[9])
+check('and only for that player',
+  styleFor('Matt', picked, TEAMMATES).color === defaultStyle('Matt', TEAMMATES).color)
 
 console.log('\nhost and presentation share the open clue')
 let so = reducer(initialState(), { type: 'shuffleTeams' })

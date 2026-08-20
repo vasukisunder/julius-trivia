@@ -4,6 +4,8 @@ type Props = {
   name: string
   style?: PlayerStyle
   size?: 'sm' | 'md' | 'lg'
+  /** Off where the emoji would crowd the name — a revealed answer, for instance. */
+  icon?: boolean
 }
 
 /** The player's emoji. */
@@ -23,13 +25,15 @@ export function PlayerIcon({ icon, size = 16 }: { icon: string; size?: number })
  * colour — a colour that changed once they opened the buzzer would be worse than
  * no colour at all.
  */
-export function PlayerPill({ name, style, size = 'md' }: Props) {
+export function PlayerPill({ name, style, size = 'md', icon = true }: Props) {
   if (!style) {
     return <span className={`ppill blank ${size}`}>{name}</span>
   }
   return (
     <span className={`ppill ${size}`} style={{ ['--p' as string]: style.color }}>
-      <PlayerIcon icon={style.icon} size={size === 'sm' ? 12 : size === 'lg' ? 30 : 14} />
+      {icon && (
+        <PlayerIcon icon={style.icon} size={size === 'sm' ? 12 : size === 'lg' ? 30 : 14} />
+      )}
       {name}
     </span>
   )

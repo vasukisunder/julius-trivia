@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
-import type { GameState } from '../types'
+import type { GameState, PlayerStyle } from '../types'
 import type { Connection } from '../net/useRoom'
 import { playerId, savedName, saveName, hasChosen, markChosen } from '../net/player'
-import { PLAYER_COLORS, PLAYER_EMOJI, freeStyle } from '../data/avatars'
+import { PLAYER_COLORS, PLAYER_EMOJI } from '../data/avatars'
 import { PlayerIcon, PlayerPill } from './PlayerPill'
 import { Wordmark } from './Wordmark'
 
 type Props = {
   state: GameState
+  styleOf: (name: string) => PlayerStyle
   connection: Connection
   onBuzz: (name: string, teamId: number, reactionMs: number) => void
   onPickStyle: (name: string, color: string, icon: string) => void
@@ -37,7 +38,7 @@ function useSecondsLeft(endsAt: number | null): number | null {
 const ORDINALS = ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th']
 
 export function BuzzerScreen({
-  state, connection, onBuzz, onPickStyle, onRenameTeam,
+  state, styleOf, connection, onBuzz, onPickStyle, onRenameTeam,
 }: Props) {
   const [name, setName] = useState<string | null>(savedName)
   // Opens by default the first time, because a picker you have to discover is a
@@ -57,7 +58,7 @@ export function BuzzerScreen({
   // Same threshold the shared screen uses, so the room and the phones agree on
   // when it has become urgent.
   const urgent = left !== null && left <= 5
-  const style = name ? state.playerStyles[name] : undefined
+  const style = name ? styleOf(name) : undefined
 
   // Start the local clock the moment the live button paints.
   useEffect(() => {
@@ -70,17 +71,6 @@ export function BuzzerScreen({
     }
   }, [open, state.buzzOpenedAt])
 
-  /** Hand out a colour and shape on arrival, so nobody has to choose. */
-  useEffect(() => {
-    if (!name || style) return
-    const taken = Object.entries(state.playerStyles)
-      .filter(([n]) => n !== name)
-      .map(([, s]) => s)
-    const suggested = freeStyle(taken)
-    onPickStyle(name, suggested.color, suggested.icon)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [name, style])
-
   if (!name || !onRoster) {
     return (
       <div className="phone">
@@ -91,7 +81,7 @@ export function BuzzerScreen({
         ) : (
           <div className="phone-names">
             {state.roster.map((member) => {
-              const st = state.playerStyles[member]
+              const st = styleOf(member)
               return (
                 <button
                   key={member}
@@ -141,7 +131,7 @@ export function BuzzerScreen({
                 {me.members
                   .filter((m) => m !== name)
                   .map((m) => (
-                    <PlayerPill key={m} name={m} style={state.playerStyles[m]} size="sm" />
+                    <PlayerPill key={m} name={m} style={styleOf(m)} size="sm" />
                   ))}
               </div>
             )}

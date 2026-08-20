@@ -18,7 +18,7 @@ type Props = {
   phase: CluePhase
   timerEndsAt: number | null
   buzzes: Buzz[]
-  playerStyles: Record<string, PlayerStyle>
+  styleOf: (name: string) => PlayerStyle
   lockedOut: number[]
   /** The buzz with the floor — fastest from a team not already ruled wrong. */
   onTheSpot: Buzz | null
@@ -74,7 +74,7 @@ function useCountdown(endsAt: number | null, onZero: () => void): number | null 
 }
 
 export function ClueStage({
-  clue, categoryName, accent, mode, teams, awardedIds, phase, timerEndsAt, buzzes, playerStyles,
+  clue, categoryName, accent, mode, teams, awardedIds, phase, timerEndsAt, buzzes, styleOf,
   lockedOut, onTheSpot, lastWrong, clueKeyStr, hoveredKey, onHover,
   onOpenBuzzers, onEndBuzzing, onCorrect, onWrong, onSkipToAnswer, isFinal, doneLabel,
   canReturnToBoard, onDone, onDismiss, onReturnToBoard,
@@ -111,17 +111,16 @@ export function ClueStage({
     return () => document.removeEventListener('keydown', onKey)
   }, [isHost, onDismiss])
 
-  // Always the category. This used to swap in the person's name for spot-the-lie
-  // clues, so Around the World's 600 announced itself as "Greg · 600 points".
-  // Who the card is about belongs in the question, where it already is.
   /**
-   * Answers that are simply a person get the same pill they wear everywhere else —
-   * their colour and their emoji — instead of appearing as plain text. Anything
-   * else is rendered as text with any names inside it picked out.
+   * An answer that is simply a person is shown in their colour rather than as plain
+   * text. No emoji here — at 52px it crowds the name, and the colour alone already
+   * ties the answer to the person.
    */
   const answerAsPerson = (answer: string) =>
     PEOPLE.includes(answer.trim()) ? answer.trim() : null
 
+  // Always the category: this used to swap in the person's name for spot-the-lie
+  // clues, so Around the World's 600 announced itself as "Greg · 600 points".
   const heading = categoryName
   const low = left !== null && left <= 5
 
@@ -200,7 +199,7 @@ export function ClueStage({
                   <span className="matchfact">{item.fact}</span>
                   {showAnswer && (
                     <span className="matchwho" style={{ animationDelay: `${i * 140}ms` }}>
-                      <PlayerPill name={item.person} style={playerStyles[item.person]} />
+                      <PlayerPill name={item.person} style={styleOf(item.person)} />
                     </span>
                   )}
                 </li>
@@ -256,11 +255,9 @@ export function ClueStage({
                     style={{ ['--team' as string]: teamColor(indexOf(b.teamId)) }}
                   >
                     <span className="buzzrank">{i + 1}</span>
-                    {playerStyles[b.name] && (
-                      <span style={{ color: playerStyles[b.name].color }}>
-                        <PlayerIcon icon={playerStyles[b.name].icon} size={15} />
-                      </span>
-                    )}
+                    <span style={{ color: styleOf(b.name).color }}>
+                      <PlayerIcon icon={styleOf(b.name).icon} size={15} />
+                    </span>
                     <span className="buzzname">{b.name}</span>
                     <span className="buzzteam">{teamOf(b.teamId)?.name}</span>
                     <span className="buzzms">{(b.reactionMs / 1000).toFixed(2)}s</span>
@@ -282,9 +279,7 @@ export function ClueStage({
           <div className="verdict" style={{ ['--team' as string]: teamColor(indexOf(onTheSpot.teamId)) }}>
             <div className="verdict-team">{spotTeam.name}</div>
             <div className="verdict-who">
-              {playerStyles[onTheSpot.name] && (
-                <PlayerIcon icon={playerStyles[onTheSpot.name].icon} size={17} />
-              )}
+              <PlayerIcon icon={styleOf(onTheSpot.name).icon} size={17} />
               {onTheSpot.name} buzzed in {(onTheSpot.reactionMs / 1000).toFixed(2)}s
             </div>
             {lockedOut.length > 0 && (
@@ -303,8 +298,9 @@ export function ClueStage({
               <span className="answer-person">
                 <PlayerPill
                   name={answerAsPerson(clue.answer)!}
-                  style={playerStyles[answerAsPerson(clue.answer)!]}
+                  style={styleOf(answerAsPerson(clue.answer)!)}
                   size="lg"
+                  icon={false}
                 />
               </span>
             ) : (
