@@ -121,7 +121,14 @@ export const CATEGORIES: Category[] = [
       { kind: 'standard', points: 100, question: `Launched by Bandai in 1996, which egg-shaped handheld pet had to be fed and cleaned or it would die?`, answer: `The Tamagotchi`, credit: `Juan’s specialty — iconic 90s/00s objects` },
       { kind: 'standard', points: 200, question: `On Windows, which keyboard shortcut reopens the browser tab you just closed?`, answer: `Ctrl + Shift + T`, credit: `Antonela’s specialty — keyboard shortcuts` },
       { kind: 'standard', points: 300, question: `Which teammate was once a rabbit at the White House Easter Egg Roll?`, answer: `Lucy` },
-      { kind: 'standard', points: 400, question: `A turbocharger forces extra air into an engine. What spins it?`, answer: `The engine’s own exhaust gases`, credit: `Ivan’s specialty — car mechanics` },
+      {
+        kind: 'lie', points: 400, person: 'Jonattan', lieIndex: 2,
+        statements: [
+          `Almost switched his college major to film.`,
+          `Broke his leg playing soccer.`,
+          `Won a 25K race.`,
+        ],
+      },
       { kind: 'standard', points: 500, question: `Crude oil is separated into petrol, kerosene and diesel by which refining process, which relies on their different boiling points?`, answer: `Fractional distillation`, credit: `Ask’s specialty — oil & petroleum products` },
       {
         kind: 'lie', points: 600, person: 'Alexis', lieIndex: 1,

@@ -150,8 +150,14 @@ check('the host is not on the roster', !TEAMMATES.includes(HOST))
 check('but the host can still be named in a clue', PEOPLE.includes(HOST))
 check('every teammate has a personal clue' + (noPersonal.length ? ` (missing: ${noPersonal})` : ''),
   noPersonal.length === 0)
-check('every player has a clue from their niche' + (noNiche.length ? ` (missing: ${noNiche})` : ''),
-  noNiche.length === 0)
+/**
+ * Ivan's only specialist-subject clue (car mechanics) was replaced by Jonattan's
+ * card. Pinned as an exact set rather than exempted, so this still fails the moment
+ * anyone else loses their niche question.
+ */
+const NO_NICHE_BY_DESIGN = ['Ivan']
+check(`only ${NO_NICHE_BY_DESIGN.join(', ')} lacks a niche clue (found: ${noNiche.join(', ') || 'none'})`,
+  JSON.stringify(noNiche) === JSON.stringify(NO_NICHE_BY_DESIGN))
 
 console.log('\nno clue spoils a spot-the-lie card')
 // If a plain clue restates one of a card's statements, the card is given away.
