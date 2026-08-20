@@ -421,9 +421,13 @@ body[data-mode="host"]::before{
   background:var(--surface);border-radius:var(--r);min-height:280px;overflow:hidden;
 }
 .draft-col-name{
-  background:var(--team);color:var(--on-color);
+  display:block;width:100%;box-sizing:border-box;
+  background:var(--team);color:var(--on-color);border:none;
   font-family:var(--display);font-size:var(--t-15);font-weight:600;padding:9px 16px;
 }
+.draft-col-name::placeholder{color:rgba(16,21,38,.5)}
+.draft-col-name:focus{outline:2px solid var(--ink);outline-offset:-2px}
+.draft-col-name:read-only{cursor:default}
 .draft-list{padding:14px 20px 22px}
 .draft-member{
   font-family:var(--display);font-size:var(--t-20);font-weight:500;
@@ -651,6 +655,23 @@ body[data-mode="host"]::before{
 .phone-head{text-align:center}
 .phone-who{font-family:var(--display);font-size:var(--t-32);font-weight:700;letter-spacing:-.02em}
 .phone-team{font-size:var(--t-15);font-weight:600;color:var(--team)}
+
+/* Any player can rename their team from their phone. The dashed underline says it
+   is editable without needing a label to explain it. */
+.phone-team-name{
+  background:none;border:none;text-align:center;width:100%;
+  font-family:var(--display);font-size:var(--t-20);font-weight:600;color:var(--team);
+  border-bottom:1px dashed color-mix(in oklab, var(--team) 55%, transparent);
+  padding:2px 4px 3px;
+}
+.phone-team-name:focus{outline:none;border-bottom-style:solid}
+.phone-team-name::placeholder{color:var(--ink-3)}
+
+/* The rest of the team, so a player can see who they are playing with. */
+.phone-mates{
+  display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-top:10px;
+  max-width:340px;
+}
 .phone-pick-label{font-family:var(--display);font-size:var(--t-24);font-weight:600;margin:8px 0 0}
 .phone-names{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:520px}
 .phone-name{

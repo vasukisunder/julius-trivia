@@ -105,6 +105,9 @@ export default function App() {
         onPickStyle={(name, color, icon) =>
           dispatch({ type: 'setPlayerStyle', name, color, icon })
         }
+        onRenameTeam={(teamId, teamName) =>
+          dispatch({ type: 'renameTeam', teamId, name: teamName })
+        }
       />
       </>
     )
@@ -152,6 +155,7 @@ export default function App() {
         onConfirm={() => dispatch({ type: 'setTeams', rosters: state.teams.map((t) => t.members) })}
         onAddMember={(teamId, name) => dispatch({ type: 'addMember', teamId, name })}
         onRemoveMember={(teamId, name) => dispatch({ type: 'removeMember', teamId, name })}
+        onRename={(teamId, name) => dispatch({ type: 'renameTeam', teamId, name })}
         onBack={() => dispatch({ type: 'backToRoster' })}
       />
       </>

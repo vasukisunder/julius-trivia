@@ -104,6 +104,21 @@ check('no clue text contains lowercase "ask" that a loose match would catch' +
   (looseAskHits.length ? ` (${looseAskHits.length})` : ''),
   looseAskHits.length === 0)
 
+console.log('\nrenaming a team')
+// Renaming is shared state, so a player doing it from their phone changes the name
+// on the host's board and the shared screen at the same moment.
+let sn2 = reducer(initialState(), { type: 'shuffleTeams' })
+const t = sn2.teams[1]
+sn2 = reducer(sn2, { type: 'renameTeam', teamId: t.id, name: 'Quiz Khalifa' })
+check('a team can be renamed during setup', sn2.teams[1].name === 'Quiz Khalifa')
+check('renaming touches nothing else', sn2.teams[1].members === t.members)
+sn2 = reducer(sn2, { type: 'setTeams', rosters: sn2.teams.map(x => x.members) })
+check('the name survives starting the game', sn2.teams[1].name === 'Quiz Khalifa')
+sn2 = reducer(sn2, { type: 'renameTeam', teamId: t.id, name: 'Les Quizerables' })
+check('and can still be renamed mid-game', sn2.teams[1].name === 'Les Quizerables')
+sn2 = reducer(sn2, { type: 'renameTeam', teamId: t.id, name: '' })
+check('clearing it is allowed, so a placeholder can show', sn2.teams[1].name === '')
+
 console.log('\nthe closing question')
 // It is deliberately off the board: reachable only from the host toolbar, and worth
 // more than any tile.

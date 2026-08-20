@@ -3,7 +3,7 @@ import type { GameState } from '../types'
 import type { Connection } from '../net/useRoom'
 import { playerId, savedName, saveName, hasChosen, markChosen } from '../net/player'
 import { PLAYER_COLORS, PLAYER_EMOJI, freeStyle } from '../data/avatars'
-import { PlayerIcon } from './PlayerPill'
+import { PlayerIcon, PlayerPill } from './PlayerPill'
 import { Wordmark } from './Wordmark'
 
 type Props = {
@@ -11,6 +11,8 @@ type Props = {
   connection: Connection
   onBuzz: (name: string, teamId: number, reactionMs: number) => void
   onPickStyle: (name: string, color: string, icon: string) => void
+  /** Anyone on a team can rename it, and it changes everywhere at once. */
+  onRenameTeam: (teamId: number, name: string) => void
 }
 
 /**
@@ -34,7 +36,9 @@ function useSecondsLeft(endsAt: number | null): number | null {
 
 const ORDINALS = ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th']
 
-export function BuzzerScreen({ state, connection, onBuzz, onPickStyle }: Props) {
+export function BuzzerScreen({
+  state, connection, onBuzz, onPickStyle, onRenameTeam,
+}: Props) {
   const [name, setName] = useState<string | null>(savedName)
   // Opens by default the first time, because a picker you have to discover is a
   // picker nobody uses.
@@ -115,7 +119,30 @@ export function BuzzerScreen({ state, connection, onBuzz, onPickStyle }: Props) 
       <div className="phone-id">
         {style && <PlayerIcon icon={style.icon} size={30} />}
         <span className="phone-who">{name}</span>
-        <span className="phone-team">{me ? me.name : 'Team to be drawn'}</span>
+
+        {me ? (
+          <>
+            {/* Editable by anyone on the team; the change lands on every screen. */}
+            <input
+              className="phone-team-name"
+              value={me.name}
+              aria-label="Your team's name"
+              placeholder="Name your team"
+              onChange={(e) => onRenameTeam(me.id, e.target.value)}
+            />
+            {me.members.length > 1 && (
+              <div className="phone-mates">
+                {me.members
+                  .filter((m) => m !== name)
+                  .map((m) => (
+                    <PlayerPill key={m} name={m} style={state.playerStyles[m]} size="sm" />
+                  ))}
+              </div>
+            )}
+          </>
+        ) : (
+          <span className="phone-team">Team to be drawn</span>
+        )}
       </div>
 
       {picking ? (

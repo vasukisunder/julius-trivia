@@ -17,6 +17,7 @@ type Props = {
   onConfirm: () => void
   onAddMember: (teamId: number, name: string) => void
   onRemoveMember: (teamId: number, name: string) => void
+  onRename: (teamId: number, name: string) => void
   onBack: () => void
 }
 
@@ -24,7 +25,8 @@ const ROLL_MS = 60      // how fast names cycle while scrambling
 const LAND_MS = 130     // gap between each name locking in
 
 export function TeamDraft({
-  teams, drawSeq, mode, onRedraw, onConfirm, onAddMember, onRemoveMember, onBack,
+  teams, drawSeq, mode, onRedraw, onConfirm, onAddMember, onRemoveMember, onRename,
+  onBack,
 }: Props) {
   const [landed, setLanded] = useState(0)
   const [rolling, setRolling] = useState(false)
@@ -113,7 +115,14 @@ export function TeamDraft({
               setOver(null)
             }}
           >
-            <div className="draft-col-name">{team.name}</div>
+            <input
+              className="draft-col-name"
+              value={team.name}
+              aria-label={`Name for ${team.name}`}
+              placeholder="Name this team"
+              readOnly={!editable}
+              onChange={(e) => onRename(team.id, e.target.value)}
+            />
             <div className="draft-list">
               {team.members.map((name, row) => {
                 // Once the scramble finishes everything reads as landed, so a
