@@ -183,19 +183,32 @@ export function TeamDraft({
         ))}
       </div>
 
-      {editable && (
-        <div className="draft-foot">
-          <button className="bigbtn" disabled={rolling} onClick={onConfirm}>
-            Start game
-          </button>
-          <button className="bigbtn ghost" disabled={rolling} onClick={onRedraw}>
-            Shuffle again
-          </button>
-          <button className="bigbtn ghost" disabled={rolling} onClick={onBack}>
-            Edit players
-          </button>
-        </div>
-      )}
+      {/* The room sees the same controls the host is using; only answers are held
+          back. On the shared screen they are inert — hiding them meant the room
+          could not tell what the host was about to do. */}
+      <div className="draft-foot">
+        <button
+          className="bigbtn"
+          disabled={!editable || rolling}
+          onClick={onConfirm}
+        >
+          Start game
+        </button>
+        <button
+          className="bigbtn ghost"
+          disabled={!editable || rolling}
+          onClick={onRedraw}
+        >
+          Shuffle again
+        </button>
+        <button
+          className="bigbtn ghost"
+          disabled={!editable || rolling}
+          onClick={onBack}
+        >
+          Edit players
+        </button>
+      </div>
     </div>
   )
 }

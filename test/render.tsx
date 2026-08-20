@@ -14,6 +14,8 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { Stickers } from '../src/components/Stickers'
 import { ClueStage } from '../src/components/ClueStage'
+import { TeamDraft } from '../src/components/TeamDraft'
+import { RosterStage } from '../src/components/RosterStage'
 import { CATEGORIES, FINAL_CLUE } from '../src/data'
 import { clueKey, type Clue, type CluePhase, type Buzz } from '../src/types'
 import { initialState, reducer } from '../src/state/gameState'
@@ -186,6 +188,49 @@ check('and not before them',
   !stage(FINAL_CLUE, 'verdict', true).includes('finalmark'))
 check('a tile never shows the marker',
   !stage(CATEGORIES[0].clues[0], 'verdict', false).includes('finalmark'))
+
+console.log('\nthe shared screen mirrors every control')
+// Both setup screens print the join URL, which reads window.location.
+;(globalThis as { window?: unknown }).window = {
+  location: { protocol: 'http:', hostname: 'localhost', port: '5173', host: 'localhost:5173' },
+}
+/**
+ * The room should see the same controls the host is using — only answers are held
+ * back. Hiding a control on the shared screen means nobody watching can tell what
+ * the host is about to press, which is the whole reason the mirror exists.
+ *
+ * The draft screen spent a while with its entire footer wrapped in a host-only
+ * branch, so Start game, Shuffle again and Edit players were missing there.
+ */
+const setupScreens = (['host', 'present'] as const).map((viewMode) => ({
+  viewMode,
+  draft: renderToStaticMarkup(
+    <TeamDraft
+      teams={teams} drawSeq={1} mode={viewMode}
+      onRedraw={() => {}} onConfirm={() => {}} onAddMember={() => {}}
+      onRemoveMember={() => {}} onRename={() => {}} onBack={() => {}}
+    />,
+  ),
+  roster: renderToStaticMarkup(
+    <RosterStage
+      roster={seeded.roster} teamCount={3} mode={viewMode}
+      onAdd={() => {}} onRemove={() => {}} onSetTeamCount={() => {}}
+      onShuffle={() => {}} onResetRoster={() => {}} isOriginal
+    />,
+  ),
+}))
+
+const buttonLabels = (markup: string) =>
+  [...markup.matchAll(/<button[^>]*>((?:<[^>]*>)*)([^<]*)/g)].map((m) => m[2].trim())
+
+for (const screen of ['draft', 'roster'] as const) {
+  const [host, present] = setupScreens.map((s) => buttonLabels(s[screen]).sort().join('|'))
+  check(`the ${screen} screen shows the host's controls on the shared screen too`,
+    host === present)
+}
+// And the join code, which is how anyone reaches a buzzer at all.
+check('both setup screens carry the join code on both views',
+  setupScreens.every((s) => s.draft.includes('svg') && s.roster.includes('svg')))
 
 console.log(`\n${pass} passed, ${fail} failed`)
 if (fail) throw new Error(`${fail} render check(s) failed`)
