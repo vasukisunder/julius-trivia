@@ -67,8 +67,8 @@ check(`every tilt is within 13 degrees${badRot.length ? ` — ${badRot}` : ''}`,
 
 // Near 1 by default; a clue may call for an explicit emphasis, which multiplies it.
 const scales = nums('--scale')
-const badScale = scales.filter((v) => v < 0.85 || v > 2.3)
-check(`every scale is between 0.85 and 2.3${badScale.length ? ` — ${badScale}` : ''}`,
+const badScale = scales.filter((v) => v < 0.7 || v > 2.3)
+check(`every scale is between 0.7 and 2.3${badScale.length ? ` — ${badScale}` : ''}`,
   scales.length > 0 && badScale.length === 0)
 // Emphasis is relative: a clue that scales up every sticker has emphasised none.
 const allBig = clues.filter(({ clue }) =>
@@ -79,6 +79,13 @@ check(`no clue emphasises all of its stickers (${scales.filter((v) => v > 1.15).
 // Both sides get used, or the "scatter" is a single column.
 check('stickers land on both edges',
   nums('left').length > 0 && nums('right').length > 0)
+
+// The side class drives transform-origin, so it has to agree with the inset the
+// sticker was given — otherwise an emphasised one grows out of the screen, not into it.
+const mismatched = [...all.matchAll(/class="sticker (from-left|from-right)[^"]*"\s+style="([^"]*)"/g)]
+  .filter((m) => !m[2].includes(m[1] === 'from-left' ? 'left:' : 'right:'))
+check(`every sticker's side class matches its inset${mismatched.length ? ` (${mismatched.length} off)` : ''}`,
+  mismatched.length === 0)
 /**
  * Two stickers on one side of one clue must sit in different bands. Heights are set
  * in CSS, so this checks the gap between them instead: a printed piece is about 16%

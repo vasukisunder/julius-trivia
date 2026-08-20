@@ -1197,6 +1197,11 @@ body[data-mode="present"] .roster-remove{opacity:.6}
   position:absolute;width:clamp(64px,7.4vw,124px);
   animation:stickIn .5s var(--ease) var(--d) both;
 }
+/* An emphasised sticker grows toward the middle of the screen rather than out of
+   it. The inset is applied to the unscaled box, so growing from the centre would
+   push half the extra size back past the inset and into the margin. */
+.sticker.from-left{transform-origin:left center}
+.sticker.from-right{transform-origin:right center}
 .sticker.wide{width:clamp(150px,16vw,250px)}
 /* Lands with a slight overshoot, like it was pressed on. */
 @keyframes stickIn{

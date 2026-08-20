@@ -84,7 +84,15 @@ export function Stickers({ stickers, seed }: Props) {
         else style.right = inset
 
         return (
-          <div className={`sticker${wide ? ' wide' : ''}`} key={i} style={style}>
+          <div
+            // The side is a class as well as an inset, because scaling grows a
+            // sticker from its anchored edge inward — see the stylesheet. The inset
+            // applies to the unscaled box, so a 1.45x sticker growing from its
+            // centre would reach back past it toward the edge of the screen.
+            className={`sticker ${onLeft ? 'from-left' : 'from-right'}${wide ? ' wide' : ''}`}
+            key={i}
+            style={style}
+          >
             <div className="sticker-art">
               <img className="sticker-img" src={stickerSrc(artOf(sticker))} alt="" draggable={false} />
             </div>

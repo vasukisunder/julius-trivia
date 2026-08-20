@@ -232,11 +232,12 @@ check('no clue is mostly postcards',
   art.every(a => a.filter(k => k.startsWith('postcard-')).length <= 2 ||
     a.every(k => k.startsWith('postcard-'))))
 
-// An explicit scale is for a piece the default box does not do justice to. Past
-// about 2x it stops being emphasis and starts crowding the question.
+// An explicit scale is for a piece the default box does not do justice to, in
+// either direction — some art is too dominant at the default size, not just too
+// small. Past about 2x it stops being emphasis and starts crowding the question.
 const scales = decorated.flatMap(c => c.stickers.map(scaleOf))
-check(`explicit sizes stay between 1 and 2 (${[...new Set(scales)].sort().join(', ')})`,
-  scales.every(v => v >= 1 && v <= 2))
+check(`explicit sizes stay between 0.7 and 2 (${[...new Set(scales)].sort().join(', ')})`,
+  scales.every(v => v >= 0.7 && v <= 2))
 
 /**
  * The room sees the stickers while the question is being read, so a sticker that
