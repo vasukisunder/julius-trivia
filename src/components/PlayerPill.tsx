@@ -3,7 +3,7 @@ import type { PlayerStyle } from '../types'
 type Props = {
   name: string
   style?: PlayerStyle
-  size?: 'sm' | 'md'
+  size?: 'sm' | 'md' | 'lg'
 }
 
 /** The player's emoji. */
@@ -29,7 +29,7 @@ export function PlayerPill({ name, style, size = 'md' }: Props) {
   }
   return (
     <span className={`ppill ${size}`} style={{ ['--p' as string]: style.color }}>
-      <PlayerIcon icon={style.icon} size={size === 'sm' ? 12 : 14} />
+      <PlayerIcon icon={style.icon} size={size === 'sm' ? 12 : size === 'lg' ? 30 : 14} />
       {name}
     </span>
   )

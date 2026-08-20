@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Buzz, Clue, CluePhase, PlayerStyle, Team, ViewMode, Wrong } from '../types'
 import { PlayerIcon, PlayerPill } from './PlayerPill'
+import { PEOPLE } from '../data'
 import { WithNames } from './WithNames'
 import { useAwardFlash } from '../state/useAwardFlash'
 import { teamColor, CATEGORY_GRADIENT } from '../theme'
@@ -113,6 +114,14 @@ export function ClueStage({
   // Always the category. This used to swap in the person's name for spot-the-lie
   // clues, so Around the World's 600 announced itself as "Greg · 600 points".
   // Who the card is about belongs in the question, where it already is.
+  /**
+   * Answers that are simply a person get the same pill they wear everywhere else —
+   * their colour and their emoji — instead of appearing as plain text. Anything
+   * else is rendered as text with any names inside it picked out.
+   */
+  const answerAsPerson = (answer: string) =>
+    PEOPLE.includes(answer.trim()) ? answer.trim() : null
+
   const heading = categoryName
   const low = left !== null && left <= 5
 
@@ -290,7 +299,17 @@ export function ClueStage({
         {phase === 'revealed' && clue.kind === 'standard' && (
           <div className="answer">
             <span className="label">Answer</span>
-            <span className="answer-val">{clue.answer}</span>
+            {answerAsPerson(clue.answer) ? (
+              <span className="answer-person">
+                <PlayerPill
+                  name={answerAsPerson(clue.answer)!}
+                  style={playerStyles[answerAsPerson(clue.answer)!]}
+                  size="lg"
+                />
+              </span>
+            ) : (
+              <span className="answer-val"><WithNames text={clue.answer} /></span>
+            )}
           </div>
         )}
         {phase === 'revealed' && (

@@ -1,9 +1,12 @@
-import type { Category, ClueRef, ViewMode } from '../types'
+import type { Category, ClueRef, PlayerStyle, ViewMode } from '../types'
 import { clueKey } from '../types'
 import { catColor } from '../theme'
+import { PEOPLE } from '../data'
 
 type Props = {
   categories: Category[]
+  /** Player colours, so a name in the host's answer key wears its owner's colour. */
+  playerStyles: Record<string, PlayerStyle>
   used: Set<string>
   mode: ViewMode
   /** Omitted in presentation mode: the shared screen mirrors, it does not drive. */
@@ -24,7 +27,9 @@ function answerFor(clue: Category['clues'][number]): string {
   return clue.answer
 }
 
-export function Board({ categories, used, mode, onOpen, hoveredKey, onHover }: Props) {
+export function Board({
+  categories, playerStyles, used, mode, onOpen, hoveredKey, onHover,
+}: Props) {
   // Categories may hold different numbers of clues; pad the short ones so the
   // rows across the board stay level.
   const rows = Math.max(...categories.map((c) => c.clues.length))
@@ -72,7 +77,18 @@ export function Board({ categories, used, mode, onOpen, hoveredKey, onHover }: P
             >
               <span className="tile-pts">{clue.points}</span>
               {mode === 'host' && !isUsed && (
-                <span className="tile-ans">{answerFor(clue)}</span>
+                <span
+                  className="tile-ans"
+                  // A name in the answer key wears its owner's colour, same as
+                  // everywhere else the person appears.
+                  style={
+                    clue.kind === 'standard' && PEOPLE.includes(clue.answer.trim())
+                      ? { color: playerStyles[clue.answer.trim()]?.color }
+                      : undefined
+                  }
+                >
+                  {answerFor(clue)}
+                </span>
               )}
             </button>
           )

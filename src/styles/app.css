@@ -68,7 +68,7 @@ button{font-family:inherit;color:inherit}
   font-family:var(--display);font-size:var(--t-24);font-weight:700;
   letter-spacing:-.02em;line-height:1.1;
 }
-.wordmark span{color:#8B90E5}
+/* Colour comes from the palette, set inline in Wordmark.tsx. */
 /* The presentation board mirrors the host, so its tiles are inert. */
 .tile.static{cursor:default}
 .tile.static:hover{background:var(--surface);color:var(--cat);transform:none}
@@ -311,6 +311,12 @@ body[data-mode="host"]::before{
 .answer.host-only .answer-val{font-size:clamp(20px,2.6vw,32px);font-weight:600}
 /* Host-only answers are framed in red so a mis-shared window is obvious. */
 .answer.host-only{border:1px solid rgba(229,87,77,.5);border-radius:var(--r);padding:14px 22px}
+
+/* An answer that is a person wears their pill rather than plain text. */
+.answer-person .ppill{
+  font-family:var(--display);font-size:clamp(26px,4vw,52px);font-weight:700;
+  letter-spacing:-.03em;padding:10px 26px 10px 20px;gap:12px;
+}
 .answer.host-only .label{color:var(--signal)}
 
 .stage-foot{flex:none;display:flex;align-items:center;justify-content:center;gap:8px;
