@@ -78,6 +78,10 @@ field rather than a fractional entry in `awards`: two ledgers that can both desc
 the same clue is two things to keep in step. `awardTo` refuses the closing question
 outright for the same reason.
 
+The marker appears only once the answers are revealed: scoring before the room has
+seen what the answers were puts the arithmetic ahead of the moment the question exists
+for.
+
 Setting a mark replaces it rather than adding, so a host correcting themselves cannot
 inflate a score, and only a mark going *up* stamps `lastAward` — otherwise fixing a
 typo sets off the confetti again. Putting the question back on the board clears

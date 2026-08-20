@@ -170,11 +170,12 @@ check('the closing question reveals a winner from its last step',
 check('and it cannot be put back on a tile it never had',
   !finalRevealed.includes('Put back on the board'))
 
-// Marking is what replaces Correct/Wrong there, and it has to be reachable.
-check('the closing question can be marked while it is being judged',
-  stage(FINAL_CLUE, 'verdict', true).includes('finalmark'))
-check('and still while the answers are up',
+// Marking is what replaces Correct/Wrong there, and it waits for the reveal — the
+// room should see the answers before it sees the scoring.
+check('the closing question is marked once the answers are up',
   stage(FINAL_CLUE, 'revealed', true).includes('finalmark'))
+check('and not before them',
+  !stage(FINAL_CLUE, 'verdict', true).includes('finalmark'))
 check('a tile never shows the marker',
   !stage(CATEGORIES[0].clues[0], 'verdict', false).includes('finalmark'))
 

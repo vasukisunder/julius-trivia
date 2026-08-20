@@ -302,8 +302,12 @@ export function ClueStage({
 
         {/* The closing question is marked, not buzzed: every team hands in three
             matches, so every team can score, and one or two out of three is worth
-            having. A row each, rather than one team on the spot. */}
-        {isFinal && clue.kind === 'match' && (phase === 'verdict' || phase === 'revealed') && (
+            having. A row each, rather than one team on the spot.
+
+            Held back until the answers are up. Marking before the room has seen what
+            the answers were puts the scoring ahead of the reveal, which is the moment
+            the question exists for. */}
+        {isFinal && clue.kind === 'match' && phase === 'revealed' && (
           <div className="finalmark">
             <div className="finalmark-head">
               How many did each team get?
