@@ -110,6 +110,27 @@ arranged alike. Slots are corner-weighted because stage text is centred both way
 The whole set is preloaded during setup. `test/stickers.mjs` checks the registry, the
 files on disk and the board data all agree, and holds the set to a size budget.
 
+### Generating art
+
+`sticker-prompts.csv` holds one image-generation prompt per sticker key, and
+`tools/key.py` turns the results into assets:
+
+```bash
+python3 tools/key.py --dir raw/ --out public/stickers/
+```
+
+Prompts ask for a flat magenta `#FF00FF` background rather than transparency. Asked
+for transparency, models sometimes paint the *symbol* for it — an opaque grey-and-white
+checkerboard. That cannot be undone here: the art has pure white die-cut borders, so
+a border pixel landing on a white checker square is bit-identical to the background,
+and half of every border does. A lattice-based repair measured IoU 0.43-0.71 and ate
+up to 42% of the sticker. White and black are out for the same reason — the art uses
+both. Magenta appears in none of the palettes, which are all faded vintage colours,
+so the split is exact: IoU 0.982-0.994 measured against known alpha.
+
+The keyer unmixes edge pixels rather than thresholding them, so an anti-aliased pixel
+has the key's contribution subtracted back out instead of leaving a pink fringe.
+
 ## Sound
 
 Only `/present` produces audio. Cues are synthesised with the Web Audio API rather than
