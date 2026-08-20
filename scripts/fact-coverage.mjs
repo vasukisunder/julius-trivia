@@ -56,11 +56,20 @@ const FIX = [
   // One distinctive word, so it cannot clear the two-keyword threshold. It lives in
   // the closing question.
   [/ambidextrous/i, FINAL_CATEGORY],
+  // The form says "delivering"; the clue says "delivered".
+  [/delivering newspapers/i, FINAL_CATEGORY],
   [/brewer/i, 'Origin Stories 300'],
   [/kung fu/i, 'Game On 300'],
   [/bike fixing shop/i, 'Origin Stories 600'],
   [/Lagos/i, null],
 ]
+/**
+ * Lies the form never marked. Two people left theirs unmarked; where the answer has
+ * since been supplied, record it here so the column is not left saying "not marked"
+ * for a set we can actually resolve.
+ */
+const KNOWN_LIE = { Hattie: /brownies/i }
+
 /** Fragments and pleasantries that are not facts in their own right. */
 const DROP = [/^I was sober/i, /^Thank you/i, /^Thanks for/i, /^I love travelling and living abroad$/i]
 /** Tidy the artefacts of splitting free text. */
@@ -148,8 +157,10 @@ for (const r of table.slice(1)) {
     let where = autoLocate(`${name} ${fact}`)
     for (const [pattern, fixed] of FIX) if (pattern.test(fact)) where = fixed
 
+    const known = KNOWN_LIE[name]
     const kind = source !== 'Two truths & a lie'
       ? ''
+      : known ? (known.test(fact) ? 'the lie' : 'true')
       : !marked ? 'not marked'
       : isLie ? 'the lie'
       : 'true'

@@ -27,8 +27,10 @@ check('standard clues all have a question and answer', standard.every(c => !!c.q
 check('every lie clue has exactly 3 statements', lieClues.every(c => c.statements.length === 3))
 check('every lieIndex is a valid statement index',
   lieClues.every(c => c.lieIndex >= 0 && c.lieIndex < c.statements.length))
-check('no unresolved lies (Juan and Hattie never marked theirs, so are not used here)',
-  !lieClues.some(c => c.person === 'Juan' || c.person === 'Hattie'))
+// Juan never said which of his statements was false, so he cannot have a card.
+// Hattie's was supplied separately after the fact.
+check('nobody has a card whose lie is unknown',
+  !lieClues.some(c => c.person === 'Juan'))
 
 console.log('\nauthoring mistakes that would show up mid-game')
 // A spot-the-lie card names a person; if that name is not a real teammate, the

@@ -23,7 +23,14 @@ export const CATEGORIES: Category[] = [
   {
     name: 'Origin Stories',
     clues: [
-      { kind: 'standard', points: 100, question: `Which teammate’s very first job was delivering newspapers?`, answer: `Greg` },
+      {
+        kind: 'lie', points: 100, person: 'Hattie', lieIndex: 2,
+        statements: [
+          `Fell down a waterfall.`,
+          `Was recruited for a reality dating show.`,
+          `Won a lifetime supply of brownies.`,
+        ],
+      },
       { kind: 'standard', points: 200, question: `Which teammate’s first “real” job was in the men’s sportswear department at Nordstrom?`, answer: `Lucy` },
       {
         kind: 'lie', points: 300, person: 'Hannah', lieIndex: 2,
