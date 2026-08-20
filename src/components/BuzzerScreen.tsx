@@ -118,8 +118,20 @@ export function BuzzerScreen({
   return (
     <div className="phone" style={{ ['--team' as string]: accent }}>
       <div className="phone-id">
-        {style && <PlayerIcon icon={style.icon} size={30} />}
-        <span className="phone-who">{name}</span>
+        <div className="phone-idrow">
+          {style && <PlayerIcon icon={style.icon} size={30} />}
+          <span className="phone-who">{name}</span>
+          {/* Sits with the thing it edits, rather than as a full-width button
+              competing with the buzzer below. */}
+          <button
+            className="phone-edit"
+            aria-label="Change your colour and emoji"
+            aria-expanded={picking}
+            onClick={() => setPicking((p) => !p)}
+          >
+            Edit
+          </button>
+        </div>
 
         {me ? (
           <>
@@ -162,7 +174,7 @@ export function BuzzerScreen({
         </button>
       ))}
 
-      {picking ? (
+      {picking && (
         <div className="picker">
           <div className="picker-label">Your colour</div>
           <div className="picker-row">
@@ -201,10 +213,6 @@ export function BuzzerScreen({
             Done
           </button>
         </div>
-      ) : (
-        <button className="picker-open" onClick={() => setPicking(true)}>
-          Change colour &amp; emoji
-        </button>
       )}
 
       {myBuzz ? (

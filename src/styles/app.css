@@ -822,9 +822,17 @@ button:disabled{cursor:default}
 
 /* ============================ phone identity ============================= */
 .phone-id{
-  display:flex;flex-direction:column;align-items:center;gap:2px;
+  display:flex;flex-direction:column;align-items:center;gap:4px;
   color:var(--ink);padding:4px 12px;
 }
+.phone-idrow{display:flex;align-items:center;gap:10px}
+/* Small, and next to the identity it edits. */
+.phone-edit{
+  background:var(--surface);border:none;border-radius:99px;color:var(--ink-3);
+  font-size:var(--t-12);font-weight:600;padding:5px 12px;cursor:pointer;flex:none;
+  transition:background .15s,color .15s;
+}
+.phone-edit:hover,.phone-edit[aria-expanded="true"]{background:var(--surface-2);color:var(--ink)}
 
 .picker{
   width:100%;max-width:440px;background:var(--surface);border-radius:var(--r);
