@@ -9,3 +9,5 @@ tsconfig.tsbuildinfo
 # in src/data already holds everything the game needs, so the CSV stays local.
 *.csv
 fact-coverage.csv
+# ...but the sticker prompts are just prompts, and are meant to be shared.
+!sticker-prompts.csv
