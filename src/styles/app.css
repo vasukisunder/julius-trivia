@@ -906,7 +906,8 @@ button:disabled{cursor:default}
   background:var(--ink);color:var(--canvas);border:none;border-radius:var(--r-sm);
   padding:12px;font-size:var(--t-15);font-weight:700;cursor:pointer;margin-top:4px;
 }
-.phone-name{display:inline-flex;align-items:center;gap:7px}
+/* Flex for the vertical centring only — the gap went with the emoji. */
+.phone-name{display:inline-flex;align-items:center}
 
 @media (max-width:640px){
   .draft-head{gap:18px}

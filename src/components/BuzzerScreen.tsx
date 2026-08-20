@@ -78,6 +78,10 @@ export function BuzzerScreen({
       <div className="phone">
         <div className="phone-head"><Wordmark /></div>
         <p className="phone-pick-label">Who are you?</p>
+        {/* No emoji in this list. Everyone has one by default, but showing it before
+            anyone has picked reads as already claimed — and picking one is the very
+            next thing that happens. The colour stays: it is what makes the list
+            scannable at a glance. */}
         {state.roster.length === 0 ? (
           <p className="phone-note">Waiting for the host to open the game.</p>
         ) : (
@@ -88,13 +92,12 @@ export function BuzzerScreen({
                 <button
                   key={member}
                   className="phone-name"
-                  style={st ? { ['--team' as string]: st.color } : undefined}
+                  style={{ ['--team' as string]: st.color }}
                   onClick={() => {
                     saveName(member)
                     setName(member)
                   }}
                 >
-                  {st && <PlayerIcon icon={st.icon} size={15} />}
                   {st.label}
                 </button>
               )
