@@ -220,25 +220,15 @@ const printed = decorated.flatMap(c => c.stickers).filter(s => typeof s === 'obj
 check(`every printed piece carries its text (${printed.length} of them)`,
   printed.every(s =>
     ('postcard' in s && !!s.postcard && !!s.note) ||
-    ('pennant' in s && !!s.pennant) ||
-    ('stub' in s && !!s.stub && !!s.sub) ||
-    ('photo' in s && !!s.photo && !!s.of) ||
-    ('tag' in s && !!s.tag) ||
-    ('rosette' in s && !!s.rosette) ||
-    ('stamp' in s && !!s.stamp)))
+    ('photo' in s && !!s.photo && !!s.of)))
 
 /**
- * The point of the printed forms is that they are not all one thing. If the board
- * drifts back to postcards everywhere, this is the line that notices.
+ * Both surviving forms stay in play. Five others were cut for being a flat shape
+ * with a word on it; these two are the ones that carry a picture, and a board that
+ * quietly lost one of them would be back to a single material.
  */
 const forms = new Set(printed.map(s => Object.keys(s)[0]))
-check(`the printed pieces use ${forms.size} different forms (${[...forms].sort()})`,
-  forms.size >= 5)
-// Roughly half the clues should carry something that is not object art, or the
-// board reads as one material again.
-const withPrinted = decorated.filter(c => c.stickers.some(s => typeof s === 'object')).length
-check(`${withPrinted} of ${decorated.length} clues carry a printed piece`,
-  withPrinted >= decorated.length / 2)
+check(`postcards and Polaroids both in use (${[...forms].sort()})`, forms.size === 2)
 
 // Four postcards reading "Wish you were here" is a template, not a souvenir.
 const notes = printed.flatMap(s => ('postcard' in s ? [s.note] : []))

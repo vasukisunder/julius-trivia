@@ -48,20 +48,14 @@ export const CATEGORIES: Category[] = [
         kind: 'standard', points: 300,
         question: `Which teammate was the lead singer of a rock band, with a song they wrote still floating around on YouTube?`,
         answer: `Ana`,
-        stickers: [
-          'guitar', 'musical-notes', 'star',
-          { stub: 'Live tonight', sub: 'One night only' },
-        ],
+        stickers: ['guitar', 'musical-notes', 'star'],
       },
-      { kind: 'standard', points: 400, question: `Which teammate worked on “Popstars,” the TV show that came before American Idol?`, answer: `Daniel`, stickers: ['tv', { rosette: 'On air' }] },
+      { kind: 'standard', points: 400, question: `Which teammate worked on “Popstars,” the TV show that came before American Idol?`, answer: `Daniel`, stickers: ['tv', 'clapper'] },
       {
         kind: 'standard', points: 500,
         question: `Which teammate’s first “real” job was in the men’s sportswear department at Nordstrom?`,
         answer: `Lucy`,
-        stickers: [
-          'tshirt', 'dress-shoe', 'coat',
-          { tag: 'Menswear', sub: 'Second floor' },
-        ],
+        stickers: ['tshirt', 'dress-shoe', 'coat'],
       },
       { kind: 'standard', points: 600, question: `Which team member used to be a pediatric doctor?`, answer: `Juan`, stickers: ['bandage', { photo: 'On call', of: 'stethoscope' }] },
     ],
@@ -70,7 +64,7 @@ export const CATEGORIES: Category[] = [
     name: 'Game On',
     clues: [
       { kind: 'standard', points: 100, question: `Only one nation has appeared at every FIFA World Cup since 1930. Which country?`, answer: `Brazil`, credit: `Shakir’s specialty`, stickers: ['ball-soccer', 'trophy'] },
-      { kind: 'standard', points: 200, question: `The NFL’s championship trophy carries the name of which legendary Green Bay Packers coach?`, answer: `Vince Lombardi`, credit: `Joe’s specialty`, stickers: ['football', { pennant: 'Green Bay' }] },
+      { kind: 'standard', points: 200, question: `The NFL’s championship trophy carries the name of which legendary Green Bay Packers coach?`, answer: `Vince Lombardi`, credit: `Joe’s specialty`, stickers: ['football', { postcard: 'Green Bay', note: 'Frozen tundra' }] },
       {
         kind: 'lie', points: 300, person: 'Ask', lieIndex: 0,
         statements: [
@@ -78,11 +72,11 @@ export const CATEGORIES: Category[] = [
           `Biked 120 km on a drunken bet.`,
           `Ran a marathon on a drunken bet.`,
         ],
-        stickers: ['beer', 'canoe', { rosette: 'On a bet' }],
+        stickers: ['beer', 'canoe', 'running-shoe'],
       },
       { kind: 'standard', points: 400, question: `Which teammate did fifteen years of kung fu?`, answer: `Ivan`, stickers: ['gi', 'medal'] },
       { kind: 'standard', points: 500, question: `Which teammate used to be a competitive figure skater?`, answer: `Hattie`, stickers: ['skate', 'snowflake', 'medal'] },
-      { kind: 'standard', points: 600, question: `Where did the US men’s team finish at the very first World Cup?`, answer: `Third — still their best ever`, credit: `Greg’s specialty`, stickers: ['ball-soccer', { stub: 'World Cup', sub: 'First final \u00b7 1930' }] },
+      { kind: 'standard', points: 600, question: `Where did the US men’s team finish at the very first World Cup?`, answer: `Third — still their best ever`, credit: `Greg’s specialty`, stickers: ['trophy', { photo: 'First final', of: 'ball-soccer' }] },
     ],
   },
   {
@@ -97,7 +91,7 @@ export const CATEGORIES: Category[] = [
           `A bed and breakfast.`,
           `A commune.`,
         ],
-        stickers: ['bed', 'house-garden', 'camping', { tag: 'Former address' }],
+        stickers: ['bed', 'house-garden', 'camping'],
       },
       {
         kind: 'standard', points: 200,
@@ -123,20 +117,20 @@ export const CATEGORIES: Category[] = [
           { postcard: 'Lagos', note: 'Six months here' },
         ],
       },
-      { kind: 'standard', points: 400, question: `AI companies now pay a fortune for “.ai” web addresses. The domain actually belongs to which Caribbean island?`, answer: `Anguilla`, credit: `Antonela’s specialty`, stickers: ['laptop', 'palm', 'globe', { stamp: '.ai' }] },
+      { kind: 'standard', points: 400, question: `AI companies now pay a fortune for “.ai” web addresses. The domain actually belongs to which Caribbean island?`, answer: `Anguilla`, credit: `Antonela’s specialty`, stickers: ['laptop', 'palm', 'globe'] },
       { kind: 'standard', points: 500, question: `The War of the Triple Alliance pitted Paraguay against Brazil, Argentina and which third country?`, answer: `Uruguay`, credit: `Jonattan’s specialty`, stickers: ['swords', 'compass', 'world-map'] },
-      { kind: 'standard', points: 600, question: `Which state does Matt intend to never visit?`, answer: `South Dakota`, stickers: ['automobile', 'luggage', 'pushpin', { tag: 'Never' }] },
+      { kind: 'standard', points: 600, question: `Which state does Matt intend to never visit?`, answer: `South Dakota`, stickers: ['automobile', 'luggage', 'pushpin'] },
     ],
   },
   {
     name: 'Pop Culture',
     clues: [
-      { kind: 'standard', points: 100, question: `Premiering in 1989, this animated sitcom is the longest-running scripted prime-time show in US TV history.`, answer: `The Simpsons`, credit: `Ana & Juan’s specialty`, stickers: ['couch', 'tv', { stub: 'Prime time', sub: 'Since 1989' }] },
-      { kind: 'standard', points: 200, question: `This HBO drama became the network’s most-watched series ever before it ended in 2019.`, answer: `Game of Thrones`, credit: `Hattie’s specialty`, stickers: ['crown', 'popcorn', { rosette: 'Most watched' }] },
-      { kind: 'standard', points: 300, question: `Launched by Bandai in 1996, which egg-shaped handheld pet had to be fed and cleaned or it would die?`, answer: `The Tamagotchi`, credit: `Juan’s specialty`, stickers: ['egg', 'videogame', 'heart-pink', { tag: 'Feed me' }] },
+      { kind: 'standard', points: 100, question: `Premiering in 1989, this animated sitcom is the longest-running scripted prime-time show in US TV history.`, answer: `The Simpsons`, credit: `Ana & Juan’s specialty`, stickers: ['couch', 'tv'] },
+      { kind: 'standard', points: 200, question: `This HBO drama became the network’s most-watched series ever before it ended in 2019.`, answer: `Game of Thrones`, credit: `Hattie’s specialty`, stickers: ['crown', 'popcorn'] },
+      { kind: 'standard', points: 300, question: `Launched by Bandai in 1996, which egg-shaped handheld pet had to be fed and cleaned or it would die?`, answer: `The Tamagotchi`, credit: `Juan’s specialty`, stickers: ['egg', 'videogame', 'heart-pink'] },
       { kind: 'standard', points: 400, question: `In the US the first Harry Potter book is “Harry Potter and the Sorcerer’s Stone.” What is it called in the rest of the world?`, answer: `“Harry Potter and the Philosopher’s Stone”`, credit: `Lucy’s specialty`, stickers: ['wand', 'glasses', 'gem', 'open-book'] },
-      { kind: 'standard', points: 500, question: `Which teammate has watched all three Lord of the Rings films more than twenty times?`, answer: `Antonela`, stickers: ['ring', 'volcano', { stub: 'Extended edition', sub: 'All three' }] },
-      { kind: 'standard', points: 600, question: `In 1991 this became the first animated film ever nominated for the Best Picture Oscar.`, answer: `Beauty and the Beast`, credit: `Hannah’s specialty`, stickers: ['film', 'trophy', { stamp: '1991' }] },
+      { kind: 'standard', points: 500, question: `Which teammate has watched all three Lord of the Rings films more than twenty times?`, answer: `Antonela`, stickers: ['ring', 'volcano'] },
+      { kind: 'standard', points: 600, question: `In 1991 this became the first animated film ever nominated for the Best Picture Oscar.`, answer: `Beauty and the Beast`, credit: `Hannah’s specialty`, stickers: ['film', 'trophy'] },
     ],
   },
   {
@@ -185,7 +179,7 @@ export const CATEGORIES: Category[] = [
   {
     name: 'Odds & Ends',
     clues: [
-      { kind: 'standard', points: 100, question: `This children’s author drew wartime political cartoons, wrote under a pen name, and was really named Theodor Geisel.`, answer: `Dr. Seuss`, credit: `Matt’s specialty`, stickers: ['fountain-pen', 'open-book', { tag: 'Pen name' }] },
+      { kind: 'standard', points: 100, question: `This children’s author drew wartime political cartoons, wrote under a pen name, and was really named Theodor Geisel.`, answer: `Dr. Seuss`, credit: `Matt’s specialty`, stickers: ['fountain-pen', 'open-book'] },
       { kind: 'standard', points: 200, question: `On Windows, which keyboard shortcut reopens the browser tab you just closed?`, answer: `Ctrl + Shift + T`, credit: `Antonela’s specialty`, stickers: ['keyboard', 'laptop'] },
       {
         kind: 'lie', points: 300, person: 'Matt', lieIndex: 1,
@@ -194,10 +188,7 @@ export const CATEGORIES: Category[] = [
           `Hit with John McEnroe for thirty minutes.`,
           `Is a twin.`,
         ],
-        stickers: [
-          'golf', 'tennis', 'cocktail',
-          { stub: 'Centre court', sub: 'Thirty minutes' },
-        ],
+        stickers: ['golf', 'tennis', 'cocktail'],
       },
       {
         kind: 'lie', points: 400, person: 'Jonattan', lieIndex: 2,
@@ -208,7 +199,7 @@ export const CATEGORIES: Category[] = [
         ],
         stickers: ['clapper', 'crutch', 'running-shoe'],
       },
-      { kind: 'standard', points: 500, question: `English borrowed the word “tycoon,” meaning a powerful businessman, in the 1800s — from the language of which country?`, answer: `Japan (from “taikun”)`, credit: `Ask’s specialty`, stickers: ['top-hat', 'money-bag', 'ship', { stamp: '1800s' }] },
+      { kind: 'standard', points: 500, question: `English borrowed the word “tycoon,” meaning a powerful businessman, in the 1800s — from the language of which country?`, answer: `Japan (from “taikun”)`, credit: `Ask’s specialty`, stickers: ['top-hat', 'money-bag', 'ship'] },
       { kind: 'standard', points: 600, question: `Crude oil is separated into petrol, kerosene and diesel by which refining process, which relies on their different boiling points?`, answer: `Fractional distillation`, credit: `Ask’s specialty`, stickers: ['test-tube', 'oil-drum', 'fire'] },
     ],
   },

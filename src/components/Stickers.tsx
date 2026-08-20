@@ -1,7 +1,4 @@
-import {
-  isPennant, isPhoto, isPostcard, isRosette, isStamp, isStub, isTag, isWide,
-  stickerSrc, type Sticker,
-} from '../data/stickers'
+import { isPhoto, isPostcard, isWide, stickerSrc, type Sticker } from '../data/stickers'
 
 /**
  * The sticker layer for a clue.
@@ -27,20 +24,24 @@ function hash(s: string): number {
 }
 
 /**
- * Slots anchor to an edge rather than centring on a point. Centring meant half of a
- * corner sticker sat outside the layer and got clipped; anchoring an inset puts the
- * whole box inside by construction, and jitter only ever moves it further in.
+ * Placement is banded rather than free.
  *
- * All eight hug the left or right edge at four heights. The stage's text is centred
- * horizontally, so the edges are the only region that is clear of it no matter how
- * long the question runs — and alternating sides keeps any run of slots balanced.
+ * Free scatter kept putting art in the four corners, which is where the stage puts
+ * everything else — the category name, the Close button, the primary action — and
+ * where a sticker looks like it fell off the page. So stickers stay in a middle
+ * band down the left and right edges: below the header, above the footer, never in
+ * a corner, and always clear of the centred text.
+ *
+ * Within that, each sticker gets its own side and its own band, alternating. Four
+ * on one clue is the most there can be, which is exactly two per side — so nothing
+ * can overlap anything else, including a postcard, without needing to pack.
  */
-const SLOTS = [
-  { l: 3, t: 7 }, { r: 3, t: 5 },
-  { l: 2, t: 33 }, { r: 2, t: 30 },
-  { l: 5, t: 60 }, { r: 5, t: 57 },
-  { l: 3, b: 6 }, { r: 3, b: 5 },
-] as const
+/** Vertical bands, as a percentage of the stage. Objects are short and get room to
+ *  drift; printed pieces are three times the height and get a tighter leash. */
+const BANDS = {
+  object: [{ t: 18, drift: 14 }, { t: 54, drift: 14 }],
+  wide: [{ t: 18, drift: 6 }, { t: 52, drift: 6 }],
+}
 
 /** Postcard scenery. Indexed by position so four cards on one clue never match. */
 const SCENES = [
@@ -66,20 +67,25 @@ export function Stickers({ stickers, seed }: Props) {
     <div className="stickers" aria-hidden="true">
       {stickers.map((sticker, i) => {
         const h = hash(`${seed}#${i}`)
-        const slot = SLOTS[(base + i) % SLOTS.length]
         const wide = isWide(sticker)
+
+        // Which side and band this one takes. The two flips give four arrangements,
+        // so clues do not all deal their stickers out in the same order.
+        const onLeft = (i % 2 === 0) !== (base % 2 === 1)
+        const band = (Math.floor(i / 2) + ((base >> 1) % 2)) % 2
+        const { t, drift } = BANDS[wide ? 'wide' : 'object'][band]
 
         const style: Record<string, string | number> = {
           ['--rot']: `${((h >> 11) % 27) - 13}deg`,
           ['--scale']: 0.87 + ((h >> 17) % 7) / 26,
           ['--d']: `${i * 80}ms`,
+          top: `${t + ((h >> 7) % drift)}%`,
         }
-        // Jitter is added to the inset, never subtracted: more inset is always
-        // further from the edge, so no amount of it can push a sticker out.
-        if ('l' in slot) style.left = `${slot.l + ((h >> 3) % 4)}%`
-        else style.right = `${slot.r + ((h >> 3) % 4)}%`
-        if ('t' in slot) style.top = `${slot.t + ((h >> 7) % 5)}%`
-        else style.bottom = `${slot.b + ((h >> 7) % 5)}%`
+        // Anchored as an inset from the edge, and the jitter only ever adds to it —
+        // more inset is further in, so no amount of it can push a sticker out.
+        const inset = `${2 + ((h >> 3) % 5)}%`
+        if (onLeft) style.left = inset
+        else style.right = inset
 
         return (
           <div className={`sticker${wide ? ' wide' : ''}`} key={i} style={style}>
@@ -109,23 +115,6 @@ function art(sticker: Sticker, i: number) {
     )
   }
 
-  if (isPennant(sticker)) {
-    return (
-      <div className="pennant">
-        <span className="pennant-text">{sticker.pennant}</span>
-      </div>
-    )
-  }
-
-  if (isStub(sticker)) {
-    return (
-      <div className="stub">
-        <span className="stub-head">{sticker.stub}</span>
-        <span className="stub-sub">{sticker.sub}</span>
-      </div>
-    )
-  }
-
   if (isPhoto(sticker)) {
     return (
       <div className="polaroid">
@@ -133,36 +122,6 @@ function art(sticker: Sticker, i: number) {
           <img src={stickerSrc(sticker.of)} alt="" draggable={false} />
         </div>
         <div className="polaroid-cap">{sticker.photo}</div>
-      </div>
-    )
-  }
-
-  if (isTag(sticker)) {
-    return (
-      <div className="ltag">
-        <span className="ltag-hole" />
-        <span className="ltag-text">
-          {sticker.tag}
-          {sticker.sub && <em>{sticker.sub}</em>}
-        </span>
-      </div>
-    )
-  }
-
-  if (isRosette(sticker)) {
-    return (
-      <div className="rosette">
-        <span className="rosette-tail" />
-        <span className="rosette-tail" />
-        <span className="rosette-disc">{sticker.rosette}</span>
-      </div>
-    )
-  }
-
-  if (isStamp(sticker)) {
-    return (
-      <div className="pstamp">
-        <span className="pstamp-panel">{sticker.stamp}</span>
       </div>
     )
   }
