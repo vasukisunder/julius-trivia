@@ -89,25 +89,25 @@ button{font-family:inherit;color:inherit}
 .tbtn.go{background:var(--ink);color:var(--canvas)}
 /* The closing question is worth more than anything on the board, so its control
    does not look like the rest of the toolbar. */
-/* The closing question, sitting under the last row of the board.
-   Full width and near-white: it has to look like the biggest thing on the page
-   without borrowing a category hue, and the blush pink it used to wear read as an
-   error rather than a prize. */
+/* The closing question, sitting under the last row of the board. Built from the
+   same surface as a tile, so it reads as one more row rather than shouting: a
+   full-width white bar was far too loud, and the blush pink before it read as an
+   error. Its weight comes from spanning the board, not from colour. */
 .finalbar{
-  display:flex;align-items:center;justify-content:center;gap:16px;
+  display:flex;align-items:center;justify-content:center;gap:14px;
   width:100%;margin-top:8px;
-  background:var(--ink);color:var(--canvas);border:none;border-radius:var(--r);
-  padding:20px 24px;cursor:pointer;
-  font-family:var(--display);font-size:clamp(17px,2.2vw,var(--t-24));font-weight:700;
-  letter-spacing:-.02em;
-  transition:transform .14s var(--ease),filter .15s;
+  background:var(--surface);color:var(--ink);border:none;border-radius:var(--r);
+  padding:16px 24px;cursor:pointer;
+  font-family:var(--display);font-size:var(--t-17);font-weight:600;letter-spacing:-.01em;
+  transition:background .15s var(--ease),transform .14s var(--ease);
 }
-.finalbar:hover:not(:disabled){transform:translateY(-2px);filter:brightness(1.04)}
+.finalbar:hover:not(:disabled){background:var(--surface-2);transform:translateY(-1px)}
 .finalbar:disabled{cursor:default}
 .finalbar-pts{
-  background:rgba(20,26,46,.14);border-radius:99px;padding:5px 16px;
-  font-size:clamp(15px,1.9vw,var(--t-20));font-weight:700;
+  background:var(--surface-2);color:var(--ink-2);border-radius:99px;
+  padding:4px 14px;font-size:var(--t-15);font-weight:700;
 }
+.finalbar:hover:not(:disabled) .finalbar-pts{color:var(--ink)}
 .tbtn.go:hover{background:#fff;color:var(--canvas)}
 
 .chip{font-size:var(--t-12);font-weight:700;padding:5px 10px;border-radius:99px}
