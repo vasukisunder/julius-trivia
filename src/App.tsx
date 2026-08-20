@@ -190,7 +190,7 @@ export default function App() {
           {route === 'present' && <SoundToggle />}
           {mode === 'host' && (
             <button
-              className="tbtn go"
+              className="tbtn"
               onClick={() => {
                 // The changing param forces a fresh load. window.open reuses a
                 // window with the same name and will happily leave it running
