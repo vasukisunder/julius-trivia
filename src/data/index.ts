@@ -117,11 +117,11 @@ export const CATEGORIES: Category[] = [
       { kind: 'standard', points: 400, question: `A turbocharger forces extra air into an engine. What spins it?`, answer: `The engine’s own exhaust gases`, credit: `Ivan’s specialty — car mechanics` },
       { kind: 'standard', points: 500, question: `Crude oil is separated into petrol, kerosene and diesel by which refining process, which relies on their different boiling points?`, answer: `Fractional distillation`, credit: `Ask’s specialty — oil & petroleum products` },
       {
-        kind: 'lie', points: 600, person: 'Antonela', lieIndex: 2,
+        kind: 'lie', points: 600, person: 'Alexis', lieIndex: 2,
         statements: [
-          `Can do a handstand.`,
-          `Has never had a cup of coffee.`,
-          `Can whistle.`,
+          `Started a podcast in 2012.`,
+          `Collects frog-themed things, but doesn’t like real frogs.`,
+          `Is pretty good at playing the electric guitar.`,
         ],
       },
     ],
@@ -157,11 +157,23 @@ export const FINAL_CATEGORY = 'Final question'
 /** Outside the six category hues, so the closing question reads as its own thing. */
 export const FINAL_ACCENT = '#F0A6B4'
 
-/** Everyone who filled in the sign-up form, for the coverage check in the tests. */
+/**
+ * Everyone playing. This seeds the roster and gets drawn into teams, so it is
+ * players only.
+ */
 export const TEAMMATES = [
   'Matt', 'Hannah', 'Ivan', 'Daniel', 'Shakir', 'Lucy', 'Ask',
   'Juan', 'Antonela', 'Hattie', 'Ana', 'Greg', 'Joe', 'Jonattan',
 ]
+
+/** Hosting rather than playing, so not in the draw — but still on the board. */
+export const HOST = 'Alexis'
+
+/**
+ * Everyone who can be named in a clue. Wider than the roster, because the host has
+ * facts on the board without being drafted onto a team.
+ */
+export const PEOPLE = [...TEAMMATES, HOST]
 
 /** Played in 2–3 teams rather than as fourteen individuals. */
 export const DEFAULT_TEAMS = ['Team 1', 'Team 2', 'Team 3']

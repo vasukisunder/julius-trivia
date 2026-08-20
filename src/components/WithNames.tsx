@@ -1,9 +1,9 @@
 import { Fragment } from 'react'
-import { TEAMMATES } from '../data'
+import { PEOPLE } from '../data'
 
 /** Longest first, so "Hannah" cannot be shadowed by a shorter name inside it. */
 const NAME_RE = new RegExp(
-  `\\b(${[...TEAMMATES]
+  `\\b(${[...PEOPLE]
     .sort((a, b) => b.length - a.length)
     .map((n) => n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
     .join('|')})\\b`,

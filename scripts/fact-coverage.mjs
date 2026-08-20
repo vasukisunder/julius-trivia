@@ -76,6 +76,17 @@ const CLEAN = (t) => t
   .replace(/[,;\s]+$/, '')
   .trim()
 
+/**
+ * Facts from people who are not in the sign-up export — the host, who has clues on
+ * the board without having filled in the form. Without these the CSV would report
+ * her facts as unused.
+ */
+const EXTRA = [
+  ['Alexis', 'Started a podcast in 2012', 'true'],
+  ['Alexis', "Collects frog-themed things, but doesn't like real frogs", 'true'],
+  ['Alexis', 'Is pretty good at playing the electric guitar', 'the lie'],
+]
+
 /* ---- form.csv ----------------------------------------------------------- */
 function parseCsv(text) {
   const out = []; let row = []; let cell = ''; let q = false
@@ -144,6 +155,10 @@ for (const r of table.slice(1)) {
       : 'true'
     rows.push({ name, fact, source, kind, where })
   }
+}
+
+for (const [name, fact, kind] of EXTRA) {
+  rows.push({ name, fact, source: 'Two truths & a lie', kind, where: autoLocate(`${name} ${fact}`) })
 }
 
 /* ---- write -------------------------------------------------------------- */

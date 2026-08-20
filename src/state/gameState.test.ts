@@ -1,6 +1,6 @@
 import { reducer, initialState, computeScores, currentBuzz, STATE_VERSION } from './gameState'
 import type { GameState } from '../types'
-import { CATEGORIES, TEAMMATES, FINAL_CLUE } from '../data'
+import { CATEGORIES, TEAMMATES, PEOPLE, HOST, FINAL_CLUE } from '../data'
 import { FINAL_REF } from '../types'
 import { TEAM_NAMES, TEAM_COUNT, drawTeams } from '../data/teams'
 import { PLAYER_COLORS, PLAYER_EMOJI, freeStyle } from '../data/avatars'
@@ -33,8 +33,8 @@ check('no unresolved lies (Juan and Hattie never marked theirs, so are not used 
 console.log('\nauthoring mistakes that would show up mid-game')
 // A spot-the-lie card names a person; if that name is not a real teammate, the
 // pills and team lookups have nothing to resolve.
-const unknownPeople = lieClues.filter(c => !TEAMMATES.includes(c.person)).map(c => c.person)
-check('every lie card names a real teammate' + (unknownPeople.length ? ` (${unknownPeople})` : ''),
+const unknownPeople = lieClues.filter(c => !PEOPLE.includes(c.person)).map(c => c.person)
+check('every lie card names someone real' + (unknownPeople.length ? ` (${unknownPeople})` : ''),
   unknownPeople.length === 0)
 
 // A credit naming nobody real is a typo waiting to be read out loud.
@@ -75,7 +75,7 @@ console.log('\nname highlighting has something to work with')
 // anyone, or a name is misspelled, the highlight silently does nothing — so the
 // data is checked rather than the rendering.
 const nameRe = new RegExp(
-  `\\b(${[...TEAMMATES].sort((a, b) => b.length - a.length).join('|')})\\b`,
+  `\\b(${[...PEOPLE].sort((a, b) => b.length - a.length).join('|')})\\b`,
 )
 const creditsWithoutNames = allClues
   .filter(c => c.credit && !nameRe.test(c.credit))
@@ -123,10 +123,13 @@ const creditText = allClues.map(c => c.credit ?? '').join(' | ')
 
 const noPersonal = TEAMMATES.filter(n => !personalText.includes(n))
 const noNiche = TEAMMATES.filter(n => !creditText.includes(n))
-check('14 teammates signed up', TEAMMATES.length === 14)
+check('14 players on the roster', TEAMMATES.length === 14)
+// The host is nameable in clues but must never be drafted into a team.
+check('the host is not on the roster', !TEAMMATES.includes(HOST))
+check('but the host can still be named in a clue', PEOPLE.includes(HOST))
 check('every teammate has a personal clue' + (noPersonal.length ? ` (missing: ${noPersonal})` : ''),
   noPersonal.length === 0)
-check('every teammate has a clue from their niche' + (noNiche.length ? ` (missing: ${noNiche})` : ''),
+check('every player has a clue from their niche' + (noNiche.length ? ` (missing: ${noNiche})` : ''),
   noNiche.length === 0)
 
 console.log('\nno clue spoils a spot-the-lie card')

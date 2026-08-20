@@ -38,7 +38,7 @@ export type Action =
   | { type: 'clearClue'; key: string }
 
 /** Bump on any change to the saved shape or to the seeded defaults. */
-export const STATE_VERSION = 12
+export const STATE_VERSION = 13
 
 export function initialState(): GameState {
   return {
