@@ -15,7 +15,7 @@ import { Ceremony } from './components/Ceremony'
 import { useAwardFlash } from './state/useAwardFlash'
 import { BuzzerScreen } from './components/BuzzerScreen'
 import { playerId } from './net/player'
-import { catColor } from './theme'
+import { catColor, CATEGORY_GRADIENT } from './theme'
 import { clueKey, isFinal, FINAL_REF, type ViewMode } from './types'
 import { PRESENT_URL, buzzUrl, routeFromUrl } from './routes'
 import type { Connection } from './net/useRoom'
@@ -271,7 +271,9 @@ export default function App() {
         onClick={() => dispatch({ type: 'openClue', ref: FINAL_REF })}
       >
         <span className="finalbar-label">Final question</span>
-        <span className="finalbar-pts">{FINAL_CLUE.points}</span>
+        <span className="finalbar-pts" style={{ background: CATEGORY_GRADIENT }}>
+          {FINAL_CLUE.points} points
+        </span>
       </button>
 
       <Scoreboard
@@ -325,6 +327,7 @@ export default function App() {
             if (openIsFinal) dispatch({ type: 'startCeremony', seconds: CEREMONY_COUNTDOWN })
             else dispatch({ type: 'closeClue' })
           }}
+          isFinal={openIsFinal}
           doneLabel={openIsFinal ? 'And the winner is…' : 'Next question'}
           canReturnToBoard={!openIsFinal}
           onDismiss={() => dispatch({ type: 'closeClue' })}

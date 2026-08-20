@@ -102,11 +102,22 @@ button{font-family:inherit;color:inherit}
 }
 .finalbar:hover:not(:disabled){background:var(--surface-2);transform:translateY(-1px)}
 .finalbar:disabled{cursor:default}
+/* All six category colours: the closing question draws on every column, which is
+   the one place a gradient here means something. Background set inline from
+   theme.ts so the palette has a single source. */
 .finalbar-pts{
-  background:var(--surface-2);color:var(--ink-2);border-radius:99px;
-  padding:4px 14px;font-size:var(--t-15);font-weight:700;
+  color:var(--on-color);border-radius:99px;
+  padding:5px 16px;font-size:var(--t-15);font-weight:700;
 }
-.finalbar:hover:not(:disabled) .finalbar-pts{color:var(--ink)}
+
+/* The same badge, stated loudly, on the clue itself. */
+.final-stake{
+  color:var(--on-color);border-radius:99px;
+  padding:9px 26px;margin-bottom:6px;
+  font-family:var(--display);font-size:clamp(20px,2.8vw,var(--t-32));font-weight:700;
+  letter-spacing:-.02em;
+  animation:pop .4s var(--ease) both;
+}
 
 .chip{font-size:var(--t-12);font-weight:700;padding:5px 10px;border-radius:99px}
 .chip.host{background:rgba(229,87,77,.16);color:var(--signal)}

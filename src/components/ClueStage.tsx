@@ -3,7 +3,7 @@ import type { Buzz, Clue, CluePhase, PlayerStyle, Team, ViewMode, Wrong } from '
 import { PlayerIcon, PlayerPill } from './PlayerPill'
 import { WithNames } from './WithNames'
 import { useAwardFlash } from '../state/useAwardFlash'
-import { teamColor } from '../theme'
+import { teamColor, CATEGORY_GRADIENT } from '../theme'
 
 type Props = {
   clue: Clue
@@ -33,6 +33,8 @@ type Props = {
   onCorrect: (teamId: number) => void
   onWrong: (teamId: number) => void
   onSkipToAnswer: () => void
+  /** The closing question, which is worth more than any tile and says so. */
+  isFinal: boolean
   /** "Next question" normally; the closing question leads into the ceremony. */
   doneLabel: string
   /** The closing question has no tile, so it cannot be put back on one. */
@@ -73,7 +75,7 @@ function useCountdown(endsAt: number | null, onZero: () => void): number | null 
 export function ClueStage({
   clue, categoryName, accent, mode, teams, awardedIds, phase, timerEndsAt, buzzes, playerStyles,
   lockedOut, onTheSpot, lastWrong, clueKeyStr, hoveredKey, onHover,
-  onOpenBuzzers, onEndBuzzing, onCorrect, onWrong, onSkipToAnswer, doneLabel,
+  onOpenBuzzers, onEndBuzzing, onCorrect, onWrong, onSkipToAnswer, isFinal, doneLabel,
   canReturnToBoard, onDone, onDismiss, onReturnToBoard,
 }: Props) {
   const isHost = mode === 'host'
@@ -161,6 +163,14 @@ export function ClueStage({
       </div>
 
       <div className="stage-body">
+        {/* The stake, stated outright. The header alone was too quiet for a
+            question worth more than the board's whole bottom row. */}
+        {isFinal && (
+          <div className="final-stake" style={{ background: CATEGORY_GRADIENT }}>
+            {clue.points} points
+          </div>
+        )}
+
         {clue.kind === 'standard' ? (
           <>
             <p className="clue"><WithNames text={clue.question} /></p>

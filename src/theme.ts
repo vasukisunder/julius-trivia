@@ -23,3 +23,10 @@ export const TEAM_COLORS = ['#8B90E5', '#4FBAC7', '#A2C86E']
 
 export const catColor = (i: number) => CATEGORY_COLORS[i % CATEGORY_COLORS.length]
 export const teamColor = (i: number) => TEAM_COLORS[i % TEAM_COLORS.length]
+
+/**
+ * All six category hues in order. Used by the closing question, which draws on
+ * every column — the one place a gradient carries meaning here rather than being
+ * decoration.
+ */
+export const CATEGORY_GRADIENT = `linear-gradient(95deg, ${CATEGORY_COLORS.join(', ')})`
