@@ -16,7 +16,9 @@ const check = (label, cond) => {
 }
 
 // Set inline from React, so they are legitimately absent from the stylesheet.
-const SET_INLINE = new Set(['cols', 'p'])
+// 'dx' and 'spin' are per-confetti-particle; 'cols' is the board width; 'p' is a
+// player's colour.
+const SET_INLINE = new Set(['cols', 'p', 'dx', 'spin'])
 
 const defined = new Set([...css.matchAll(/--([a-z0-9-]+)\s*:/g)].map((m) => m[1]))
 const used = new Set([...css.matchAll(/var\(--([a-z0-9-]+)\s*[,)]/g)].map((m) => m[1]))

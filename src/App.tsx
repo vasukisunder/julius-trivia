@@ -10,6 +10,8 @@ import { useGame } from './state/useGame'
 import { useBuildCheck } from './net/useBuildCheck'
 import { useGameSounds } from './audio/useGameSounds'
 import { SoundToggle, useSoundPref } from './components/SoundToggle'
+import { Confetti } from './components/Confetti'
+import { useAwardFlash } from './state/useAwardFlash'
 import { BuzzerScreen } from './components/BuzzerScreen'
 import { playerId } from './net/player'
 import { catColor } from './theme'
@@ -65,6 +67,11 @@ export default function App() {
 
   useGameSounds(state, route === 'present' && soundOn)
 
+  // Confetti on the two screens the room can see. Phones are left out: fifteen
+  // of them erupting at once is noise nobody watching the game would see.
+  const award = useAwardFlash(state.lastAward, 3200)
+  const showConfetti = award !== null && route !== 'buzz'
+
   const used = useMemo(() => new Set(state.used), [state.used])
   const scores = useMemo(() => computeScores(state), [state])
 
@@ -90,6 +97,8 @@ export default function App() {
   ) : null
 
   if (route === 'none') return <Landing />
+
+  const confetti = showConfetti && award ? <Confetti seed={award.seq} /> : null
 
   // Phones only ever show the buzzer.
   if (route === 'buzz') {
@@ -164,6 +173,7 @@ export default function App() {
 
   return (
     <div className="shell">
+      {confetti}
       {staleBar}
       <header className="topbar">
         <Wordmark />

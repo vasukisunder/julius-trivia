@@ -933,3 +933,50 @@ button:disabled{cursor:default}
   .matchrow{grid-template-columns:auto 1fr;row-gap:10px;padding:14px 16px}
   .matchwho{grid-column:2}
 }
+
+
+/* ==================== confetti ==========================================
+   Above everything, but no backdrop of its own: the answer underneath has to stay
+   readable, which is what sank the earlier full-bleed celebration.
+   ==================================================================== */
+.confetti{
+  position:fixed;inset:0;z-index:150;pointer-events:none;overflow:hidden;
+}
+.confetti i{
+  position:absolute;top:-12vh;display:block;
+  animation-name:fall;animation-timing-function:cubic-bezier(.25,.6,.5,1);
+  animation-fill-mode:forwards;
+}
+@keyframes fall{
+  0%{transform:translate3d(0,0,0) rotate(0deg);opacity:0}
+  8%{opacity:1}
+  85%{opacity:1}
+  100%{transform:translate3d(var(--dx),118vh,0) rotate(var(--spin));opacity:0}
+}
+
+/* ==================== wrong buzzer ======================================
+   A red surge in from the edges, twice, like a buzzer going off — rather than the
+   whole screen flashing red, which read as an error state.
+   ==================================================================== */
+.stage-scrim.buzzed::after{
+  content:"";position:absolute;inset:0;z-index:40;pointer-events:none;
+  box-shadow:inset 0 0 180px 30px rgba(229,87,77,.75);
+  animation:buzzout 1s var(--ease) both;
+}
+@keyframes buzzout{
+  0%{opacity:0}
+  10%{opacity:1}
+  32%{opacity:.1}
+  46%{opacity:1}
+  100%{opacity:0}
+}
+/* The content jolts with it, so the buzz has some physical weight. */
+.stage-scrim.buzzed .stage-body{animation:jolt .42s var(--ease) both}
+@keyframes jolt{
+  0%{transform:translateX(0)}
+  15%{transform:translateX(-9px)}
+  35%{transform:translateX(7px)}
+  55%{transform:translateX(-5px)}
+  75%{transform:translateX(3px)}
+  100%{transform:translateX(0)}
+}

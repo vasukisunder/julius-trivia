@@ -132,7 +132,7 @@ export function ClueStage({
 
   return (
     <div
-      className={`stage-scrim phase-${phase}`}
+      className={`stage-scrim phase-${phase}${wrongFlash ? ' buzzed' : ''}`}
       style={{ ['--cat' as string]: accent }}
       ref={stageRef}
     >
