@@ -47,6 +47,7 @@ export function load(): GameState {
       awards: saved.awards ?? {},
       used: Array.isArray(saved.used) ? saved.used : [],
       adjustments: saved.adjustments ?? {},
+      finalHits: saved.finalHits ?? {},
       teamSeq: saved.teamSeq ?? saved.teams.length + 1,
       phase: saved.phase ?? fresh.phase,
       drawSeq: saved.drawSeq ?? 0,

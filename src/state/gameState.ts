@@ -1,5 +1,5 @@
 import type { Buzz, ClueRef, GameState, Team } from '../types'
-import { clueKey } from '../types'
+import { clueKey, FINAL_REF } from '../types'
 import { CATEGORIES, FINAL_CLUE } from '../data'
 import { TEAMMATES } from '../data'
 import { MAX_TEAMS, MIN_TEAMS, TEAM_COUNT, drawTeams, teamNameFor } from '../data/teams'
@@ -33,6 +33,7 @@ export type Action =
   | { type: 'buzz'; buzz: Buzz }
   | { type: 'markWrong'; teamId: number }
   | { type: 'awardTo'; teamId: number; points: number }
+  | { type: 'setFinalHits'; teamId: number; hits: number }
   | { type: 'startCeremony'; seconds: number }
   | { type: 'revealWinner' }
   | { type: 'endCeremony' }
@@ -41,7 +42,7 @@ export type Action =
   | { type: 'clearClue'; key: string }
 
 /** Bump on any change to the saved shape or to the seeded defaults. */
-export const STATE_VERSION = 14
+export const STATE_VERSION = 15
 
 export function initialState(): GameState {
   return {
@@ -53,6 +54,7 @@ export function initialState(): GameState {
     awards: {},
     used: [],
     adjustments: {},
+    finalHits: {},
     teamSeq: TEAM_COUNT + 1,
     phase: 'roster',
     drawSeq: 0,
@@ -158,6 +160,9 @@ export function reducer(state: GameState, action: Action): GameState {
     case 'awardTo': {
       const key = state.open ? clueKey(state.open) : null
       if (!key) return state
+      // The closing question is scored from finalHits, where several teams can each
+      // hold a partial. Letting it into the ledger as well would count it twice.
+      if (key === FINAL_KEY) return state
       const current = state.awards[key] ?? []
       const awards = current.includes(action.teamId)
         ? state.awards
@@ -174,6 +179,32 @@ export function reducer(state: GameState, action: Action): GameState {
           key,
           seq: (state.lastAward?.seq ?? 0) + 1,
         },
+      }
+    }
+
+    /**
+     * Partial credit on the closing question. Unlike a tile, every team can score
+     * here, and each of the three matches is worth a third of the thousand.
+     */
+    case 'setFinalHits': {
+      const hits = Math.max(0, Math.min(FINAL_ITEMS, Math.round(action.hits)))
+      const finalHits = { ...state.finalHits }
+      if (hits === 0) delete finalHits[action.teamId]
+      else finalHits[action.teamId] = hits
+      const points = finalPoints(hits)
+      return {
+        ...state,
+        finalHits,
+        // Only a change upward is worth a celebration; correcting a mistake down
+        // should not set off the confetti again.
+        lastAward: points > (finalPoints(state.finalHits[action.teamId] ?? 0))
+          ? {
+              teamId: action.teamId,
+              points,
+              key: FINAL_KEY,
+              seq: (state.lastAward?.seq ?? 0) + 1,
+            }
+          : state.lastAward,
       }
     }
 
@@ -204,7 +235,14 @@ export function reducer(state: GameState, action: Action): GameState {
     case 'clearClue': {
       const awards = { ...state.awards }
       delete awards[action.key]
-      return { ...state, awards, used: state.used.filter((k) => k !== action.key) }
+      return {
+        ...state,
+        awards,
+        // The closing question's points live in finalHits, so clearing the ledger
+        // alone would leave them standing.
+        finalHits: action.key === FINAL_KEY ? {} : state.finalHits,
+        used: state.used.filter((k) => k !== action.key),
+      }
     }
 
     case 'adjustScore': {
@@ -352,7 +390,7 @@ export function reducer(state: GameState, action: Action): GameState {
     case 'resetGame':
       return {
         ...state,
-        awards: {}, used: [], adjustments: {},
+        awards: {}, used: [], adjustments: {}, finalHits: {},
         open: null, cluePhase: 'reading', timerEndsAt: null,
         buzzOpenedAt: null, buzzes: [], lockedOut: [],
         lastAward: null, lastWrong: null,
@@ -364,6 +402,14 @@ export function reducer(state: GameState, action: Action): GameState {
   }
 }
 
+/** The closing question's key, and how much one of its three matches is worth. */
+export const FINAL_KEY = clueKey(FINAL_REF)
+const FINAL_ITEMS = FINAL_CLUE.kind === 'match' ? FINAL_CLUE.items.length : 1
+
+/** Points for landing `hits` of the closing question's matches. */
+export const finalPoints = (hits: number) =>
+  Math.round((FINAL_CLUE.points * Math.max(0, Math.min(FINAL_ITEMS, hits))) / FINAL_ITEMS)
+
 /** clueKey -> point value, built once from the board. */
 const POINTS: Map<string, number> = (() => {
   const map = new Map<string, number>()
@@ -372,12 +418,15 @@ const POINTS: Map<string, number> = (() => {
       map.set(`${c}-${r}`, clue.points)
     })
   })
-  // The closing question scores like any other clue; it just has no tile.
-  map.set('-1-0', FINAL_CLUE.points)
+  // The closing question is scored from finalHits, not from the ledger, so it is
+  // deliberately absent here.
   return map
 })()
 
-/** Scores derived from the award ledger plus manual adjustments. */
+/**
+ * Scores derived from the award ledger, the closing question's partial credit, and
+ * manual adjustments. Never stored, so awarding stays idempotent.
+ */
 export function computeScores(state: GameState): Map<number, number> {
   const scores = new Map<number, number>()
   for (const team of state.teams) scores.set(team.id, state.adjustments[team.id] ?? 0)
@@ -385,6 +434,12 @@ export function computeScores(state: GameState): Map<number, number> {
     const points = POINTS.get(key) ?? 0
     for (const id of ids) {
       if (scores.has(id)) scores.set(id, (scores.get(id) ?? 0) + points)
+    }
+  }
+  for (const [id, hits] of Object.entries(state.finalHits)) {
+    const teamId = Number(id)
+    if (scores.has(teamId)) {
+      scores.set(teamId, (scores.get(teamId) ?? 0) + finalPoints(hits))
     }
   }
   return scores

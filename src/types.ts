@@ -119,6 +119,16 @@ export type GameState = {
   used: string[]
   /** teamId -> manual point delta applied via the scoreboard steppers. */
   adjustments: Record<number, number>
+  /**
+   * The closing question is a three-way match and a team can land one or two of
+   * them, so it does not fit `awards`, which is all-or-nothing per clue. teamId ->
+   * how many of the three they matched.
+   *
+   * Its own field rather than a fractional entry in the ledger, so there is still
+   * exactly one source of truth per clue instead of two that can disagree. Several
+   * teams can score here at once, which no tile allows.
+   */
+  finalHits: Record<number, number>
   /** Next team id to hand out. */
   teamSeq: number
   /** Whether the teams have been drawn yet. */

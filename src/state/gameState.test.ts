@@ -1,4 +1,7 @@
-import { reducer, initialState, computeScores, currentBuzz, standings, STATE_VERSION } from './gameState'
+import {
+  reducer, initialState, computeScores, currentBuzz, standings, STATE_VERSION,
+  finalPoints, FINAL_KEY,
+} from './gameState'
 import type { GameState } from '../types'
 import { CATEGORIES, TEAMMATES, PEOPLE, HOST, FINAL_CLUE } from '../data'
 import { artOf, scaleOf } from '../data/stickers'
@@ -186,15 +189,20 @@ check('no fact gives away its own person',
   items.every(i => !i.fact.includes(i.person)))
 check('no matching clue sits on the board too',
   !onBoard.some(c => c.kind === 'match'))
-// It scores through the same ledger as everything else.
+// It opens like any tile, but it is marked rather than awarded — see the partial
+// credit section below.
 let sf = reducer(initialState(), { type: 'shuffleTeams' })
 sf = reducer(sf, { type: 'setTeams', rosters: sf.teams.map(t => t.members) })
 sf = reducer(sf, { type: 'openClue', ref: FINAL_REF })
 check('opening it starts the same sequence', sf.cluePhase === 'reading')
-sf = reducer(sf, { type: 'awardTo', teamId: sf.teams[0].id, points: FINAL_CLUE.points })
-check('awarding it credits the full value',
+sf = reducer(sf, { type: 'setFinalHits', teamId: sf.teams[0].id, hits: 3 })
+check('marking all three credits the full value',
   computeScores(sf).get(sf.teams[0].id) === FINAL_CLUE.points)
-check('and it lands under its own key, not a tile’s', sf.lastAward?.key === '-1-0')
+check('and it lands under its own key, not a tile’s', sf.lastAward?.key === FINAL_KEY)
+// The all-or-nothing path must not reach it, or its points could arrive twice.
+const sfAward = reducer(sf, { type: 'awardTo', teamId: sf.teams[0].id, points: 1000 })
+check('the all-or-nothing award does not apply to it',
+  computeScores(sfAward).get(sf.teams[0].id) === FINAL_CLUE.points)
 
 console.log('\nstickers')
 /**
@@ -246,6 +254,60 @@ const spoilers = standard
   })
 check(`no sticker names the answer it sits next to${spoilers.length ? ` (${spoilers})` : ''}`,
   spoilers.length === 0)
+
+console.log('\npartial credit on the closing question')
+/**
+ * The closing question is a three-way match, so a team can land one or two. It is
+ * also the one clue where every team scores at once — a tile has a single winner by
+ * construction, this does not.
+ */
+let sfp = reducer(initialState(), { type: 'shuffleTeams' })
+sfp = reducer(sfp, { type: 'setTeams', rosters: sfp.teams.map(t => t.members) })
+const [fp1, fp2, fp3] = sfp.teams
+sfp = reducer(sfp, { type: 'openClue', ref: FINAL_REF })
+
+check('a third of the thousand, rounded', finalPoints(1) === 333 && finalPoints(2) === 667)
+check('all three is the full value', finalPoints(3) === FINAL_CLUE.points)
+check('none is nothing', finalPoints(0) === 0)
+check('and it cannot exceed the full value', finalPoints(9) === FINAL_CLUE.points)
+
+sfp = reducer(sfp, { type: 'setFinalHits', teamId: fp1.id, hits: 2 })
+check('two of three scores two thirds', score(sfp, fp1.id) === 667)
+sfp = reducer(sfp, { type: 'setFinalHits', teamId: fp2.id, hits: 1 })
+check('a second team can score at the same time', score(sfp, fp2.id) === 333)
+check('and the first keeps its own', score(sfp, fp1.id) === 667)
+check('a team given nothing stays on zero', score(sfp, fp3.id) === 0)
+
+// Setting a value twice must not stack, or a host correcting themselves inflates it.
+sfp = reducer(sfp, { type: 'setFinalHits', teamId: fp1.id, hits: 2 })
+check('re-marking the same score changes nothing', score(sfp, fp1.id) === 667)
+sfp = reducer(sfp, { type: 'setFinalHits', teamId: fp1.id, hits: 3 })
+check('marking up replaces rather than adds', score(sfp, fp1.id) === 1000)
+sfp = reducer(sfp, { type: 'setFinalHits', teamId: fp1.id, hits: 1 })
+check('and marking down replaces too', score(sfp, fp1.id) === 333)
+sfp = reducer(sfp, { type: 'setFinalHits', teamId: fp1.id, hits: 0 })
+check('zero clears it', score(sfp, fp1.id) === 0 && !(fp1.id in sfp.finalHits))
+
+// The celebration should fire on a mark going up, and stay quiet on a correction.
+let sfq = reducer(sfp, { type: 'setFinalHits', teamId: fp3.id, hits: 3 })
+const seqUp = sfq.lastAward?.seq ?? 0
+check('marking up stamps an award for the confetti',
+  sfq.lastAward?.teamId === fp3.id && sfq.lastAward?.points === 1000)
+sfq = reducer(sfq, { type: 'setFinalHits', teamId: fp3.id, hits: 1 })
+check('marking down does not set it off again', (sfq.lastAward?.seq ?? 0) === seqUp)
+
+// Points live in finalHits, not the ledger, so putting the clue back must clear them.
+sfq = reducer(sfq, { type: 'clearClue', key: FINAL_KEY })
+check('clearing the closing question strips its partial points',
+  score(sfq, fp3.id) === 0 && Object.keys(sfq.finalHits).length === 0)
+
+// One source of truth: the closing question must not also be in the award ledger,
+// or its points would be counted twice.
+let sfr = reducer(sfp, { type: 'setFinalHits', teamId: fp2.id, hits: 3 })
+check('the closing question is not double-counted', score(sfr, fp2.id) === 1000)
+
+sfr = reducer(sfr, { type: 'resetGame' })
+check('reset clears partial credit', Object.keys(sfr.finalHits).length === 0)
 
 console.log('\nteammate coverage')
 /**

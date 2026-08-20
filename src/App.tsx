@@ -345,6 +345,9 @@ export default function App() {
             dispatch({ type: 'awardTo', teamId, points: openClue.points })
           }
           onWrong={(teamId: number) => dispatch({ type: 'markWrong', teamId })}
+          finalHits={state.finalHits}
+          onSetFinalHits={(teamId: number, hits: number) =>
+            dispatch({ type: 'setFinalHits', teamId, hits })}
           onSkipToAnswer={() => dispatch({ type: 'reveal' })}
           onDone={() => {
             dispatch({ type: 'consumeClue', key: openKey })

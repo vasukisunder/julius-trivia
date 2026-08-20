@@ -66,6 +66,23 @@ otherwise an old save silently beats new defaults.
 
 Consequence: deploying a version bump resets live state.
 
+### Scoring the closing question
+
+Every tile is all-or-nothing: one team wins it, and `awards` records who. The closing
+question is a three-way match, so a team can land one or two of them, and every team
+hands in an answer rather than one team buzzing — several can score at once.
+
+That does not fit the ledger, so it has its own field, `finalHits` (teamId -> matches
+landed, 0-3), and `computeScores` adds `finalPoints(hits)` for each. Deliberately one
+field rather than a fractional entry in `awards`: two ledgers that can both describe
+the same clue is two things to keep in step. `awardTo` refuses the closing question
+outright for the same reason.
+
+Setting a mark replaces it rather than adding, so a host correcting themselves cannot
+inflate a score, and only a mark going *up* stamps `lastAward` — otherwise fixing a
+typo sets off the confetti again. Putting the question back on the board clears
+`finalHits` as well as the ledger.
+
 ### Buzz ordering
 
 Ranking by message arrival ranks connections, not reaction times: round trips differ by

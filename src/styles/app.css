@@ -1124,6 +1124,47 @@ body[data-mode="present"] .draft-remove,
 body[data-mode="present"] .roster-remove{opacity:.6}
 
 
+/* ===================== marking the closing question ====================
+   Every team hands in three matches, so unlike a tile this is not one team on the
+   spot — it is a row each, and one or two out of three is worth having. The row
+   shows what it is worth the moment it is set, so the room can do the arithmetic
+   before the ceremony rather than after.
+   ==================================================================== */
+.finalmark{
+  display:flex;flex-direction:column;gap:8px;width:100%;max-width:44ch;
+  animation:rise .22s var(--ease) both;
+}
+.finalmark-head{
+  font-family:var(--display);font-size:var(--t-17);font-weight:600;color:var(--ink-2);
+  text-align:center;margin-bottom:2px;
+}
+.finalmark-row{
+  display:flex;align-items:center;gap:14px;background:var(--surface);
+  border-radius:var(--r);padding:10px 16px;
+}
+.finalmark-team{
+  font-family:var(--display);font-size:var(--t-20);font-weight:700;color:var(--team);
+  letter-spacing:-.01em;flex:1;min-width:0;text-align:left;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.finalmark-pips{display:flex;gap:6px;flex:none}
+.pip{
+  width:38px;height:38px;border:none;border-radius:10px;cursor:pointer;
+  background:var(--surface-2);color:var(--ink-2);
+  font-family:var(--display);font-size:var(--t-17);font-weight:700;
+  transition:background .15s,color .15s,transform .15s var(--ease);
+}
+.pip:hover:not(:disabled){background:var(--rule);color:var(--ink)}
+.pip.on{background:var(--team);color:var(--on-color)}
+.pip:disabled{cursor:default}
+/* The host's cursor, mirrored so the room sees the mark coming. */
+.pip.remote-hover{transform:translateY(-2px);background:var(--rule);color:var(--ink)}
+.finalmark-pts{
+  font-family:var(--display);font-size:var(--t-20);font-weight:700;color:var(--ink-3);
+  flex:none;width:5ch;text-align:right;
+}
+.finalmark-pts.on{color:var(--team)}
+
 /* ===================== stickers =========================================
    Decoration with a job: something for the room to look at while the question is
    read, and a bit of made-object character on what would otherwise be a text

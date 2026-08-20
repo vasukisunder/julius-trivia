@@ -6,6 +6,7 @@ import { WithNames } from './WithNames'
 import { Stickers } from './Stickers'
 import { useAwardFlash } from '../state/useAwardFlash'
 import { teamColor, CATEGORY_GRADIENT } from '../theme'
+import { finalPoints } from '../state/gameState'
 
 type Props = {
   clue: Clue
@@ -34,6 +35,9 @@ type Props = {
   onEndBuzzing: () => void
   onCorrect: (teamId: number) => void
   onWrong: (teamId: number) => void
+  /** Closing question only: how many of the three each team matched. */
+  finalHits: Record<number, number>
+  onSetFinalHits: (teamId: number, hits: number) => void
   onSkipToAnswer: () => void
   /** The closing question, which is worth more than any tile and says so. */
   isFinal: boolean
@@ -78,6 +82,7 @@ export function ClueStage({
   clue, categoryName, accent, mode, teams, awardedIds, phase, timerEndsAt, buzzes, styleOf,
   lockedOut, onTheSpot, lastWrong, clueKeyStr, hoveredKey, onHover,
   onOpenBuzzers, onEndBuzzing, onCorrect, onWrong, onSkipToAnswer, isFinal, doneLabel,
+  finalHits, onSetFinalHits,
   canReturnToBoard, onDone, onDismiss, onReturnToBoard,
 }: Props) {
   const isHost = mode === 'host'
@@ -295,6 +300,46 @@ export function ClueStage({
           </div>
         )}
 
+        {/* The closing question is marked, not buzzed: every team hands in three
+            matches, so every team can score, and one or two out of three is worth
+            having. A row each, rather than one team on the spot. */}
+        {isFinal && clue.kind === 'match' && (phase === 'verdict' || phase === 'revealed') && (
+          <div className="finalmark">
+            <div className="finalmark-head">
+              How many did each team get?
+            </div>
+            {teams.map((team) => {
+              const hits = finalHits[team.id] ?? 0
+              return (
+                <div
+                  className="finalmark-row"
+                  key={team.id}
+                  style={{ ['--team' as string]: teamColor(indexOf(team.id)) }}
+                >
+                  <span className="finalmark-team">{team.name}</span>
+                  <span className="finalmark-pips">
+                    {[0, 1, 2, 3].map((n) => (
+                      <button
+                        key={n}
+                        className={`pip${hits === n ? ' on' : ''}${hoverClass(`f${team.id}-${n}`)}`}
+                        disabled={!isHost}
+                        {...hoverProps(`f${team.id}-${n}`)}
+                        onClick={() => onSetFinalHits(team.id, n)}
+                        aria-label={`${team.name}: ${n} of ${clue.items.length}`}
+                      >
+                        {n}
+                      </button>
+                    ))}
+                  </span>
+                  <span className={`finalmark-pts${hits ? ' on' : ''}`}>
+                    {hits ? `+${finalPoints(hits)}` : '—'}
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+        )}
+
         {/* ---- step 4: the answer, plainly ---- */}
         {phase === 'revealed' && clue.kind === 'standard' && (
           <div className="answer">
@@ -313,7 +358,7 @@ export function ClueStage({
             )}
           </div>
         )}
-        {phase === 'revealed' && (
+        {phase === 'revealed' && !isFinal && (
           winner ? (
             <div
               className="result"
@@ -373,7 +418,7 @@ export function ClueStage({
           </button>
         )}
 
-        {phase === 'verdict' && onTheSpot && (
+        {phase === 'verdict' && onTheSpot && !isFinal && (
           <>
             <button
               className={`step-btn right${hoverClass('right')}`}
