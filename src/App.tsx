@@ -266,7 +266,6 @@ export default function App() {
 
       <Board
         categories={CATEGORIES}
-        styleOf={styleOf}
         used={used}
         mode={mode}
         // Only the host drives the board; the shared screen is a mirror.
