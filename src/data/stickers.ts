@@ -30,19 +30,20 @@
 /** Art available in public/stickers. The union below makes a typo a build error. */
 export const STICKER_KEYS = [
   'automobile', 'ball-soccer', 'bamboo', 'bandage', 'barn', 'baseball', 'basketball', 'bed',
-  'beer', 'bicycle', 'brownie', 'camping', 'canoe', 'cat', 'clapper', 'classical-building',
-  'clock', 'coat', 'cocktail', 'coffee', 'compass', 'couch', 'crown', 'crutch',
-  'cut-of-meat', 'deer', 'dress-shoe', 'egg', 'film', 'fire', 'football', 'fountain-pen',
-  'frog', 'gem', 'ghost', 'gi', 'glasses', 'globe', 'goblet', 'golf', 'guitar',
-  'heart-pink', 'helmet', 'house-garden', 'inkwell', 'keyboard', 'lantern', 'laptop',
-  'luggage', 'medal', 'mic', 'money-bag', 'mountain-snow', 'mouse', 'movie-camera',
-  'musical-notes', 'newspaper', 'oil-drum', 'open-book', 'palm', 'palms-up', 'pine',
+  'bedside-lamp', 'beer', 'bicycle', 'brownie', 'camping', 'canoe', 'cat', 'clapper',
+  'classical-building', 'clock', 'coat', 'cocktail', 'coffee', 'compass', 'couch',
+  'crescent-moon', 'crown', 'crutch', 'cut-of-meat', 'deer', 'dress-shoe', 'egg', 'film',
+  'fire', 'football', 'fountain-pen', 'frog', 'gem', 'ghost', 'gi', 'glasses', 'globe',
+  'goblet', 'golf', 'guitar', 'heart-pink', 'helmet', 'house-garden', 'inkwell', 'lantern',
+  'laptop', 'luggage', 'medal', 'mic', 'money-bag', 'mountain-snow', 'movie-camera',
+  'musical-notes', 'newspaper', 'oil-drum', 'open-book', 'owl', 'palm', 'palms-up', 'pine',
   'popcorn', 'postcard-arctic-circle', 'postcard-china', 'postcard-green-bay',
   'postcard-india', 'postcard-japan', 'postcard-lagos', 'postcard-madagascar', 'pushpin',
-  'rabbit', 'remote', 'ring', 'rose', 'running-shoe', 'ship', 'skate', 'skis', 'snowflake',
-  'snowman', 'soccer-boot', 'spotlight', 'stadium', 'star', 'stethoscope', 'sun-umbrella',
-  'swords', 'teddy-bear', 'tennis', 'test-tube', 'top-hat', 'trophy', 'tshirt', 'tv',
-  'videogame', 'volcano', 'wand', 'water-wave', 'whistle', 'wine', 'world-map',
+  'rabbit', 'remote', 'ring', 'rose', 'running-shoe', 'ship', 'skate', 'skis', 'slippers',
+  'snowflake', 'snowman', 'soccer-boot', 'spotlight', 'stadium', 'star', 'stethoscope',
+  'sun-umbrella', 'swords', 'teddy-bear', 'tennis', 'test-tube', 'top-hat', 'trophy',
+  'tshirt', 'tv', 'videogame', 'volcano', 'wand', 'water-wave', 'whistle', 'wine',
+  'world-map',
 ] as const
 
 export type StickerKey = (typeof STICKER_KEYS)[number]
