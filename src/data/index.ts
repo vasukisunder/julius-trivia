@@ -111,7 +111,7 @@ export const CATEGORIES: Category[] = [
       },
       { kind: 'standard', points: 400, question: `AI companies now pay a fortune for “.ai” web addresses. The domain actually belongs to which Caribbean island?`, answer: `Anguilla`, credit: `Antonela’s specialty`, stickers: ['laptop', 'palm', 'globe'] },
       { kind: 'standard', points: 500, question: `The War of the Triple Alliance pitted Paraguay against Brazil, Argentina and which third country?`, answer: `Uruguay`, credit: `Jonattan’s specialty`, stickers: ['swords', 'compass', 'world-map'] },
-      { kind: 'standard', points: 600, question: `Which state does Matt intend to never visit?`, answer: `South Dakota`, stickers: ['automobile', 'luggage', 'pushpin'] },
+      { kind: 'standard', points: 600, question: `Which state does Matt intend to never visit?`, answer: `South Dakota`, stickers: [{ art: 'automobile', scale: 1.7 }, 'luggage', 'pushpin'] },
     ],
   },
   {

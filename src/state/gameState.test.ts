@@ -1,6 +1,7 @@
 import { reducer, initialState, computeScores, currentBuzz, standings, STATE_VERSION } from './gameState'
 import type { GameState } from '../types'
 import { CATEGORIES, TEAMMATES, PEOPLE, HOST, FINAL_CLUE } from '../data'
+import { artOf, scaleOf } from '../data/stickers'
 import { FINAL_REF } from '../types'
 import { TEAM_NAMES, TEAM_COUNT, drawTeams } from '../data/teams'
 import { PLAYER_COLORS, PLAYER_EMOJI, defaultStyle, styleFor } from '../data/avatars'
@@ -207,20 +208,27 @@ const counts = decorated.map(c => c.stickers.length)
 check(`every clue carries three or four stickers (${Math.min(...counts)}-${Math.max(...counts)})`,
   Math.min(...counts) >= 3 && Math.max(...counts) <= 4)
 
-const dupWithin = decorated.filter(c => new Set(c.stickers).size !== c.stickers.length)
+const art = decorated.map(c => c.stickers.map(artOf))
+const dupWithin = art.filter(a => new Set(a).size !== a.length)
 check(`no clue repeats one piece of art${dupWithin.length ? ` (${dupWithin.length})` : ''}`,
   dupWithin.length === 0)
 
 // Postcards are landscape and get a wider box in the scatter; they are also the only
 // art that names a place, so a clue set to nowhere in particular should not have one.
-const cards = decorated.flatMap(c => c.stickers.filter(s => s.startsWith('postcard-')))
+const cards = art.flat().filter(k => k.startsWith('postcard-'))
 check(`postcards are in play (${cards.length}) and none repeats`,
   cards.length >= 5 && new Set(cards).size === cards.length)
 
 // No clue should be more than half postcards — they are 200px wide.
 check('no clue is mostly postcards',
-  decorated.every(c => c.stickers.filter(s => s.startsWith('postcard-')).length <= 2 ||
-    c.stickers.every(s => s.startsWith('postcard-'))))
+  art.every(a => a.filter(k => k.startsWith('postcard-')).length <= 2 ||
+    a.every(k => k.startsWith('postcard-'))))
+
+// An explicit scale is for a piece the default box does not do justice to. Past
+// about 2x it stops being emphasis and starts crowding the question.
+const scales = decorated.flatMap(c => c.stickers.map(scaleOf))
+check(`explicit sizes stay between 1 and 2 (${[...new Set(scales)].sort().join(', ')})`,
+  scales.every(v => v >= 1 && v <= 2))
 
 /**
  * The room sees the stickers while the question is being read, so a sticker that
@@ -232,8 +240,9 @@ const spoilers = standard
   .flatMap(c => {
     const words = c.answer.toLowerCase().match(/[a-z]{4,}/g) ?? []
     return c.stickers
-      .filter(art => words.some(w => art.includes(w) || w.includes(art)))
-      .map(art => `${art} on "${c.answer}"`)
+      .map(artOf)
+      .filter(k => words.some(w => k.includes(w) || w.includes(k)))
+      .map(k => `${k} on "${c.answer}"`)
   })
 check(`no sticker names the answer it sits next to${spoilers.length ? ` (${spoilers})` : ''}`,
   spoilers.length === 0)

@@ -61,10 +61,13 @@ const rots = nums('--rot')
 const badRot = rots.filter((v) => v < -13 || v > 13)
 check(`every tilt is within 13 degrees${badRot.length ? ` — ${badRot}` : ''}`, badRot.length === 0)
 
+// Near 1 by default; a clue may call for an explicit emphasis, which multiplies it.
 const scales = nums('--scale')
-const badScale = scales.filter((v) => v < 0.85 || v > 1.15)
-check(`every scale is near 1${badScale.length ? ` — ${badScale}` : ''}`,
+const badScale = scales.filter((v) => v < 0.85 || v > 2.3)
+check(`every scale is between 0.85 and 2.3${badScale.length ? ` — ${badScale}` : ''}`,
   scales.length > 0 && badScale.length === 0)
+const emphasised = scales.filter((v) => v > 1.15)
+check(`exactly one sticker is emphasised (${emphasised.length})`, emphasised.length === 1)
 
 // Both sides get used, or the "scatter" is a single column.
 check('stickers land on both edges',

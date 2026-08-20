@@ -51,9 +51,18 @@ export type StickerKey = (typeof STICKER_KEYS)[number]
 export const stickerSrc = (key: StickerKey) => `/stickers/${key}.webp`
 
 /**
- * One sticker: a key into the art above. Postcards are landscape and two to three
- * times the width of an object, so the scatter gives them a wider box.
+ * One sticker: a key into the art above, or that key with an explicit size.
+ *
+ * The size box is a width, so a wide landscape piece comes out short — the estate
+ * car is 2.3:1, which in a 124px box is 54px tall and reads as an afterthought next
+ * to a square sticker of the same nominal size. `scale` is the escape hatch for a
+ * piece that deserves more room than the default gives it.
  */
-export type Sticker = StickerKey
+export type Emphasis = { art: StickerKey; scale: number }
+export type Sticker = StickerKey | Emphasis
 
-export const isWide = (s: Sticker) => s.startsWith('postcard-')
+export const artOf = (s: Sticker): StickerKey => (typeof s === 'string' ? s : s.art)
+export const scaleOf = (s: Sticker): number => (typeof s === 'string' ? 1 : s.scale)
+
+/** Postcards are landscape and get a wider box in the scatter. */
+export const isWide = (s: Sticker) => artOf(s).startsWith('postcard-')

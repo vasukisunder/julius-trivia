@@ -1,4 +1,4 @@
-import { isWide, stickerSrc, type Sticker } from '../data/stickers'
+import { artOf, isWide, scaleOf, stickerSrc, type Sticker } from '../data/stickers'
 
 /**
  * The sticker layer for a clue.
@@ -73,7 +73,7 @@ export function Stickers({ stickers, seed }: Props) {
 
         const style: Record<string, string | number> = {
           ['--rot']: `${((h >>> 11) % 27) - 13}deg`,
-          ['--scale']: 0.87 + ((h >>> 17) % 7) / 26,
+          ['--scale']: (0.87 + ((h >>> 17) % 7) / 26) * scaleOf(sticker),
           ['--d']: `${i * 80}ms`,
           top: `${t + ((h >>> 7) % drift)}%`,
         }
@@ -86,7 +86,7 @@ export function Stickers({ stickers, seed }: Props) {
         return (
           <div className={`sticker${wide ? ' wide' : ''}`} key={i} style={style}>
             <div className="sticker-art">
-              <img className="sticker-img" src={stickerSrc(sticker)} alt="" draggable={false} />
+              <img className="sticker-img" src={stickerSrc(artOf(sticker))} alt="" draggable={false} />
             </div>
           </div>
         )
