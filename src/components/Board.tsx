@@ -19,9 +19,9 @@ type Props = {
  * the useful thing is which statement is false, so it leads with that.
  */
 function answerFor(clue: Category['clues'][number]): string {
-  return clue.kind === 'lie'
-    ? `${clue.person}: lie is #${clue.lieIndex + 1}`
-    : clue.answer
+  if (clue.kind === 'lie') return `${clue.person}: lie is #${clue.lieIndex + 1}`
+  if (clue.kind === 'match') return clue.items.map((i) => i.person).join(' · ')
+  return clue.answer
 }
 
 export function Board({ categories, used, mode, onOpen, hoveredKey, onHover }: Props) {

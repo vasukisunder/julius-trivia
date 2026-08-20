@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Buzz, Clue, CluePhase, PlayerStyle, Team, ViewMode, Wrong } from '../types'
-import { PlayerIcon } from './PlayerPill'
+import { PlayerIcon, PlayerPill } from './PlayerPill'
 import { WithNames } from './WithNames'
 import { useAwardFlash } from '../state/useAwardFlash'
 import { teamColor } from '../theme'
@@ -149,6 +149,23 @@ export function ClueStage({
           <>
             <p className="clue"><WithNames text={clue.question} /></p>
             {clue.credit && <p className="credit"><WithNames text={clue.credit} /></p>}
+          </>
+        ) : clue.kind === 'match' ? (
+          <>
+            <p className="clue">{clue.prompt}</p>
+            <ol className="matchlist">
+              {clue.items.map((item, i) => (
+                <li className="matchrow" key={i} style={{ animationDelay: `${i * 70}ms` }}>
+                  <span className="matchnum">{i + 1}</span>
+                  <span className="matchfact">{item.fact}</span>
+                  {showAnswer && (
+                    <span className="matchwho" style={{ animationDelay: `${i * 140}ms` }}>
+                      <PlayerPill name={item.person} style={playerStyles[item.person]} />
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ol>
           </>
         ) : (
           <>

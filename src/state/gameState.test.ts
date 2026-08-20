@@ -108,15 +108,19 @@ console.log('\nthe closing question')
 // It is deliberately off the board: reachable only from the host toolbar, and worth
 // more than any tile.
 const onBoard = CATEGORIES.flatMap(c => c.clues)
-check('the final clue is not one of the board clues',
-  !onBoard.some(c => c.kind === 'standard' && FINAL_CLUE.kind === 'standard' && c.question === FINAL_CLUE.question))
 check('it outscores every tile',
   FINAL_CLUE.points > Math.max(...onBoard.map(c => c.points)))
-check('it has a question and an answer',
-  FINAL_CLUE.kind === 'standard' && !!FINAL_CLUE.question && !!FINAL_CLUE.answer)
-const finalAnswer = FINAL_CLUE.kind === 'standard' ? FINAL_CLUE.answer : ''
-check('its answer names three teammates',
-  TEAMMATES.filter(n => finalAnswer.includes(n)).length === 3)
+check('it is a matching clue, not three facts crammed into one sentence',
+  FINAL_CLUE.kind === 'match')
+const items = FINAL_CLUE.kind === 'match' ? FINAL_CLUE.items : []
+check('it pairs three facts with three people', items.length === 3)
+check('each fact names a different person',
+  new Set(items.map(i => i.person)).size === items.length)
+check('everyone it names is real', items.every(i => PEOPLE.includes(i.person)))
+check('no fact gives away its own person',
+  items.every(i => !i.fact.includes(i.person)))
+check('no matching clue sits on the board too',
+  !onBoard.some(c => c.kind === 'match'))
 // It scores through the same ledger as everything else.
 let sf = reducer(initialState(), { type: 'shuffleTeams' })
 sf = reducer(sf, { type: 'setTeams', rosters: sf.teams.map(t => t.members) })
@@ -130,7 +134,11 @@ check('and it lands under its own key, not a tile’s', sf.lastAward?.key === '-
 console.log('\nteammate coverage')
 // A personal clue is one that names no specialty: the answer is a teammate.
 const personalText = allClues
-  .map(c => (c.kind === 'lie' ? c.person : c.credit ? '' : c.answer))
+  .map(c =>
+    c.kind === 'lie' ? c.person
+    : c.kind === 'match' ? c.items.map(i => i.person).join(' ')
+    : c.credit ? '' : c.answer,
+  )
   .join(' | ')
 const creditText = allClues.map(c => c.credit ?? '').join(' | ')
 

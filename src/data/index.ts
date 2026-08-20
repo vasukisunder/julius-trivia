@@ -154,10 +154,14 @@ export const CATEGORIES: Category[] = [
  * from one clue to the next.
  */
 export const FINAL_CLUE: Clue = {
-  kind: 'standard',
+  kind: 'match',
   points: 1000,
-  question: `Match each to the right teammate: delivered newspapers as a first job · is ambidextrous · has never had a cup of coffee.`,
-  answer: `Greg (newspapers) · Ask (ambidextrous) · Antonela (coffee)`,
+  prompt: `Three facts. Three people. No overlap.`,
+  items: [
+    { fact: `Their very first job was a paper round.`, person: `Greg` },
+    { fact: `Is ambidextrous — equally good with either hand.`, person: `Ask` },
+    { fact: `Has never had a cup of coffee. Not one, ever.`, person: `Antonela` },
+  ],
 }
 
 export const FINAL_CATEGORY = 'Final question'

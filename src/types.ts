@@ -21,7 +21,23 @@ export type LieClue = {
   credit?: string
 }
 
-export type Clue = StandardClue | LieClue
+/**
+ * Match a set of facts to the people they belong to.
+ *
+ * Its own kind rather than a standard clue with the facts crammed into one string:
+ * as a block of text separated by middots, three facts read as one wall and there
+ * is nothing to resolve them against on reveal.
+ */
+export type MatchClue = {
+  kind: 'match'
+  points: number
+  /** Framing line above the rows. */
+  prompt: string
+  items: { fact: string; person: string }[]
+  credit?: string
+}
+
+export type Clue = StandardClue | LieClue | MatchClue
 
 export type Category = {
   name: string
