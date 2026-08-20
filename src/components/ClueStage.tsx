@@ -145,8 +145,8 @@ export function ClueStage({
   const stepLabel =
     phase === 'reading' ? 'Read the question' :
     phase === 'buzzing' ? 'Buzzers open' :
-    phase === 'verdict' ? `${spotTeam?.name ?? 'Someone'} to answer` :
-    'Answer'
+    phase === 'verdict' ? (isFinal ? 'Mark each team' : `${spotTeam?.name ?? 'Someone'} to answer`) :
+    isFinal ? 'Answers' : 'Answer'
 
   const showAnswer = isHost || phase === 'revealed'
 
@@ -437,6 +437,19 @@ export function ClueStage({
               Wrong
             </button>
           </>
+        )}
+
+        {/* The closing question has no single team on the spot, so Correct and Wrong
+            do not apply — but it still needs a way forward from here. */}
+        {phase === 'verdict' && isFinal && (
+          <button
+            className={`step-btn go${hoverClass('reveal')}`}
+            disabled={!isHost}
+            {...hoverProps('reveal')}
+            onClick={onSkipToAnswer}
+          >
+            Reveal the answers
+          </button>
         )}
 
         {phase === 'revealed' && (

@@ -13,8 +13,10 @@
  */
 import { renderToStaticMarkup } from 'react-dom/server'
 import { Stickers } from '../src/components/Stickers'
+import { ClueStage } from '../src/components/ClueStage'
 import { CATEGORIES, FINAL_CLUE } from '../src/data'
-import { clueKey, type Clue } from '../src/types'
+import { clueKey, type Clue, type CluePhase, type Buzz } from '../src/types'
+import { initialState, reducer } from '../src/state/gameState'
 
 let pass = 0, fail = 0
 const check = (label: string, cond: boolean) => {
@@ -92,6 +94,89 @@ const stacked = clues.flatMap(({ seed }, n) => {
 })
 check(`no clue stacks two stickers in one band${stacked.length ? ` — ${stacked}` : ''}`,
   stacked.length === 0)
+
+console.log('\nno step is a dead end')
+/**
+ * Every phase of every clue must offer the host at least one enabled action, or the
+ * game stops with no way forward. This exists because the closing question spent a
+ * commit with nothing in its footer during the verdict step: Correct and Wrong were
+ * removed there, since a match question has no single team on the spot, and nothing
+ * replaced them.
+ */
+let seeded = reducer(initialState(), { type: 'shuffleTeams' })
+seeded = reducer(seeded, { type: 'setTeams', rosters: seeded.teams.map((t) => t.members) })
+const teams = seeded.teams
+const buzz: Buzz = {
+  playerId: 'p1', name: teams[0].members[0], teamId: teams[0].id, reactionMs: 420,
+}
+
+const PHASES: CluePhase[] = ['reading', 'buzzing', 'verdict', 'revealed']
+const stage = (clue: Clue, phase: CluePhase, isFinal: boolean) =>
+  renderToStaticMarkup(
+    <ClueStage
+      clue={clue}
+      categoryName="Test"
+      accent="#8B90E5"
+      mode="host"
+      teams={teams}
+      awardedIds={[]}
+      phase={phase}
+      timerEndsAt={null}
+      buzzes={phase === 'reading' ? [] : [buzz]}
+      styleOf={() => ({ color: '#8B90E5', icon: '🐝' })}
+      lockedOut={[]}
+      onTheSpot={phase === 'reading' ? null : buzz}
+      lastWrong={null}
+      clueKeyStr={isFinal ? '-1-0' : '0-0'}
+      onOpenBuzzers={() => {}}
+      onEndBuzzing={() => {}}
+      onCorrect={() => {}}
+      onWrong={() => {}}
+      onSkipToAnswer={() => {}}
+      finalHits={{}}
+      onSetFinalHits={() => {}}
+      isFinal={isFinal}
+      doneLabel={isFinal ? 'And the winner is…' : 'Next question'}
+      canReturnToBoard={!isFinal}
+      onDone={() => {}}
+      onDismiss={() => {}}
+      onReturnToBoard={() => {}}
+    />,
+  )
+
+/** Enabled buttons in the footer, which is where the step's action lives. */
+function footerActions(markup: string): number {
+  const foot = markup.split('class="stage-foot"')[1] ?? ''
+  return [...foot.matchAll(/<button[^>]*>/g)].filter((m) => !m[0].includes('disabled')).length
+}
+
+const deadEnds: string[] = []
+for (const phase of PHASES) {
+  for (const [label, clue, isFinal] of [
+    ['tile', CATEGORIES[0].clues[0], false],
+    ['closing question', FINAL_CLUE, true],
+  ] as const) {
+    const n = footerActions(stage(clue, phase, isFinal))
+    if (n === 0) deadEnds.push(`${label} / ${phase}`)
+  }
+}
+check(`every step offers the host an action${deadEnds.length ? ` — stuck at ${deadEnds}` : ''}`,
+  deadEnds.length === 0)
+
+// The closing question leads into the ceremony rather than back to the board.
+const finalRevealed = stage(FINAL_CLUE, 'revealed', true)
+check('the closing question reveals a winner from its last step',
+  finalRevealed.includes('And the winner is'))
+check('and it cannot be put back on a tile it never had',
+  !finalRevealed.includes('Put back on the board'))
+
+// Marking is what replaces Correct/Wrong there, and it has to be reachable.
+check('the closing question can be marked while it is being judged',
+  stage(FINAL_CLUE, 'verdict', true).includes('finalmark'))
+check('and still while the answers are up',
+  stage(FINAL_CLUE, 'revealed', true).includes('finalmark'))
+check('a tile never shows the marker',
+  !stage(CATEGORIES[0].clues[0], 'verdict', false).includes('finalmark'))
 
 console.log(`\n${pass} passed, ${fail} failed`)
 if (fail) throw new Error(`${fail} render check(s) failed`)
